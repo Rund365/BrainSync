@@ -11,6 +11,16 @@ A neuro-adaptive music controller that synchronizes music tempo to walking caden
 
 ---
 
+## 🔬 IMU Research (in progress)
+
+Research and design for adding BNO055 IMUs to predict foot strikes and align the music's beats to the steps (not implemented yet):
+
+- [IMU Research Summary](Documentation/IMU_Research_Summary.md) — decisions and flow in short
+- [IMU Integration Plan](Documentation/IMU_Integration_Plan.md) — full plan
+- [IMU Software Architecture](Documentation/IMU_Software_Architecture.md) — how the software works, with diagrams
+
+---
+
 ## 📋 Table of Contents
 
 - [Overview](#-overview)
