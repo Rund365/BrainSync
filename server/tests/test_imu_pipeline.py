@@ -53,6 +53,7 @@ class ParserTests(unittest.TestCase):
             handle_step(b"IMU,1,2,3", 100.0)
 
 
+
 class ClockTests(unittest.TestCase):
     def test_unwrap(self):
         unwrap = TimeUnwrapper()
@@ -307,6 +308,24 @@ class HardwareReadinessTests(unittest.TestCase):
         log = SimpleNamespace(log=lambda msg: None)
         self.assertEqual(query_version(self.receiver(2), log), 2)
         self.assertEqual(query_version(self.receiver(1), log, attempts=1), 1)  # no answer = old firmware
+
+    def test_session_commands_apply_when_the_receiver_answers(self):
+        from main import _process_line
+        from utils.hardware.comms import handle_engine_command
+        from utils.hardware.sensor_stream import SensorStream
+        rx = self.receiver(2)
+        logged = []
+        log = SimpleNamespace(log=logged.append)
+        engine = SimpleNamespace(set_smoothing_window=lambda n: logged.append(("window", n)),
+                                 set_stride=lambda n: logged.append(("stride", n)))
+        for cmd in ("SET_WINDOW:5", "SET_STRIDE:9", "SET_STRIDE:2", "CAL_WEIGHT:150"):
+            handle_engine_command(cmd, rx, log, engine, None)
+        self.assertEqual([x for x in logged if isinstance(x, tuple)], [])  # nothing read or applied yet
+        stream = SensorStream()
+        while line := rx.readline().decode().strip():
+            _process_line(line, 0.0, stream, None, None, None, engine, log, None)
+        self.assertEqual([x for x in logged if isinstance(x, tuple)], [("window", 5), ("stride", 2)])  # 9 > window
+        self.assertIn("RECEIVER: ACK,CAL_WEIGHT,1000", logged)
 
     def test_command_line_overrides_phase_settings(self):
         from main import phase_settings

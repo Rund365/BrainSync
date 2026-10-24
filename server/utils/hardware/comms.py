@@ -160,10 +160,17 @@ def handle_step(raw_line: str, walking_bpm: float):
 
     return bpm, instant_bpm, ts, foot
 
+def send_session_command(ser, logger: Logger, command: str):
+    """During a session the reader thread owns the serial input, and IMU lines arrive between
+    the answers: only send here. The receiver's ACK comes back as a normal line (main._process_line)."""
+    logger.log(f"Sending {command} to the receiver")
+    ser.write(f"{command}\n".encode("utf-8"))
+
+
 # communication with the GUI
 def handle_engine_command(cmd, ser, logger, bpm_estimation, player):
     """
-    Process a command coming from the GUI/STDIN.
+    Process a command coming from the GUI/STDIN during a session.
     Returns True if a QUIT signal was handled (caller should break).
     """
     # String commands (from stdin)
@@ -182,11 +189,9 @@ def handle_engine_command(cmd, ser, logger, bpm_estimation, player):
                     bpm_estimation.set_manual_bpm(float(val))
                     logger.log(f"Config: Manual BPM set to {val}")
                 elif key == "SET_WINDOW":
-                    if send_config_command(ser, logger, "SET_WINDOW", int(val), "steps window", "ACK,WINDOW"):
-                        bpm_estimation.set_smoothing_window(int(val))
+                    send_session_command(ser, logger, f"SET_WINDOW,{int(val)}")
                 elif key == "SET_STRIDE":
-                    if send_config_command(ser, logger, "SET_STRIDE", int(val), "update stride", "ACK,STRIDE"):
-                        bpm_estimation.set_stride(int(val))
+                    send_session_command(ser, logger, f"SET_STRIDE,{int(val)}")
                 elif key == "SET_RANDOM_SPAN":
                     if hasattr(bpm_estimation, 'set_random_span'):
                         bpm_estimation.set_random_span(float(val))
@@ -222,7 +227,7 @@ def handle_engine_command(cmd, ser, logger, bpm_estimation, player):
                 elif key == "SET_HYBRID_UNLOCK_THRESHOLD":
                     bpm_estimation.set_hybrid_unlock_threshold(float(val))
                 elif key == "CAL_WEIGHT":
-                    send_calibration_command(ser, logger, int(val) if val else 200)
+                    send_session_command(ser, logger, f"CAL_WEIGHT,{int(val) if val else 200}")
             except ValueError:
                 logger.log(f"Invalid command format: {cmd}")
         elif cmd == "QUIT":

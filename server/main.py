@@ -350,6 +350,9 @@ def _process_line(line_str, arrival, stream, tracker, aligner, sensor_logger, bp
     if isinstance(msg, LiftMsg):
         sensor_logger.row("gait_events", [f"{msg.sender_s:.4f}", "", msg.foot, "LIFT", ""])
         return
+    if isinstance(msg, OtherMsg) and msg.kind in ("ACK", "ERR"):
+        _on_receiver_answer(msg, line_str, bpm_estimation, logger)
+        return
     is_step = isinstance(msg, StepMsg) or (isinstance(msg, OtherMsg) and msg.kind == "LEGACY_STEP")
     if not is_step:
         return
@@ -377,6 +380,21 @@ def _process_line(line_str, arrival, stream, tracker, aligner, sensor_logger, bp
     bpm_estimation.register_step(bpm, instant_bpm, use_model=use_model)
     logger.log_data(event_epoch, player.walkingBPM, bpm, step_event=True, instant_bpm=instant_bpm)
     logger.log(f"Processed: BPM={bpm:.2f}")
+
+
+def _on_receiver_answer(msg, line_str, bpm_estimation, logger):
+    """Answers to commands sent during the session; window and stride apply once the receiver took them."""
+    logger.log(f"RECEIVER: {line_str}")
+    if msg.kind != "ACK" or len(msg.fields) != 2 or msg.fields[0] not in ("WINDOW", "STRIDE"):
+        return
+    try:
+        value = int(msg.fields[1])
+    except ValueError:
+        return
+    if msg.fields[0] == "WINDOW":
+        bpm_estimation.set_smoothing_window(value)
+    else:
+        bpm_estimation.set_stride(value)
 
 
 def _notify(status_callback, message):
