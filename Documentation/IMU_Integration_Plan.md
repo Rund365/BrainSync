@@ -816,7 +816,9 @@ The base tempo from the modes is the *feed-forward* (gets the speed roughly righ
 
 **Base tempo on the IMU path:** the step BPM given to the mode is computed from the exact strike times, not the receiver's 3-step average: a straight line fitted through the last 8 step times (left + right pairs, so the foot difference cancels), read at the latest step. It follows pace changes without the lag of an average, so δ is free for the phase. After a stop it restarts from the first step (`base_min_steps = 1`) instead of the receiver average, which includes the pause. A 4-step line was tested and made no difference.
 
-**Standing on the IMU path:** the music keeps its last walking tempo (`hold_when_standing`) instead of slowing down toward 0, and the phase reset puts the beat back on the first steps. The old system keeps its "no step yet: slow down" behaviour.
+**Music starts and restarts on the step (IMU path, `start_on_step`, `pause_when_standing`):** the music does not play before walking starts. After `start_steps` (5) steps the pace is read from a line through the step times (at the latest step, `start_ahead = 0`), and the first beat is sent so that it is *heard* on the predicted next strike (or last strike + one step period if there is no confident prediction), minus `L` and the learned bias; that strike is paired with that beat. When no step came for `pause_after_periods` (1.75) step periods and no strike is predicted, the music pauses (all notes off, no hanging notes) and the song position is kept; on the next walk it waits for the pace again and resumes where it stopped, skipping the part that would have played in between. A step lost on the radio link does not pause it, because the predictor still expects a strike. This replaces "start at the song tempo, then catch up": the old start was the biggest error (first 12 s median 123 ms in real time) and the tempo bump at the start is gone. Cost: the first 5 steps of each walk have no music (about 2.5 s). `hold_when_standing` (keep playing at the last tempo while standing) is still available (`--standing hold`) but was worse (fast loop 79% vs 84% within ±30 ms). The old system keeps its "start at once, no step yet: slow down" behaviour.
+
+**Recovery after pace changes:** with the start on the step, the error in the 6 s after a pace change fell from 50 to 22 ms (fast loop). A firmer tempo limit when far off (`max_change_far`, e.g. 8–10% per beat from `far_error_s` 80 ms until back under `near_error_s` 30 ms, with hysteresis) gained only 1 percentage point and allows bigger tempo jumps, so it is off by default. A "frequency first" mode (change only the tempo until the pace matches, then the phase) and a larger `δ_max` (8–10%) gave no gain and were not kept; the 5% per-beat limit already prevents overshoot when catching up.
 
 **Smooth tempo on the IMU path:** each beat may be at most `max_change_per_beat` (5%) faster or slower than the beat before, so pace changes, restarts and phase resets become ramps instead of jumps. The base tempo ramps at the same rate and the controller is told the nudge actually applied, so it plans with the tempo that really plays (without this the limit made the tempo swing back and forth after a restart). Cost in the fast loop (4 walks × 4 seeds): within ±30 ms 80% → 73%, median error in the 6 s after a change 26 → 50 ms; 8% per beat gives 76% and 37 ms.
 9. **Anti-windup:** when δ is at its limit, do not grow `I`.
@@ -866,15 +868,21 @@ self.player.set_BPM(self.base_bpm * (1 + delta))                # PI nudge appli
 | `e_dead` | 0 ms | Soft dead-band, subtracted from the error |
 | `t_min` | 50 ms | Do not try to correct beats closer than this |
 | base tempo | line through 8 steps, from 1 step after a stop | See "Base tempo on the IMU path" above |
-| `hold_when_standing` | on | Keep the tempo while standing (IMU path only) |
+| `start_on_step` / `start_steps` | on / 5 steps | Music waits for walking and starts with the first beat on a strike (IMU path only) |
+| `start_ahead` | 0 steps | Where the start pace is read on the step line (0 = at the latest step) |
+| `pause_when_standing` / `pause_after_periods` | on / 1.75 step periods | Pause while standing, resume on the step |
+| `hold_when_standing` | off | Instead of pausing: keep playing at the last tempo |
 | `max_change_per_beat` | 5% | Largest tempo change from one beat to the next (IMU path only) |
-| `decay_grace` | 1.5 step periods | Slow-down safety tolerance on the IMU path when `hold_when_standing` is off |
+| `max_change_far` / `far_error_s` / `near_error_s` | off / 80 ms / 30 ms | Optional firmer limit while far off, with hysteresis |
+| `decay_grace` | 1.5 step periods | Slow-down safety tolerance on the IMU path when neither pause nor hold is on |
 
 These are tuned in Phase 5 by listening tests plus the asynchrony measurements.
 
 ### 17.4 Simulation before hardware
 
 Write a simulator: synthetic strike stream (with jitter, gradual tempo change, sudden speed-up, stop/start) → predictor noise model → phase controller → beat clock. Plot phase error over time. Tune Kp/Ki/δ limits in simulation first; this is fast and safe.
+
+Implemented in `server/utils/simulation/` (`fast_loop.py` for quick sweeps, `compare.py` for real-time before/after runs through `main.py`). Beat-to-step error counts only strikes **with music** (inside a play span, 0.15 s margin); steps before the start or while paused are reported separately as "steps without music". Tempo jumps are measured between consecutive beats only, so a pause is not counted as a jump. The "applied tempo" column in `beats.csv` is a snapshot at the beat; the tempo actually heard is 60 / the time between beats (max 5% change per beat in all real-time runs).
 
 ---
 
@@ -1012,7 +1020,8 @@ Implemented `main.py` CLI arguments (not yet in the GUI):
 | `--phase-deadband-ms` | 0 | `e_dead` |
 | `--phase-max-nudge` | 15 | `δ_max`, percent |
 | `--phase-reset-ms` | 100 | `reset_s`; 0 = no phase reset |
-| `--standing` | `hold` | With alignment on: `hold` the tempo while standing, or `slow` down as without alignment |
+| `--standing` | `pause` | With alignment on: `pause` while standing and restart on the step, `hold` the tempo, or `slow` down as without alignment |
+| `--start-steps` | 5 | With alignment on: steps before the music starts on the step; 0 = start at once at the song tempo (old start) |
 | `--max-tempo-change` | 5 | With alignment on: largest tempo change from one beat to the next, in percent; 0 = no limit |
 | `--no-audio` | off | No MIDI port (silent simulation runs) |
 | `--simulate`, `--sim-seed`, `--sim-sharp`, `--sim-protocol` | – | Simulated walker instead of the ESP32s |

@@ -25,6 +25,8 @@ import math
 import time
 from dataclasses import dataclass, asdict
 
+STOP_GAP_S = 1.5  # a longer gap between steps is a stop: the pace is measured again
+
 
 @dataclass
 class PhaseSettings:
@@ -64,10 +66,27 @@ class PhaseSettings:
     # Standing still: keep the last walking tempo instead of slowing down toward 0, so the
     # music is ready to restart on the first step (the phase reset puts the beat on it)
     hold_when_standing: bool = True
+    # Start on the step: the music waits until start_steps steps give the pace, then starts at
+    # that tempo with its first beat on the next step, so there is nothing to catch up
+    start_on_step: bool = True
+    # People speed up over their first steps: the pace is a line through the step times since
+    # walking began, read at the latest step (1 step ahead overshoots, a plain average lags)
+    start_steps: int = 5
+    start_ahead: float | None = 0.0
+    # Standing still: pause the music once no step came for this many step periods, and
+    # restart it on the step the same way (takes the place of hold_when_standing)
+    pause_when_standing: bool = True
+    pause_after_periods: float = 1.75
     # Smooth tempo: each beat may be at most this much faster or slower than the beat before
     # (base tempo and correction together), so pace changes and restarts become ramps, not
     # jumps. None: no limit
     max_change_per_beat: float | None = 0.05
+    # Firmer when far off: from far_error_s of phase error the limit is max_change_far, back
+    # to max_change_per_beat once the error is under near_error_s. Off (None) by default: with
+    # the start on the step it gained ~1% of steps within 30 ms for beat changes up to 8-10%
+    max_change_far: float | None = None
+    far_error_s: float = 0.080
+    near_error_s: float = 0.030
 
 
 class PhaseController:
@@ -77,6 +96,20 @@ class PhaseController:
         self.bias_s = 0.0
         self.pairs = {}  # strike number -> beat index
         self._last_t = None
+        self.phase_error_s = 0.0  # latest planned phase error (> 0: the beat would be late)
+        self.firm = False
+
+    def max_change(self) -> float | None:
+        """Largest tempo change per beat now: gentle when in sync, firmer when far off."""
+        s = self.s
+        if s.max_change_per_beat is None or s.max_change_far is None:
+            return s.max_change_per_beat
+        e = abs(self.phase_error_s)
+        if e > s.far_error_s:
+            self.firm = True
+        elif e < s.near_error_s:
+            self.firm = False
+        return s.max_change_far if self.firm else s.max_change_per_beat
 
     def update(self, now: float, base_bpm: float, beat_now: float, strike) -> float:
         dt = 0.0 if self._last_t is None else now - self._last_t
@@ -100,6 +133,7 @@ class PhaseController:
             return self.delta, False  # too late to re-plan this beat: hold
         beat_period = 60.0 / base_bpm
         phase_error = (k - beat_now) * beat_period - remaining  # > 0: at base tempo the beat is late
+        self.phase_error_s = phase_error
         if abs(phase_error) > self.s.catchup_s:
             # Far off: the tempo that lands beat k exactly on the strike
             target = 60.0 * (k - beat_now) / remaining / base_bpm - 1.0
@@ -153,10 +187,22 @@ class PhaseAligner:
         self._pending = []  # (strike number, foot, contact pc time) waiting for their beat to play
         self._logged_beat = -1
         self._base_bpm = 0.0
+        # Start / pause / restart on the step
+        s = self.settings
+        self.transport = enabled and (s.start_on_step or s.pause_when_standing)
+        self._walk_steps = 0  # steps since walking (re)started
+        self._last_contact = None
+        self._paused_by_us = False
+        self.transport_events = []  # (pc time, "start" | "pause", beat, bpm, beat send time)
 
     @property
     def settings(self) -> PhaseSettings:
         return self.ctrl.s
+
+    @property
+    def waiting(self) -> bool:
+        """True while the music waits for the pace (not started yet, or paused while standing)."""
+        return self.transport and not self.player.playing
 
     def update(self, base_bpm: float) -> float:
         now = time.perf_counter()
@@ -165,9 +211,62 @@ class PhaseAligner:
         self._resolve()
         strike = self.tracker.next_strike(now)
         self.last_strike = strike
-        if not self.enabled:
+        if not self.enabled or self.waiting:
             return 0.0
         return self.ctrl.update(now, base_bpm, self.player.get_beat_now(), strike)
+
+    def update_transport(self) -> float | None:
+        """Pause when standing, start / restart on the step. Returns the tempo when the music
+        was (re)started on this call, so the caller can set its base tempo to it."""
+        if not self.transport:
+            return None
+        s = self.settings
+        now = time.perf_counter()
+        if self.player.playing:
+            if s.pause_when_standing and self._last_contact is not None:
+                period = 60.0 / max(self.player.walkingBPM, 1.0)
+                # A swinging foot still gives a prediction: a step lost on the link is not a stop
+                if now - self._last_contact > s.pause_after_periods * period and self.last_strike is None:
+                    self.player.pause()
+                    self._paused_by_us = True
+                    self._walk_steps = 0
+                    self._event(now, "pause", None, self.player.walkingBPM, None)
+            return None
+        if not (self._paused_by_us or (s.start_on_step and not self.transport_events)):
+            return None
+        if self._walk_steps < s.start_steps or self._last_contact is None:
+            return None
+        predictor = self.tracker.predictor
+        steps = min(s.base_steps, self._walk_steps - 1)  # only the steps since walking resumed
+        if steps < 1:
+            return None
+        cadence = predictor.cadence_bpm(steps, s.start_ahead, steps)
+        if not cadence:
+            return None
+        number = predictor.strike_count
+        strike = self.tracker.next_strike(now)
+        if strike is not None and strike.number == number and strike.sigma_s <= s.max_sigma_s:
+            land = strike.pc_t
+        else:
+            land = self._last_contact + 60.0 / cadence
+        send = land - s.latency_s - self.ctrl.bias_s
+        while send - now < s.t_min_s:  # too close to start cleanly: the step after
+            send += 60.0 / cadence
+            number += 1
+        self._log_beats()
+        beat = self.player.play_at(send, cadence)
+        self._logged_beat = beat - 1  # beats skipped with the paused part of the song are never played
+        self.ctrl.pairs = {number: beat}
+        self.ctrl.delta = 0.0
+        self._paused_by_us = False
+        self._event(now, "start", beat, cadence, send)
+        return cadence
+
+    def _event(self, now, kind, beat, bpm, send):
+        self.transport_events.append((now, kind, beat, bpm, send))
+        if self.log:
+            self.log.row("transport", [f"{now:.6f}", kind, "" if beat is None else beat, f"{bpm:.3f}",
+                                       "" if send is None else f"{send:.6f}"])
 
     def step_bpm(self, receiver_bpm: float) -> tuple[float, bool]:
         """Walking BPM for this step, and whether the LGBM blend should be applied to it.
@@ -180,6 +279,11 @@ class PhaseAligner:
         return receiver_bpm, True
 
     def on_strike(self, number: int, foot: int, contact_pc: float | None):
+        t = contact_pc if contact_pc is not None else time.perf_counter()
+        if self._last_contact is None or t - self._last_contact > STOP_GAP_S:
+            self._walk_steps = 0
+        self._walk_steps += 1
+        self._last_contact = t
         if contact_pc is not None:
             self._pending.append((number, foot, contact_pc))
 
@@ -191,7 +295,8 @@ class PhaseAligner:
             if k is None:
                 continue  # no beat was planned for it (alignment off or not confident yet)
             if k not in beat_times:
-                keep.append((number, foot, contact_pc))
+                if k > self.player.get_beat_now() - 2:  # older ones were cut off by a pause
+                    keep.append((number, foot, contact_pc))
                 continue
             error = beat_times[k] + self.settings.latency_s - contact_pc
             self.ctrl.on_result(error)

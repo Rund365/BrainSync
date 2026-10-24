@@ -42,6 +42,9 @@ class BeatClockPlayer:
         self._anchor_beat = 0.0
         self._anchor_time = time.perf_counter()
         self.beat_times = {}  # whole beat index -> perf_counter time it was reached
+        self._last_beat = 0  # last whole beat recorded in beat_times
+        self._skip_before = None  # on resume: song events before this beat are skipped, not played late
+        self._silence = False  # pause asked: the player thread turns the sounding notes off
 
     def _extract_song_bpm(self):
         for track in self.mid.tracks:
@@ -102,6 +105,10 @@ class BeatClockPlayer:
             index = math.floor(current) + 1
             return index, now + (index - current) * 60.0 / self.walkingBPM
 
+    @property
+    def playing(self) -> bool:
+        return self._running
+
     def start(self):
         if self._thread and self._thread.is_alive():
             return
@@ -110,9 +117,42 @@ class BeatClockPlayer:
             self._anchor_time = time.perf_counter()
             self._running = True
             self.beat_times = {0: self._anchor_time}
+            self._last_beat = 0
+        self._start_thread()
+
+    def _start_thread(self):
         self._stop = False
         self._thread = threading.Thread(target=self._run, daemon=True)
         self._thread.start()
+
+    def play_at(self, at_time: float, bpm: float) -> int:
+        """Start (or resume after pause()) so that a whole beat is reached exactly at
+        `at_time` (perf_counter), at `bpm`. The song goes on from where it was; the part
+        between the pause and the lead-in is skipped. Returns the index of that beat."""
+        with self._lock:
+            now = time.perf_counter()
+            lead = max(at_time - now, 0.0) * bpm / 60.0
+            first = not self.beat_times
+            paused_at = self._anchor_beat
+            beat = 0 if first else math.ceil(paused_at + lead - 1e-9)
+            self.walkingBPM = bpm
+            self.TempoFactor = self.songBPM / bpm
+            self._anchor_beat, self._anchor_time = float(beat), at_time
+            self._last_beat = beat - 1
+            self._skip_before = None if first else beat - lead
+            self._running = True
+        if not (self._thread and self._thread.is_alive()):
+            self._start_thread()
+        return beat
+
+    def pause(self):
+        """Stop the beat clock where it is and turn the sounding notes off; play_at() resumes."""
+        with self._lock:
+            if not self._running:
+                return
+            self._reanchor(time.perf_counter())
+            self._running = False
+            self._silence = True
 
     def stop(self):
         self._stop = True
@@ -132,23 +172,38 @@ class BeatClockPlayer:
     def _run(self):
         index = 0
         loop = 0
-        last_beat = 0
         while not self._stop:
             event_beat, msg = self._events[index]
             target_beat = loop * self.song_length_beats + event_beat
 
             with self._lock:
+                silence, self._silence = self._silence, False
+                skip = self._skip_before is not None and target_beat < self._skip_before
+                if self._skip_before is not None and not skip:
+                    self._skip_before = None
                 now = time.perf_counter()
                 beat = self._beat_at(now)
                 remaining = (target_beat - beat) * 60.0 / self.walkingBPM
-                while last_beat + 1 <= beat:
-                    last_beat += 1
-                    # Exact crossing time, not the (up to 1 ms later) moment we noticed it
-                    self.beat_times[last_beat] = now - (beat - last_beat) * 60.0 / self.walkingBPM
+                if self._running:
+                    while self._last_beat + 1 <= beat:
+                        self._last_beat += 1
+                        # Exact crossing time, not the (up to 1 ms later) moment we noticed it
+                        self.beat_times[self._last_beat] = now - (beat - self._last_beat) * 60.0 / self.walkingBPM
 
-            if remaining > 0:
+            if silence:
+                self.outport.reset()
+            if skip:
+                if msg.type not in ("note_on", "note_off"):
+                    self.outport.send(msg)  # notes of the skipped part are dropped; program changes still apply
+                index += 1
+                if index == len(self._events):
+                    index = 0
+                    loop += 1
+                continue
+
+            if remaining > 0 or not self._running:
                 # Short sleeps so a tempo change is picked up within ~1 ms
-                time.sleep(min(0.001, remaining))
+                time.sleep(min(0.001, remaining) if self._running else 0.001)
                 continue
 
             self.outport.send(msg)

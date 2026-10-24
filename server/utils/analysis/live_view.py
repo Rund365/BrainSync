@@ -202,7 +202,7 @@ class LiveView:
             t, foot = self.pending.pop(0)
             near = [b for b in self.beats if abs(b - t) < 0.6]
             if not near:
-                self.gap_label.configure(text="no beat near this step", fg=RED)
+                self.gap_label.configure(text="music waits for your pace ...", fg=TEXT)
                 continue
             gap = (min(near, key=lambda b: abs(b - t)) - t) * 1000
             self.gaps.append(gap)

@@ -24,6 +24,7 @@ SERVER = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(SERVER))
 
 from utils.paths import get_sim_logs_dir
+from utils.simulation.fast_loop import with_music
 from utils.simulation.walker import Walker, parse_scenario
 
 RUNS = (("before", "off"), ("after", "on"))
@@ -72,15 +73,38 @@ def analyze(session: Path) -> dict:
     start = hs_pc[0] - float(truth[0]["hs_s"])  # PC time of the walk start
     heard = np.array([float(b["pc_t"]) for b in beats]) + latency
     nearest = heard[np.abs(heard[None, :] - hs_pc[:, None]).argmin(axis=1)]
+    music = with_music(hs_pc, music_spans(read_csv(session / "transport.csv"), heard, latency))
+    index = np.array([int(b["beat_index"]) for b in beats])
     return {
-        "strike_t": hs_pc - start,
-        "async_ms": (nearest - hs_pc) * 1000,
+        "strike_t": (hs_pc - start)[music],
+        "async_ms": ((nearest - hs_pc) * 1000)[music],
+        "silent_steps": int((~music).sum()),
         "beat_t": heard - start,
         "beat_tempo": np.array([float(b["tempo_bpm_applied"]) for b in beats]),
+        "beat_consecutive": np.diff(index) == 1,  # False across a pause
         "latency_s": latency,
         "tracking": meta["strike_tracking"],
         "person": sim_meta["person"],
     }
+
+
+def music_spans(transport: list[dict], heard: np.ndarray, latency: float) -> list[tuple[float, float]]:
+    """(first, last) heard time of each stretch the music played. Without transport events
+    (today's system) the music played from the first beat to the last."""
+    if len(heard) == 0:
+        return []
+    if not transport:
+        return [(heard[0], heard[-1])]
+    spans, begin = [], None
+    for event in transport:
+        if event["event"] == "start":
+            begin = float(event["beat_pc_t"]) + latency
+        elif event["event"] == "pause" and begin is not None:
+            spans.append((begin, float(event["pc_t"]) + latency))
+            begin = None
+    if begin is not None:
+        spans.append((begin, heard[-1]))
+    return spans
 
 
 def stats(a: np.ndarray) -> dict:
@@ -89,9 +113,15 @@ def stats(a: np.ndarray) -> dict:
             "within30": float(np.mean(a < 30) * 100), "within50": float(np.mean(a < 50) * 100)}
 
 
+def first_seconds(r: dict, seconds: float = 12.0) -> dict:
+    """Error over the first seconds of the walk (the start-up), strikes with music only."""
+    inside = r["strike_t"] < seconds
+    return stats(r["async_ms"][inside]) if inside.any() else {}
+
+
 def tempo_jumps(r: dict) -> float:
     """Smoothness: average change of the music tempo from one beat to the next (BPM)."""
-    return float(np.mean(np.abs(np.diff(r["beat_tempo"]))))
+    return float(np.mean(np.abs(np.diff(r["beat_tempo"]))[r["beat_consecutive"]]))
 
 
 def steady_jumps(r: dict, walker) -> float:
@@ -100,7 +130,7 @@ def steady_jumps(r: dict, walker) -> float:
     t = r["beat_t"]
     cadence = np.array([walker.cadence_at(x) for x in t])
     steady = (cadence > 0) & (np.abs(np.gradient(cadence, t)) < 0.3)
-    both = steady[1:] & steady[:-1]
+    both = steady[1:] & steady[:-1] & r["beat_consecutive"]
     return float(np.mean(np.abs(np.diff(r["beat_tempo"]))[both])) if both.any() else float("nan")
 
 
@@ -118,8 +148,9 @@ def plot(results: dict, scenario: str, seed: int, path: Path, sharp: bool = Fals
     ax.axhspan(-30, 30, color="tab:green", alpha=0.12, label="±30 ms (feels together)")
     for name, r in results.items():
         s = stats(r["async_ms"])
+        silent = f", {r['silent_steps']} steps before the music started / while paused" if r["silent_steps"] else ""
         ax.plot(r["strike_t"], r["async_ms"], "o", ms=3.5, color=COLORS[name],
-                label=f"{LABELS[name]}: median {s['median']:.0f} ms, {s['within30']:.0f}% within ±30 ms")
+                label=f"{LABELS[name]}: median {s['median']:.0f} ms, {s['within30']:.0f}% within ±30 ms{silent}")
     ax.axhline(0, color="k", lw=0.8)
     ax.set_ylabel("Beat heard − foot strike (ms)")
     ax.set_xlabel("Time (s)")
@@ -147,7 +178,11 @@ def plot(results: dict, scenario: str, seed: int, path: Path, sharp: bool = Fals
     cadence[cadence == 0] = np.nan  # standing: no line, instead of a drop to 0
     ax.plot(t, cadence, color="k", lw=2, alpha=0.5, label="Walker cadence")
     for name, r in results.items():
-        ax.plot(r["beat_t"], r["beat_tempo"], color=COLORS[name], lw=1,
+        tempo = r["beat_tempo"].copy()
+        gaps = np.flatnonzero(~r["beat_consecutive"]) + 1
+        t_beats = np.insert(r["beat_t"], gaps, np.nan)  # no line across a pause
+        tempo = np.insert(tempo, gaps, np.nan)
+        ax.plot(t_beats, tempo, color=COLORS[name], lw=1,
                 label=f"Music tempo, {name}: jumps {tempo_jumps(r):.1f} BPM per beat")
     ax.set_xlabel("Time (s)")
     ax.set_ylabel("BPM")
@@ -225,7 +260,8 @@ def main():
 
     plot(results, args.scenario, args.seed, out_dir / "comparison.png", sharp=args.sharp)
     summary = {name: {**stats(r["async_ms"]), "tempo_jumps_bpm": tempo_jumps(r),
-                      "steady_jumps_bpm": steady_jumps(r, walker)} for name, r in results.items()}
+                      "steady_jumps_bpm": steady_jumps(r, walker), "first_12s": first_seconds(r),
+                      "steps_without_music": r["silent_steps"]} for name, r in results.items()}
     (out_dir / "summary.json").write_text(json.dumps(
         {"scenario": args.scenario, "seed": args.seed, "sessions": {k: str(v) for k, v in dirs.items()},
          "beat_minus_strike_ms": summary, "learned": results["after"]["tracking"]}, indent=2), encoding="utf-8")
@@ -233,7 +269,9 @@ def main():
     for name, s in summary.items():
         print(f"{name:6s}: median {s['median']:5.1f} ms, mean {s['mean']:5.1f} ms, "
               f"within ±30 ms {s['within30']:3.0f}%, within ±50 ms {s['within50']:3.0f}%, "
-              f"tempo jumps {s['tempo_jumps_bpm']:.2f} BPM per beat ({s['steady_jumps_bpm']:.2f} at an even pace)")
+              f"tempo jumps {s['tempo_jumps_bpm']:.2f} BPM per beat ({s['steady_jumps_bpm']:.2f} at an even pace), "
+              f"first 12 s median {s['first_12s'].get('median', float('nan')):.0f} ms, "
+              f"{s['steps_without_music']} steps without music")
     print(f"Plot: {out_dir / 'comparison.png'}")
 
 

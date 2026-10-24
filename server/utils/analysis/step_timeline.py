@@ -26,6 +26,8 @@ sys.path.insert(0, str(SERVER))
 
 from utils.paths import get_sim_logs_dir
 from utils.hardware.sensor_stream import GYR_LSB_PER_DPS
+from utils.simulation.compare import music_spans
+from utils.simulation.fast_loop import with_music
 
 FOOT_NAME = {1: "right", 2: "left"}
 LANE = {1: 1.0, 2: 0.0}
@@ -66,6 +68,10 @@ def build_table(session: Path) -> tuple[list[dict], dict]:
     heard = np.array([num(b["pc_t"]) for b in beats]) + latency
     tempo = np.array([num(b["tempo_bpm_applied"]) for b in beats])
     strike_pc = np.array([num(s["pc_t"]) for s in strikes])
+
+    # Steps before the music started (it waits for the pace) or while it paused have no beat
+    hs_all = np.array([num(t["hs_pc_t"]) for t in truth])
+    music = with_music(hs_all, music_spans(read_csv(session / "transport.csv"), heard, latency))
 
     by_strike = {}
     for p in predictions:
@@ -109,7 +115,7 @@ def build_table(session: Path) -> tuple[list[dict], dict]:
                         row["predicted_err_ms"] = (num(p["predicted_contact_pc_t"]) - hs) * 1000
                         row["predicted_method"] = p["method"]
 
-        if len(heard):
+        if len(heard) and music[len(rows)]:
             j = int(np.abs(heard - hs).argmin())
             row["beat_s"] = heard[j] - start
             row["beat_gap_ms"] = (heard[j] - hs) * 1000
@@ -138,6 +144,8 @@ def print_table(rows: list[dict]) -> None:
           f"{'pred ms':>7} {'beat ms':>7} {'BPM':>6}")
     for r in rows:
         lost = "  lost on link" if r["lost_on_link"] else ""
+        if not np.isfinite(r["beat_gap_ms"]):
+            lost += "  no music (waiting for the pace / paused)"
         print(f"{r['step']:>4} {r['foot']:>5} {r['t_s']:7.2f} {f(r['step_time_ms'])} {f(r['fsr_after_hs_ms'])} "
               f"{f(r['pc_got_it_after_hs_ms'])} {f(r['predicted_err_ms'])} {f(r['beat_gap_ms'])} "
               f"{r['beat_tempo_bpm']:6.1f}{lost}")
@@ -199,6 +207,8 @@ def plot_pages(rows: list[dict], ctx: dict, out_dir: Path, page_s: float, t_from
                              color="gray", ms=5)
             else:
                 ax_legs.text(r["heel_strike_s"], y - 0.2, "lost", color="red", ha="center", fontsize=8)
+            if not np.isfinite(r["beat_gap_ms"]) and t0 <= r["heel_strike_s"] <= t1:
+                ax_legs.text(r["heel_strike_s"], y + 0.3, "no music", color="gray", ha="center", fontsize=8)
             if np.isfinite(r["beat_gap_ms"]) and t0 <= r["heel_strike_s"] <= t1:
                 gap = r["beat_gap_ms"]
                 color = "green" if abs(gap) < 30 else "darkorange" if abs(gap) < 60 else "red"

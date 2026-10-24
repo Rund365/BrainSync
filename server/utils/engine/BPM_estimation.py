@@ -275,17 +275,27 @@ class BPM_estimation:
             self.base_bpm = current_bpm
 
         aligner = self.phase_aligner
+        mode = self._get_active_mode()
         if aligner and aligner.enabled:
             s = aligner.settings
-            self.decay_grace = math.inf if s.hold_when_standing else s.decay_grace
+            standing_safe = s.hold_when_standing or s.pause_when_standing
+            self.decay_grace = math.inf if standing_safe else s.decay_grace
+            started = aligner.update_transport()
+            if started:
+                # The music (re)started on the step at the measured pace: that is the base now
+                self.base_bpm = self._sent_bpm = started
+                self._ramped_base = started
+                self._beat_ref = (None, started, 0.0, started)
+                if hasattr(mode, "last_step_bpm"):
+                    mode.last_step_bpm = started
         else:
             self.decay_grace = 1.0
 
         # Determine Target & Next BPM from Active Mode
-        mode = self._get_active_mode()
         target, self.base_bpm = mode.handle_step(now_ts, self.base_bpm, dt)
-        if aligner and aligner.enabled and aligner.settings.max_change_per_beat is not None:
-            bpm = self._apply_smooth(aligner.settings.max_change_per_beat)
+        max_change = aligner.ctrl.max_change() if aligner and aligner.enabled else None
+        if max_change is not None:
+            bpm = self._apply_smooth(max_change)
         else:
             self._ramped_base = None
             self.phase_delta = self.phase_aligner.update(self.base_bpm) if self.phase_aligner else 0.0

@@ -252,10 +252,19 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "--standing",
-        choices=("hold", "slow"),
+        choices=("pause", "hold", "slow"),
         default=None,
-        help="With phase alignment on, when you stand still: keep the tempo (hold, default) "
+        help="With phase alignment on, when you stand still: pause the music and restart it on your "
+             "steps (pause, default), keep playing at the last tempo (hold), "
              "or slow the music down as without alignment (slow)",
+    )
+    parser.add_argument(
+        "--start-steps",
+        type=int,
+        default=None,
+        help="With phase alignment on, the music starts (and restarts after standing) on the step "
+             f"after this many steps, at their pace (default: {defaults.start_steps}); "
+             "0 = start the music right away as without alignment",
     )
     parser.add_argument(
         "--max-tempo-change",
@@ -305,7 +314,12 @@ def phase_settings(args) -> PhaseSettings:
     if getattr(args, "phase_reset_ms", None) is not None:
         overrides["reset_s"] = args.phase_reset_ms / 1000.0 if args.phase_reset_ms > 0 else None
     if getattr(args, "standing", None) is not None:
+        overrides["pause_when_standing"] = args.standing == "pause"
         overrides["hold_when_standing"] = args.standing == "hold"
+    if getattr(args, "start_steps", None) is not None:
+        overrides["start_on_step"] = args.start_steps > 0
+        if args.start_steps > 0:
+            overrides["start_steps"] = args.start_steps
     if getattr(args, "max_tempo_change", None) is not None:
         overrides["max_change_per_beat"] = args.max_tempo_change / 100.0 if args.max_tempo_change > 0 else None
     return PhaseSettings(**overrides)
@@ -396,9 +410,17 @@ def _collect_calibration_steps(ser, player, logger, status_callback, stop_event,
     
     return bpms
 
-def handle_startup_mode(args, ser, player, logger, bpm_estimation, status_callback, stop_event):
-    """Handle startup: walk-first (calibrate then play) or music-first (play immediately)."""
-    
+def handle_startup_mode(args, ser, player, logger, bpm_estimation, status_callback, stop_event,
+                        start_on_step=False):
+    """Handle startup: walk-first (calibrate then play), music-first (play immediately), or
+    start on the step (phase alignment starts the music once it knows the pace)."""
+    if start_on_step and not getattr(args, 'walk_first', False):
+        logger.log("Music starts on your steps, once the pace is known")
+        logger.log_data(time.time(), player.walkingBPM, player.walkingBPM, step_event=False)
+        _notify(status_callback, "System ready - Please begin walking! The music starts on your steps.")
+        ser.timeout = 0
+        return True
+
     if getattr(args, 'walk_first', False):
         # Calibrate from walking steps
         bpms = _collect_calibration_steps(ser, player, logger, status_callback, stop_event, 
@@ -572,10 +594,19 @@ def main(args, status_callback=print, stop_event=None, session_dir_callback=None
     # runtime serial reads should be non-blocking to avoid slowing playback
     ser.timeout = 0
     
+    phase_align = args.phase_align
+    if phase_align == "auto":
+        phase_align = "on" if run_type in ("dynamic", "hybrid") else "off"
+    if phase_align == "on" and protocol < 2:
+        logger.log("Phase alignment needs the IMU firmware (protocol 2); following the tempo only")
+        phase_align = "off"
+    settings = phase_settings(args)
+
     # ------------------------------------------------------------------
-    # STARTUP MODE: Walk-First vs Music-First
+    # STARTUP MODE: Walk-First vs Music-First vs start on the step
     # ------------------------------------------------------------------
-    startup_success = handle_startup_mode(args, ser, player, logger, bpm_estimation, status_callback, stop_event)
+    startup_success = handle_startup_mode(args, ser, player, logger, bpm_estimation, status_callback, stop_event,
+                                          start_on_step=phase_align == "on" and settings.start_on_step)
     if not startup_success:
         if ser: ser.close()
         return player, logger, bpm_estimation
@@ -594,24 +625,20 @@ def main(args, status_callback=print, stop_event=None, session_dir_callback=None
     # ------------------------------------------------------------------
     # SENSOR PIPELINE: reader thread -> IMU strike prediction -> phase alignment
     # ------------------------------------------------------------------
-    phase_align = args.phase_align
-    if phase_align == "auto":
-        phase_align = "on" if run_type in ("dynamic", "hybrid") else "off"
-    if phase_align == "on" and protocol < 2:
-        logger.log("Phase alignment needs the IMU firmware (protocol 2); following the tempo only")
-        phase_align = "off"
     stream = SensorStream()
     sensor_logger = SensorLogger(logger.path)
     tracker = StrikeTracker(stream, sensor_logger)
-    aligner = PhaseAligner(player, tracker, phase_settings(args), enabled=phase_align == "on",
-                           sensor_logger=sensor_logger)
+    aligner = PhaseAligner(player, tracker, settings, enabled=phase_align == "on", sensor_logger=sensor_logger)
+    if getattr(args, "walk_first", False):
+        aligner.settings.start_on_step = False  # walk-first already started the music
     bpm_estimation.phase_aligner = aligner
     health = SensorHealth(logger, tracker, stream, protocol)
     s = aligner.settings
     logger.log(f"Phase alignment {phase_align} (output latency {s.latency_s * 1000:.0f} ms, kp {s.kp}, "
                f"dead-band {s.deadband_s * 1000:.0f} ms, max nudge {s.delta_max * 100:.0f}%, "
                f"phase reset {f'{s.reset_s * 1000:.0f} ms' if s.reset_s else 'off'}, "
-               f"standing: {'hold' if s.hold_when_standing else 'slow'}, "
+               f"start: {f'on the step after {s.start_steps} steps' if s.start_on_step else 'right away'}, "
+               f"standing: {'pause' if s.pause_when_standing else 'hold' if s.hold_when_standing else 'slow'}, "
                f"max tempo change {f'{s.max_change_per_beat * 100:.0f}% per beat' if s.max_change_per_beat else 'off'})")
     reader = SerialReader(ser)
     reader.start()

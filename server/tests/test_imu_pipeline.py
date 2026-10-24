@@ -197,10 +197,51 @@ class PhaseControllerTests(unittest.TestCase):
         from utils.simulation import fast_loop
         r = fast_loop.run("100:8,0:3,125:14", 1, True, settings=PhaseSettings(max_change_per_beat=0.05),
                           use_model=False)
-        tempo = 60.0 / np.diff(r.beat_t)
-        self.assertLess(np.max(np.abs(np.diff(tempo)) / tempo[:-1]), 0.0501)
+        gaps = np.diff(r.beat_t)
+        tempo = 60.0 / gaps
+        playing = (gaps[1:] < 1.5) & (gaps[:-1] < 1.5)  # not across the pause while standing
+        self.assertLess(np.max((np.abs(np.diff(tempo)) / tempo[:-1])[playing]), 0.0501)
         back_on_step = r.asynchrony_ms[(r.strike_t > 18.0) & (r.strike_t < 24.0)]  # 7-13 s after the restart
         self.assertLess(np.median(np.abs(back_on_step)), 30)
+
+    def test_music_starts_on_the_step_once_the_pace_is_known(self):
+        from utils.simulation import fast_loop
+        r = fast_loop.run("110:15", 1, True, use_model=False)
+        s = PhaseSettings()
+        self.assertFalse(r.with_music[:s.start_steps].any())  # waits for the pace
+        first = np.abs(r.asynchrony_ms[r.with_music][:6])
+        self.assertLess(np.median(first), 50)  # in step from the first beats, nothing to catch up
+        old = fast_loop.run("110:15", 1, False, use_model=False)
+        self.assertTrue(old.with_music.all())  # today's system: music right away
+
+    def test_music_pauses_while_standing_and_restarts_on_the_step(self):
+        from utils.simulation import fast_loop
+        r = fast_loop.run("105:10,0:4,115:12", 1, True, use_model=False)
+        standing = (r.beat_t > 11.5) & (r.beat_t < 14.0)
+        self.assertFalse(standing.any())  # no beats while standing
+        after = r.asynchrony_ms[r.with_music & (r.strike_t > 14.0)]
+        self.assertGreater(len(after), 10)
+        self.assertLess(np.median(np.abs(after[:6])), 50)
+
+    def test_step_lost_on_the_link_does_not_pause_the_music(self):
+        from utils.engine.phase_controller import PhaseAligner
+        clock = SimpleNamespace(t=0.0)
+        player = SimpleNamespace(playing=True, walkingBPM=120.0, paused=0)
+        player.pause = lambda: setattr(player, "paused", player.paused + 1)
+        aligner = PhaseAligner(player, SimpleNamespace(), PhaseSettings(), enabled=True)
+        aligner.on_strike(0, 1, 10.0)
+        import utils.engine.phase_controller as pc
+        saved = pc.time
+        pc.time = SimpleNamespace(perf_counter=lambda: 11.2)  # 2.4 step periods without a step
+        try:
+            aligner.last_strike = SimpleNamespace(pc_t=11.4, sigma_s=0.02, number=2)  # the other foot swings
+            aligner.update_transport()
+            self.assertEqual(player.paused, 0)
+            aligner.last_strike = None  # nothing swinging: standing
+            aligner.update_transport()
+            self.assertEqual(player.paused, 1)
+        finally:
+            pc.time = saved
 
 
 class HardwareReadinessTests(unittest.TestCase):
@@ -210,6 +251,56 @@ class HardwareReadinessTests(unittest.TestCase):
         rx = SimulatedReceiver(Walker(parse_scenario("110:3"), seed=1), protocol=protocol, seed=1)
         rx.timeout = 0.05
         return rx
+
+    def test_player_starts_on_time_pauses_silently_and_resumes_on_time(self):
+        import tempfile
+        import time
+        import mido
+        from utils.hardware.midi_player import BeatClockPlayer
+        sent = []
+
+        class Port:
+            def send(self, msg):
+                sent.append((time.perf_counter(), msg.type if msg.type != "note_on" or msg.velocity else "note_off"))
+
+            def reset(self):
+                sent.append((time.perf_counter(), "reset"))
+
+            def close(self):
+                pass
+
+        mid = mido.MidiFile(ticks_per_beat=480)
+        track = mido.MidiTrack()
+        mid.tracks.append(track)
+        track.append(mido.MetaMessage("set_tempo", tempo=mido.bpm2tempo(120), time=0))
+        for _ in range(64):  # a note on every beat
+            track.append(mido.Message("note_on", note=60, velocity=100, time=0))
+            track.append(mido.Message("note_off", note=60, velocity=0, time=480))
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "beats.mid"
+            mid.save(path)
+            player = BeatClockPlayer(str(path), outport=Port())
+            try:
+                start = time.perf_counter() + 0.1
+                self.assertEqual(player.play_at(start, 240.0), 0)
+                time.sleep(0.4)
+                ons = [t for t, kind in sent if kind == "note_on"]
+                self.assertAlmostEqual(ons[0], start, delta=0.01)  # first note exactly at the given time
+                player.pause()
+                time.sleep(0.15)
+                paused = [t for t, kind in sent if kind == "note_on" and t > start + 0.42]
+                self.assertEqual(paused, [])
+                self.assertIn("reset", [kind for _, kind in sent])  # sounding notes turned off
+                position = player.get_beat_now()
+                resume = time.perf_counter() + 0.2
+                beat = player.play_at(resume, 240.0)
+                self.assertGreater(beat, position)
+                time.sleep(0.3)
+                self.assertAlmostEqual(player.beat_times[beat], resume, delta=0.01)
+                after = [t for t, kind in sent if kind == "note_on" and t > resume - 0.15]
+                self.assertAlmostEqual(after[0], resume, delta=0.01)  # no burst of the skipped part
+            finally:
+                player.close()
 
     def test_version_query_tells_old_and_new_firmware_apart(self):
         from utils.hardware.comms import query_version
@@ -224,7 +315,11 @@ class HardwareReadinessTests(unittest.TestCase):
         self.assertEqual((s.latency_s, s.kp, s.delta_max), (0.045, 0.2, 0.05))
         self.assertEqual(s.deadband_s, PhaseSettings().deadband_s)
         s = phase_settings(SimpleNamespace(latency_ms=30.0, phase_reset_ms=0.0, standing="slow"))
-        self.assertEqual((s.reset_s, s.hold_when_standing), (None, False))
+        self.assertEqual((s.reset_s, s.hold_when_standing, s.pause_when_standing), (None, False, False))
+        s = phase_settings(SimpleNamespace(latency_ms=30.0, standing="hold", start_steps=0))
+        self.assertEqual((s.hold_when_standing, s.pause_when_standing, s.start_on_step), (True, False, False))
+        s = phase_settings(SimpleNamespace(latency_ms=30.0, start_steps=7))
+        self.assertEqual((s.start_on_step, s.start_steps, s.pause_when_standing), (True, 7, True))
         s = phase_settings(SimpleNamespace(latency_ms=30.0, max_tempo_change=8.0))
         self.assertAlmostEqual(s.max_change_per_beat, 0.08)
         s = phase_settings(SimpleNamespace(latency_ms=30.0, max_tempo_change=0.0))

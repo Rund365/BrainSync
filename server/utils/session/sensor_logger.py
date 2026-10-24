@@ -20,6 +20,8 @@ COLUMNS = {
                     "predicted_contact_pc_t", "sigma_ms", "method", "b0_sender_s", "b1_sender_s", "b2_sender_s"],
     "beats": ["beat_index", "pc_t", "tempo_bpm_applied", "tempo_bpm_base", "delta", "alignment_enabled"],
     "phase_errors": ["strike_number", "foot", "contact_pc_t", "beat_index", "beat_pc_t", "error_ms", "bias_ms"],
+    # Music started on the step / paused while standing (phase alignment on)
+    "transport": ["pc_t", "event", "beat_index", "bpm", "beat_pc_t"],
 }
 FLUSH_EVERY_S = 0.1
 

@@ -7,6 +7,7 @@ Usage (from the repo root):
   .venv\\Scripts\\python.exe server\\utils\\simulation\\fast_loop.py mixed --seed 1
 """
 import argparse
+import math
 import sys
 import types
 from dataclasses import dataclass
@@ -26,6 +27,7 @@ from utils.simulation.simulated_receiver import SimulatedReceiver
 from utils.simulation.walker import Walker, parse_scenario
 
 TICK_S = 0.001
+MUSIC_MARGIN_S = 0.15  # a strike this close before the first beat / after the pause still counts
 
 
 class BeatClock:
@@ -36,10 +38,40 @@ class BeatClock:
         self.walkingBPM = self.songBPM = bpm
         self.TempoFactor = 1.0
         self._anchor_beat, self._anchor_time = 0.0, clock()
-        self.beat_times = {0: clock()}
+        self.beat_times = {}
         self._last = 0
+        self.playing = False
+        self.play_spans = []  # [start, end] of each stretch the music played, clock time
+
+    def start(self):
+        self._anchor_beat, self._anchor_time = 0.0, self.clock()
+        self.beat_times = {0: self.clock()}
+        self._last = 0
+        self.playing = True
+        self.play_spans.append([self.clock(), None])
+
+    def play_at(self, at_time, bpm):
+        """As BeatClockPlayer.play_at: a whole beat exactly at `at_time`, the song goes on."""
+        lead = max(at_time - self.clock(), 0.0) * bpm / 60.0
+        beat = 0 if not self.beat_times else math.ceil(self._anchor_beat + lead - 1e-9)
+        self.walkingBPM = bpm
+        self._anchor_beat, self._anchor_time = float(beat), at_time
+        self._last = beat - 1
+        self.playing = True
+        self.play_spans.append([at_time, None])
+        return beat
+
+    def pause(self):
+        if not self.playing:
+            return
+        t = self.clock()
+        self._anchor_beat, self._anchor_time = self._beat_at(t), t
+        self.playing = False
+        self.play_spans[-1][1] = t
 
     def _beat_at(self, t):
+        if not self.playing:
+            return self._anchor_beat
         return self._anchor_beat + (t - self._anchor_time) * self.walkingBPM / 60.0
 
     def set_BPM(self, bpm):
@@ -51,6 +83,8 @@ class BeatClock:
         return self._beat_at(self.clock())
 
     def tick(self):
+        if not self.playing:
+            return
         now = self.clock()
         beat = self._beat_at(now)
         while self._last + 1 <= beat:
@@ -76,6 +110,7 @@ class LoopResult:
     tempo_bpm: np.ndarray
     base_bpm: np.ndarray  # the mode's base tempo, before the phase nudge
     cadence_bpm: np.ndarray  # the walker's cadence at tempo_t
+    with_music: np.ndarray  # per strike: the music was playing (judged); False: waiting / paused
 
 
 def run(scenario: str, seed: int | None, enabled: bool, start_bpm: float = 110.0,
@@ -109,6 +144,8 @@ def run(scenario: str, seed: int | None, enabled: bool, start_bpm: float = 110.0
         tracker = StrikeTracker(stream)
         aligner = phase_module.PhaseAligner(player, tracker, settings, enabled=enabled)
         engine.phase_aligner = aligner
+        if not (enabled and aligner.settings.start_on_step):
+            player.start()  # as main.py: music right away, unless it starts on the step
 
         tempo = []
         while not rx.finished:
@@ -131,9 +168,11 @@ def run(scenario: str, seed: int | None, enabled: bool, start_bpm: float = 110.0
         phase_module.time, bpm_estimation_module.time = saved
 
     start = rx._boot + rx._walk_start
-    beats = np.array(sorted(player.beat_times.values())) + aligner.settings.latency_s - start
+    latency = aligner.settings.latency_s
+    beats = np.array(sorted(player.beat_times.values())) + latency - start
     strikes = np.array([s.hs for s in rx.legs.strikes])
     nearest = beats[np.abs(beats[None, :] - strikes[:, None]).argmin(axis=1)]
+    spans = [(a + latency - start, (b if b is not None else clock.t) + latency - start) for a, b in player.play_spans]
     tempo = np.array(tempo)
     tempo_t = tempo[:, 0] - start
     return LoopResult(
@@ -141,13 +180,25 @@ def run(scenario: str, seed: int | None, enabled: bool, start_bpm: float = 110.0
         asynchrony_ms=(nearest - strikes) * 1000, beat_t=beats,
         tempo_t=tempo_t, tempo_bpm=tempo[:, 1], base_bpm=tempo[:, 2],
         cadence_bpm=np.array([walker.cadence_at(t) for t in tempo_t]),
+        with_music=with_music(strikes, spans),
     )
 
 
+def with_music(strike_t, spans, margin_s: float = MUSIC_MARGIN_S) -> np.ndarray:
+    """True for strikes while the music played (the music waits for the pace at the start and
+    pauses while standing; those strikes have no beat to be judged against)."""
+    mask = np.zeros(len(strike_t), dtype=bool)
+    for a, b in spans:
+        mask |= (strike_t >= a - margin_s) & (strike_t <= b + margin_s)
+    return mask
+
+
 def summary(result: LoopResult) -> str:
-    a = np.abs(result.asynchrony_ms)
+    a = np.abs(result.asynchrony_ms[result.with_music])
+    silent = int((~result.with_music).sum())
     return (f"median |beat - strike| {np.median(a):5.1f} ms, mean {a.mean():5.1f} ms, "
-            f"within 30 ms {np.mean(a < 30) * 100:3.0f}%, within 50 ms {np.mean(a < 50) * 100:3.0f}%")
+            f"within 30 ms {np.mean(a < 30) * 100:3.0f}%, within 50 ms {np.mean(a < 50) * 100:3.0f}%"
+            f"{f', {silent} steps without music' if silent else ''}")
 
 
 def main():
