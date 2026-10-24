@@ -20,7 +20,6 @@ import matplotlib.pyplot as plt
 import numpy as np
 from sklearn.linear_model import Ridge
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
-from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 
 try:
@@ -37,7 +36,12 @@ PROJECT_ROOT = Path(__file__).resolve().parents[3]
 BASE_DIR = PROJECT_ROOT
 
 # Import from local modules in the same directory
-from analyze_data import analyze_bpm_distribution, prepare_training_dataset, build_lag_features
+from analyze_data import (
+    analyze_bpm_distribution,
+    prepare_training_dataset,
+    build_lag_features,
+    group_train_test_split,
+)
 from data_filtering import DataFiltering
 
 # Output directories for results
@@ -91,15 +95,24 @@ def _prepare_dataset(session_paths: list[str] | None = None, window_size: int = 
         window_size: Number of lag steps for feature engineering.
     
     Returns:
-        Tuple of (X_train, X_test, y_train, y_test, scaler, meta_mappings)
+        Tuple of (X_train, X_test, y_train, y_test, scaler, meta_mappings, groups_train)
         or None if preparation fails.
     """
     return prepare_training_dataset(
         session_paths=session_paths,
         window_size=window_size,
         test_size=TEST_SIZE,
-        random_seed=RANDOM_SEED
+        random_seed=RANDOM_SEED,
+        return_groups=True,
     )
+
+
+def _split_by_session(X, y, groups, test_size):
+    """Train/validation split of training rows, by session (see group_train_test_split)."""
+    X_fit, X_val, y_fit, y_val, _, _ = group_train_test_split(
+        X, y, groups, test_size=test_size, random_seed=RANDOM_SEED
+    )
+    return X_fit, X_val, y_fit, y_val
 
 
 def _plot_predictions(tag, y_true, preds, mae, r2, limit=200):
@@ -225,11 +238,11 @@ def train_lgbm_model(session_paths: list[str] | None = None, optimize: bool = Fa
     if prepared is None:
         return
 
-    X_train, X_test, y_train, y_test, scaler, meta_mappings = prepared
+    X_train, X_test, y_train, y_test, scaler, meta_mappings, groups_train = prepared
     
     # Split training data for validation tracking
-    X_train_fit, X_val_track, y_train_fit, y_val_track = train_test_split(
-        X_train, y_train, test_size=0.15, random_state=RANDOM_SEED
+    X_train_fit, X_val_track, y_train_fit, y_val_track = _split_by_session(
+        X_train, y_train, groups_train, test_size=0.15
     )
     
     # Generate feature names for visualization (preset models use DEFAULT_WINDOW_SIZE)
@@ -317,11 +330,11 @@ def train_lgbm_model(session_paths: list[str] | None = None, optimize: bool = Fa
                 if trial_prepared is None:
                     return float('inf')  # Invalid configuration
                 
-                X_train_trial, X_test_trial, y_train_trial, y_test_trial, scaler_trial, _ = trial_prepared
+                X_train_trial, X_test_trial, y_train_trial, y_test_trial, scaler_trial, _, groups_trial = trial_prepared
                 
                 # Split for validation
-                X_train_opt, X_val_opt, y_train_opt, y_val_opt = train_test_split(
-                    X_train_trial, y_train_trial, test_size=0.2, random_state=RANDOM_SEED
+                X_train_opt, X_val_opt, y_train_opt, y_val_opt = _split_by_session(
+                    X_train_trial, y_train_trial, groups_trial, test_size=0.2
                 )
                 
                 # MODEL HYPERPARAMETERS
@@ -363,11 +376,11 @@ def train_lgbm_model(session_paths: list[str] | None = None, optimize: bool = Fa
             if optuna_prepared is None:
                 print("      Failed to prepare dataset with best window_size - skipping Optuna model")
             else:
-                X_train_opt, X_test_opt, y_train_opt, y_test_opt, scaler_opt, meta_mappings_opt = optuna_prepared
+                X_train_opt, X_test_opt, y_train_opt, y_test_opt, scaler_opt, meta_mappings_opt, groups_opt = optuna_prepared
                 
                 # Split for validation tracking
-                X_train_fit_opt, X_val_track_opt, y_train_fit_opt, y_val_track_opt = train_test_split(
-                    X_train_opt, y_train_opt, test_size=0.15, random_state=RANDOM_SEED
+                X_train_fit_opt, X_val_track_opt, y_train_fit_opt, y_val_track_opt = _split_by_session(
+                    X_train_opt, y_train_opt, groups_opt, test_size=0.15
                 )
                 
                 # Generate dynamic feature names based on window_size
@@ -504,18 +517,13 @@ def optimize_lgbm_model(trials: int = DEFAULT_OPTUNA_TRIALS, timeout: Optional[i
     except ImportError:  # pragma: no cover
         raise SystemExit("Optuna is not installed. Re-run with run_lgbm.bat --optimize to install dependencies.")
 
-    prepared = prepare_training_dataset(
-        session_paths=None,
-        window_size=DEFAULT_WINDOW_SIZE,
-        test_size=TEST_SIZE,
-        random_seed=RANDOM_SEED
-    )
+    prepared = _prepare_dataset(session_paths=None, window_size=DEFAULT_WINDOW_SIZE)
     if prepared is None:
         return
 
-    X_train, X_test, y_train, y_test, scaler, meta_mappings = prepared
-    X_train_opt, X_val_opt, y_train_opt, y_val_opt = train_test_split(
-        X_train, y_train, test_size=0.2, random_state=RANDOM_SEED
+    X_train, X_test, y_train, y_test, scaler, meta_mappings, groups_train = prepared
+    X_train_opt, X_val_opt, y_train_opt, y_val_opt = _split_by_session(
+        X_train, y_train, groups_train, test_size=0.2
     )
 
     def objective(trial: optuna.Trial) -> float:
@@ -574,8 +582,8 @@ def optimize_lgbm_model(trials: int = DEFAULT_OPTUNA_TRIALS, timeout: Optional[i
         **best_params,
     )
 
-    X_train_fit, X_val_fit, y_train_fit, y_val_fit = train_test_split(
-        X_train, y_train, test_size=0.2, random_state=RANDOM_SEED
+    X_train_fit, X_val_fit, y_train_fit, y_val_fit = _split_by_session(
+        X_train, y_train, groups_train, test_size=0.2
     )
     
     # Generate feature names for visualization
@@ -685,7 +693,7 @@ def train_user_calibration(user_df, base_model_path=None, output_suffix="user_he
         raise ValueError("No valid user data after filtering.")
 
     # Build lag features
-    X_lag, y, meta, _ = build_lag_features(user_df, window_size=window_size)
+    X_lag, y, meta, _, groups = build_lag_features(user_df, window_size=window_size, return_groups=True)
     if len(X_lag) < 10:
         raise ValueError(f"Not enough user sequences to fit calibration head (found {len(X_lag)}).")
     X = np.concatenate([X_lag, meta], axis=1) if len(meta) > 0 else X_lag
@@ -700,9 +708,7 @@ def train_user_calibration(user_df, base_model_path=None, output_suffix="user_he
     calib_features = np.column_stack([base_preds, X_scaled])
 
     # Split for a quick validation (optional)
-    X_train, X_val, y_train, y_val = train_test_split(
-        calib_features, y, test_size=0.2, random_state=RANDOM_SEED
-    )
+    X_train, X_val, y_train, y_val = _split_by_session(calib_features, y, groups, test_size=0.2)
 
     calibrator = Ridge(alpha=1.0, random_state=RANDOM_SEED)
     calibrator.fit(X_train, y_train)

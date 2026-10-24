@@ -14,5 +14,7 @@ server/utils/session/__pycache__
 .venv/
 venv311/
 .cursor/
+*.pyc
 
-
+# Simulated sessions (server/main.py --simulate)
+server/sim_logs/

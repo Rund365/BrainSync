@@ -4,6 +4,7 @@ pyserial
 numpy
 mido
 python-rtmidi
+sounddevice
 scikit-learn
 lightgbm
 optuna

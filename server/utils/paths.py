@@ -32,6 +32,16 @@ def get_logs_dir():
     return logs
 
 
+def get_sim_logs_dir():
+    """
+    Logs of simulated sessions (main.py --simulate). Kept outside the logs directory
+    so training, augmentation and session lists never pick up simulated walks.
+    """
+    logs = get_app_root() / "server" / "sim_logs"
+    logs.mkdir(parents=True, exist_ok=True)
+    return logs
+
+
 def get_models_dir():
     """Get the models directory (always external, writable)."""
     models = get_app_root() / "server" / "utils" / "prediction_model" / "results" / "models"
