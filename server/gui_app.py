@@ -1546,10 +1546,10 @@ class GuiApp:
         def _worker():
             ok = False
             try:
-                import serial
-                with serial.Serial(port, 115200, timeout=1.0) as ser:
-                    class _Logger:
-                        def log(self, msg): self_outer.log(msg)
+                from utils.hardware.comms import open_receiver
+                class _Logger:
+                    def log(self, msg): self_outer.log(msg)
+                with open_receiver(port, _Logger(), timeout=1.0) as ser:
                     ok = send_calibration_command(ser, _Logger(), margin=margin, retries=3)
             except Exception as e:
                 self.log(f"Calibration failed: {e}")
