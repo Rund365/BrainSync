@@ -44,6 +44,7 @@ class FootProfile:
     ms_dps: float = 380.0  # mid-swing peak
     slap_dps: float = -110.0  # foot slapping flat right after HS
     impact_g: float = 3.5  # extra acceleration at HS, in g
+    brake_ms2: float = 20.0  # forward deceleration just before landing, ~2 g (real feet: up to ~3 g)
     fsr_delay_s: float = 0.020  # FSR crosses its threshold this long after true contact
     lift_lead_s: float = 0.030  # FSR releases this long before toe-off (heel rises first)
     timing_cv: float = 0.03  # stride-to-stride variation of the swing timing
@@ -166,7 +167,7 @@ def simulate_legs(walker: Walker, seed: int | None = None, person: Person | None
 
         _bump(t, a[:, 0], to + 0.03, 0.035 * width, 9.0 * size())  # push-off forward
         _bump(t, a[:, 2], to + 0.05, 0.040 * width, 5.0 * size())  # foot lifts
-        _bump(t, a[:, 0], hs - 0.06, 0.035 * width, -8.0 * size())  # braking before landing
+        _bump(t, a[:, 0], hs - 0.06, 0.035 * width, -p.brake_ms2 * size())  # braking before landing
         _impact(t, a, hs, p.impact_g * G * size())
 
         strikes.append(Strike(

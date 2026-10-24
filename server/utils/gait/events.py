@@ -26,6 +26,9 @@ MS_DPS = 150.0  # mid-swing peak must go above MS_DPS
 SLAP_GUARD_S = 0.15  # ignore the foot slapping flat right after a strike
 SWING_TIMEOUT_S = 1.0
 IMPACT_MS2 = 4.0  # |acceleration| this far from gravity = impact
+# ... and this much away from the sample before: an impact is a jump, while the braking just
+# before landing (up to ~3 g on real feet) builds up over several samples
+IMPACT_JUMP_MS2 = 8.0
 IMPACT_SAMPLE_LAG_S = 0.005  # first sample after contact is on average half a sample late
 
 STANCE, SWING, TERMINAL = "stance", "swing", "terminal"
@@ -118,7 +121,10 @@ class FootTracker:
         # The IMU data of a strike arrives a little after the FSR message; wait for it
         while self._pending_strikes and t >= self._pending_strikes[0] + 0.02:
             fsr_t = self._pending_strikes.pop(0)
+            prev = None
             for ts, dev in self._acc_dev:
-                if fsr_t - 0.08 <= ts <= fsr_t + 0.01 and abs(dev) > IMPACT_MS2:
+                if (prev is not None and fsr_t - 0.08 <= ts <= fsr_t + 0.01 and abs(dev) > IMPACT_MS2
+                        and abs(dev - prev) > IMPACT_JUMP_MS2):
                     self._fsr_delays.append(fsr_t - (ts - IMPACT_SAMPLE_LAG_S))
                     break
+                prev = dev

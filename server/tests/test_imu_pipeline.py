@@ -312,6 +312,25 @@ class HardwareReadinessTests(unittest.TestCase):
         rx.timeout = 0.05
         return rx
 
+    def test_fsr_delay_is_measured_from_the_impact_not_the_braking(self):
+        from dataclasses import replace
+        from utils.gait.events import FootTracker
+        from utils.simulation.legs import Person, simulate_legs, ACC_LSB_PER_MS2, GYR_LSB_PER_DPS
+        from utils.simulation.walker import Walker, parse_scenario
+        person = Person.random(np.random.default_rng(3))
+        # Real feet brake up to ~3 g just before landing, more than the simulator's default
+        person = Person(right=replace(person.right, brake_ms2=30.0), left=replace(person.left, brake_ms2=30.0))
+        rec = simulate_legs(Walker(parse_scenario("110:20"), seed=3), seed=3, person=person)
+        for foot in (RIGHT, LEFT):
+            tracker = FootTracker(foot)
+            strikes = sorted(s.fsr for s in rec.strikes if s.foot == foot)
+            for i, t in enumerate(rec.t):
+                while strikes and strikes[0] <= t:
+                    tracker.on_strike(strikes.pop(0))
+                if rec.valid[foot][i]:
+                    tracker.add_sample(t, rec.acc_raw[foot][i] / ACC_LSB_PER_MS2, rec.gyr_raw[foot][i] / GYR_LSB_PER_DPS)
+            self.assertAlmostEqual(tracker.fsr_delay_s, person.foot(foot).fsr_delay_s, delta=0.008)
+
     def test_player_starts_on_time_pauses_silently_and_resumes_on_time(self):
         import tempfile
         import time
