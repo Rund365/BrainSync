@@ -258,6 +258,14 @@ def parse_args() -> argparse.Namespace:
              "or slow the music down as without alignment (slow)",
     )
     parser.add_argument(
+        "--max-tempo-change",
+        type=float,
+        default=None,
+        help="With phase alignment on, each beat may be at most this many percent faster or slower "
+             f"than the one before, so tempo changes are gradual; 0 = no limit "
+             f"(default: {defaults.max_change_per_beat * 100:.0f})",
+    )
+    parser.add_argument(
         "--baud",
         type=int,
         default=None,
@@ -298,6 +306,8 @@ def phase_settings(args) -> PhaseSettings:
         overrides["reset_s"] = args.phase_reset_ms / 1000.0 if args.phase_reset_ms > 0 else None
     if getattr(args, "standing", None) is not None:
         overrides["hold_when_standing"] = args.standing == "hold"
+    if getattr(args, "max_tempo_change", None) is not None:
+        overrides["max_change_per_beat"] = args.max_tempo_change / 100.0 if args.max_tempo_change > 0 else None
     return PhaseSettings(**overrides)
 
 
@@ -601,7 +611,8 @@ def main(args, status_callback=print, stop_event=None, session_dir_callback=None
     logger.log(f"Phase alignment {phase_align} (output latency {s.latency_s * 1000:.0f} ms, kp {s.kp}, "
                f"dead-band {s.deadband_s * 1000:.0f} ms, max nudge {s.delta_max * 100:.0f}%, "
                f"phase reset {f'{s.reset_s * 1000:.0f} ms' if s.reset_s else 'off'}, "
-               f"standing: {'hold' if s.hold_when_standing else 'slow'})")
+               f"standing: {'hold' if s.hold_when_standing else 'slow'}, "
+               f"max tempo change {f'{s.max_change_per_beat * 100:.0f}% per beat' if s.max_change_per_beat else 'off'})")
     reader = SerialReader(ser)
     reader.start()
 

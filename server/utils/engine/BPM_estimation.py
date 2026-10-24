@@ -89,6 +89,9 @@ class BPM_estimation:
         self.phase_aligner = None  # PhaseAligner, set by main when the IMU pipeline runs
         self.phase_delta = 0.0
         self._sent_bpm = player.walkingBPM
+        # Smooth tempo (phase alignment on): (beat index, previous beat's tempo, start time, base at start)
+        self._beat_ref = (None, player.walkingBPM, 0.0, player.walkingBPM)
+        self._ramped_base = None
         # The modes slow down once the next step is later than one step period x this
         self.decay_grace = 1.0
 
@@ -230,6 +233,35 @@ class BPM_estimation:
         return None
 
 
+    def _beat_refs(self) -> tuple[float, float]:
+        """(tempo of the previous beat as it was heard, ramped base tempo when this beat began)."""
+        now = time.perf_counter()
+        position = self.player.get_beat_now()
+        beat = math.floor(position)
+        index, ref, started, ref_base = self._beat_ref
+        if beat != index:
+            boundary = now - (position - beat) * 60.0 / self.player.walkingBPM
+            if index is not None and beat == index + 1 and boundary > started:
+                ref = 60.0 / (boundary - started)
+            else:
+                ref = self.player.walkingBPM
+            ref_base = self._ramped_base or self.base_bpm
+            self._beat_ref = (beat, ref, boundary, ref_base)
+        return ref, ref_base
+
+    def _apply_smooth(self, max_change: float) -> float:
+        """Tempo with beat-to-beat changes limited to max_change. The base tempo ramps at the
+        same rate and the controller is told the nudge actually applied, so it plans with the
+        tempo that really plays instead of fighting the limit."""
+        ref, ref_base = self._beat_refs()
+        self._ramped_base = max(ref_base * (1.0 - max_change), min(ref_base * (1.0 + max_change), self.base_bpm))
+        delta = self.phase_aligner.update(self._ramped_base)
+        bpm = self._ramped_base * (1.0 + delta)
+        bpm = max(ref * (1.0 - max_change), min(ref * (1.0 + max_change), bpm))
+        self.phase_aligner.ctrl.delta = bpm / self._ramped_base - 1.0
+        self.phase_delta = self.phase_aligner.ctrl.delta
+        return bpm
+
     # ----------- Main Loop -----------
     def update_bpm(self):
         """Called ~10Hz by main loop."""
@@ -252,11 +284,16 @@ class BPM_estimation:
         # Determine Target & Next BPM from Active Mode
         mode = self._get_active_mode()
         target, self.base_bpm = mode.handle_step(now_ts, self.base_bpm, dt)
-        self.phase_delta = self.phase_aligner.update(self.base_bpm) if self.phase_aligner else 0.0
+        if aligner and aligner.enabled and aligner.settings.max_change_per_beat is not None:
+            bpm = self._apply_smooth(aligner.settings.max_change_per_beat)
+        else:
+            self._ramped_base = None
+            self.phase_delta = self.phase_aligner.update(self.base_bpm) if self.phase_aligner else 0.0
+            bpm = self.base_bpm * (1.0 + self.phase_delta)
 
         # Apply
         self.target_bpm = target
-        self._sent_bpm = self.base_bpm * (1.0 + self.phase_delta)
+        self._sent_bpm = bpm
         self.player.set_BPM(self._sent_bpm)
         
         # Logging

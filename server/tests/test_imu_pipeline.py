@@ -193,6 +193,15 @@ class PhaseControllerTests(unittest.TestCase):
             target, _ = mode.handle_step(105.0, 110.0, 0.1)  # 5 s without a step
             self.assertAlmostEqual(target, expected)
 
+    def test_tempo_changes_gradually_from_beat_to_beat(self):
+        from utils.simulation import fast_loop
+        r = fast_loop.run("100:8,0:3,125:14", 1, True, settings=PhaseSettings(max_change_per_beat=0.05),
+                          use_model=False)
+        tempo = 60.0 / np.diff(r.beat_t)
+        self.assertLess(np.max(np.abs(np.diff(tempo)) / tempo[:-1]), 0.0501)
+        back_on_step = r.asynchrony_ms[(r.strike_t > 18.0) & (r.strike_t < 24.0)]  # 7-13 s after the restart
+        self.assertLess(np.median(np.abs(back_on_step)), 30)
+
 
 class HardwareReadinessTests(unittest.TestCase):
     def receiver(self, protocol):
@@ -216,8 +225,10 @@ class HardwareReadinessTests(unittest.TestCase):
         self.assertEqual(s.deadband_s, PhaseSettings().deadband_s)
         s = phase_settings(SimpleNamespace(latency_ms=30.0, phase_reset_ms=0.0, standing="slow"))
         self.assertEqual((s.reset_s, s.hold_when_standing), (None, False))
-        s = phase_settings(SimpleNamespace(latency_ms=30.0, phase_reset_ms=0.0, standing="slow"))
-        self.assertEqual((s.reset_s, s.hold_when_standing), (None, False))
+        s = phase_settings(SimpleNamespace(latency_ms=30.0, max_tempo_change=8.0))
+        self.assertAlmostEqual(s.max_change_per_beat, 0.08)
+        s = phase_settings(SimpleNamespace(latency_ms=30.0, max_tempo_change=0.0))
+        self.assertIsNone(s.max_change_per_beat)
 
     def test_health_warns_once_when_an_imu_goes_silent_and_when_it_is_back(self):
         from utils.engine.sensor_health import SensorHealth

@@ -817,6 +817,8 @@ The base tempo from the modes is the *feed-forward* (gets the speed roughly righ
 **Base tempo on the IMU path:** the step BPM given to the mode is computed from the exact strike times, not the receiver's 3-step average: a straight line fitted through the last 8 step times (left + right pairs, so the foot difference cancels), read at the latest step. It follows pace changes without the lag of an average, so δ is free for the phase. After a stop it restarts from the first step (`base_min_steps = 1`) instead of the receiver average, which includes the pause. A 4-step line was tested and made no difference.
 
 **Standing on the IMU path:** the music keeps its last walking tempo (`hold_when_standing`) instead of slowing down toward 0, and the phase reset puts the beat back on the first steps. The old system keeps its "no step yet: slow down" behaviour.
+
+**Smooth tempo on the IMU path:** each beat may be at most `max_change_per_beat` (5%) faster or slower than the beat before, so pace changes, restarts and phase resets become ramps instead of jumps. The base tempo ramps at the same rate and the controller is told the nudge actually applied, so it plans with the tempo that really plays (without this the limit made the tempo swing back and forth after a restart). Cost in the fast loop (4 walks × 4 seeds): within ±30 ms 80% → 73%, median error in the 6 s after a change 26 → 50 ms; 8% per beat gives 76% and 37 ms.
 9. **Anti-windup:** when δ is at its limit, do not grow `I`.
 10. **Low confidence** (no prediction, large sigma, standing, turning) or a sharp base-tempo change / mode switch: freeze `I` and let it and δ decay toward 0 (e.g. ×0.8 per beat) → falls back to pure tempo following (today's behavior).
 
@@ -865,6 +867,7 @@ self.player.set_BPM(self.base_bpm * (1 + delta))                # PI nudge appli
 | `t_min` | 50 ms | Do not try to correct beats closer than this |
 | base tempo | line through 8 steps, from 1 step after a stop | See "Base tempo on the IMU path" above |
 | `hold_when_standing` | on | Keep the tempo while standing (IMU path only) |
+| `max_change_per_beat` | 5% | Largest tempo change from one beat to the next (IMU path only) |
 | `decay_grace` | 1.5 step periods | Slow-down safety tolerance on the IMU path when `hold_when_standing` is off |
 
 These are tuned in Phase 5 by listening tests plus the asynchrony measurements.
@@ -1010,6 +1013,7 @@ Implemented `main.py` CLI arguments (not yet in the GUI):
 | `--phase-max-nudge` | 15 | `δ_max`, percent |
 | `--phase-reset-ms` | 100 | `reset_s`; 0 = no phase reset |
 | `--standing` | `hold` | With alignment on: `hold` the tempo while standing, or `slow` down as without alignment |
+| `--max-tempo-change` | 5 | With alignment on: largest tempo change from one beat to the next, in percent; 0 = no limit |
 | `--no-audio` | off | No MIDI port (silent simulation runs) |
 | `--simulate`, `--sim-seed`, `--sim-sharp`, `--sim-protocol` | – | Simulated walker instead of the ESP32s |
 

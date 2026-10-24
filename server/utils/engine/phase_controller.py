@@ -64,6 +64,10 @@ class PhaseSettings:
     # Standing still: keep the last walking tempo instead of slowing down toward 0, so the
     # music is ready to restart on the first step (the phase reset puts the beat on it)
     hold_when_standing: bool = True
+    # Smooth tempo: each beat may be at most this much faster or slower than the beat before
+    # (base tempo and correction together), so pace changes and restarts become ramps, not
+    # jumps. None: no limit
+    max_change_per_beat: float | None = 0.05
 
 
 class PhaseController:

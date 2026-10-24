@@ -7,6 +7,7 @@ Under the pads: how far the last beat was from the step (green = in sync, under 
 
 Usage (from the repo root):
   .venv\\Scripts\\python.exe server\\utils\\analysis\\live_view.py [scenario] [--seed 1] [--align off] [--song FILE]
+      [--latency-ms 150] [--max-tempo-change 5]
 scenario: steady, speedup, stop_start, mixed (default steady), or 'cadence:seconds,...'.
 --align off plays today's system (tempo following only), to hear the difference.
 Esc or closing the window stops the run.
@@ -107,6 +108,8 @@ class LiveView:
                "--session-name", f"live_{stamp}"]
         if args.seed is not None:
             cmd += ["--sim-seed", str(args.seed)]
+        if args.max_tempo_change is not None:
+            cmd += ["--max-tempo-change", str(args.max_tempo_change)]
         self._console = open(self.console_path, "w", encoding="utf-8")
         self.proc = subprocess.Popen(cmd, cwd=SERVER.parent, env=env, stdin=subprocess.DEVNULL,
                                      stdout=self._console, stderr=subprocess.STDOUT)
@@ -236,6 +239,8 @@ def main():
     parser.add_argument("--align", choices=("on", "off"), default="on")
     parser.add_argument("--song", type=Path, default=None, help="MIDI file (default: a click on every beat)")
     parser.add_argument("--latency-ms", type=float, default=30.0, help="sound output delay, as in main.py")
+    parser.add_argument("--max-tempo-change", type=float, default=None,
+                        help="largest tempo change from one beat to the next, in percent, as in main.py")
     args = parser.parse_args()
     args.song = args.song or click_track()
     LiveView(args).run()
