@@ -7,6 +7,7 @@ before LightGBM training.
 import glob
 import json
 import os
+import re
 from pathlib import Path
 
 import matplotlib.pyplot as plt
@@ -84,7 +85,50 @@ def load_raw_sessions(logs_dir=None) -> pd.DataFrame:
     return load_all_sessions(str(resolved))
 
 
-def build_lag_features(df: pd.DataFrame, window_size: int, stride_aware: bool = True):
+_AUGMENTATION_SUFFIX = re.compile(r"_(warp[\d.]+|noise\d+|s\d+w\d+)$")
+
+
+def source_session_id(session_id: str) -> str:
+    """Original session an augmented session was generated from (itself if not augmented)."""
+    return _AUGMENTATION_SUFFIX.sub("", str(session_id))
+
+
+def is_augmented_session(session_id: str) -> bool:
+    return _AUGMENTATION_SUFFIX.search(str(session_id)) is not None
+
+
+def group_train_test_split(X, y, groups, test_size=0.2, random_seed=42, real_only_test=True):
+    """
+    Split rows so that all rows of a session (and of every augmented copy of it)
+    land on the same side. Rows of one session overlap heavily (sliding windows),
+    so a random row split leaks near-duplicates into the test set.
+
+    Returns (X_train, X_test, y_train, y_test, groups_train, groups_test).
+    Falls back to a random row split, with a warning, when there is only one source session.
+    """
+    from sklearn.model_selection import GroupShuffleSplit, train_test_split
+
+    groups = np.asarray(groups)
+    sources = np.array([source_session_id(g) for g in groups])
+
+    if len(np.unique(sources)) < 2:
+        print("WARNING: only one source session - falling back to a random row split; "
+              "test scores will be optimistic.")
+        return train_test_split(X, y, groups, test_size=test_size, random_state=random_seed)
+
+    splitter = GroupShuffleSplit(n_splits=1, test_size=test_size, random_state=random_seed)
+    train_idx, test_idx = next(splitter.split(X, y, groups=sources))
+
+    if real_only_test:
+        real_test = np.array([not is_augmented_session(g) for g in groups[test_idx]])
+        if real_test.any():
+            test_idx = test_idx[real_test]
+
+    return X[train_idx], X[test_idx], y[train_idx], y[test_idx], groups[train_idx], groups[test_idx]
+
+
+def build_lag_features(df: pd.DataFrame, window_size: int, stride_aware: bool = True,
+                       return_groups: bool = False):
     """
     Create sliding window lag features for one-step-ahead prediction.
     Uses both smoothed walking_bpm and per-step instant_bpm, and carries
@@ -96,11 +140,13 @@ def build_lag_features(df: pd.DataFrame, window_size: int, stride_aware: bool = 
         stride_aware: If True, lag features account for stride.
                      Note: Current implementation treats stride consistently
                      since data is already recorded at stride intervals.
+        return_groups: If True, also return the session_id of every row.
     
     Returns:
-        (X_lag, y, meta, meta_mappings) tuple
+        (X_lag, y, meta, meta_mappings) tuple,
+        or (X_lag, y, meta, meta_mappings, groups) if return_groups.
     """
-    sequences, targets, metas = [], [], []
+    sequences, targets, metas, row_groups = [], [], [], []
 
     def _to_seconds(tstr: str) -> float:
         parts = tstr.split(":")
@@ -124,7 +170,7 @@ def build_lag_features(df: pd.DataFrame, window_size: int, stride_aware: bool = 
     else:
         df["seconds"] = pd.NA
 
-    for _, group in df.groupby("session_id"):
+    for session_id, group in df.groupby("session_id"):
         g = group.copy()
         try:
             g = g.sort_values("seconds", kind="mergesort")
@@ -165,15 +211,18 @@ def build_lag_features(df: pd.DataFrame, window_size: int, stride_aware: bool = 
             sequences.append(list(walk_slice) + list(inst_slice))
             targets.append(walk_vals[idx])
             metas.append([sw, st, run_type_code])
+            row_groups.append(session_id)
             
     if not sequences:
-        return np.array([]), np.array([]), np.array([]), {"run_type": run_type_mapping}
-    return (
+        empty = (np.array([]), np.array([]), np.array([]), {"run_type": run_type_mapping})
+        return empty + (np.array([]),) if return_groups else empty
+    result = (
         np.array(sequences, dtype=np.float32),
         np.array(targets, dtype=np.float32),
         np.array(metas, dtype=np.float32),
         {"run_type": run_type_mapping},
     )
+    return result + (np.array(row_groups),) if return_groups else result
 
 
 def _plot_distribution(df: pd.DataFrame, title_prefix: str, output_name: str):
@@ -222,26 +271,29 @@ def _plot_distribution(df: pd.DataFrame, title_prefix: str, output_name: str):
 
 
 
-def prepare_training_dataset(session_paths=None, window_size=4, test_size=0.2, random_seed=42, min_steps=20):
+def prepare_training_dataset(session_paths=None, window_size=4, test_size=0.2, random_seed=42, min_steps=20,
+                             return_groups=False):
     """
     Complete dataset preparation pipeline for training.
     
-    Loads sessions, applies filters, builds lag features, splits into train/test,
-    and scales the features. Automatically filters out invalid sessions.
+    Loads sessions, applies filters, builds lag features, splits into train/test
+    by session (see group_train_test_split), and scales the features.
+    Automatically filters out invalid sessions.
     
     Args:
         session_paths: Optional list of specific session CSV paths to use.
                       If None, loads all sessions from server/logs/.
         window_size: Number of lag steps for time series features.
-        test_size: Fraction of data to use for testing.
+        test_size: Fraction of source sessions to use for testing.
         random_seed: Random seed for reproducibility.
         min_steps: Minimum number of step events required per session (default: 20).
+        return_groups: If True, also return the session_id of every training row,
+                       so callers can make further splits by session.
     
     Returns:
-        Tuple of (X_train, X_test, y_train, y_test, scaler, meta_mappings)
-        or None if insufficient data.
+        Tuple of (X_train, X_test, y_train, y_test, scaler, meta_mappings),
+        plus groups_train if return_groups, or None if insufficient data.
     """
-    from sklearn.model_selection import train_test_split
     from sklearn.preprocessing import StandardScaler
     from data_filtering import DataFiltering
     
@@ -325,7 +377,7 @@ def prepare_training_dataset(session_paths=None, window_size=4, test_size=0.2, r
     print(f"Training on {len(df)} data points from {df['session_id'].nunique()} session(s).")
 
     # Build lag features
-    X_lag, y, meta, meta_mappings = build_lag_features(df, window_size=window_size)
+    X_lag, y, meta, meta_mappings, groups = build_lag_features(df, window_size=window_size, return_groups=True)
     if len(X_lag) < 20:
         print(f"Not enough sequences to train (found {len(X_lag)}).")
         return None
@@ -338,18 +390,22 @@ def prepare_training_dataset(session_paths=None, window_size=4, test_size=0.2, r
     if finite_mask.sum() < len(finite_mask):
         X = X[finite_mask]
         y = y[finite_mask]
+        groups = groups[finite_mask]
         print(f"Dropped {len(finite_mask) - len(X)} rows with non-finite features.")
 
-    # Train/test split
-    X_train, X_test, y_train, y_test = train_test_split(
-        X, y, test_size=test_size, random_state=random_seed
+    X_train, X_test, y_train, y_test, groups_train, groups_test = group_train_test_split(
+        X, y, groups, test_size=test_size, random_seed=random_seed
     )
+    print(f"Split by session: {len(set(groups_train))} train / {len(set(groups_test))} test session(s), "
+          f"{len(X_train)} / {len(X_test)} rows.")
 
     # Feature scaling
     scaler = StandardScaler()
     X_train = scaler.fit_transform(X_train)
     X_test = scaler.transform(X_test)
 
+    if return_groups:
+        return X_train, X_test, y_train, y_test, scaler, meta_mappings, groups_train
     return X_train, X_test, y_train, y_test, scaler, meta_mappings
 
 
