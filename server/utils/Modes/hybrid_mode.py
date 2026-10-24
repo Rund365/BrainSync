@@ -81,7 +81,7 @@ class HybridMode(BaseMode):
         if self.last_step_time > 0:
             interval = now_ts - self.last_step_time
             if interval > 0:
-                decay_limit = 60.0 / interval
+                decay_limit = 60.0 * getattr(self.context, 'decay_grace', 1.0) / interval
                 if decay_limit < target:
                     target = decay_limit
 
