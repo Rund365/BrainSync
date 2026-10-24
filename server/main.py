@@ -12,15 +12,24 @@ Usage:
 """
 import sys
 import time
-import serial
 import argparse
 import threading
 from pathlib import Path
-from utils.hardware.midi_player import MidiBeatSync
+from utils.hardware.midi_player import MidiBeatSync, NullOutput
+from utils.hardware.sensor_stream import SensorStream, SerialReader, ImuMsg, StepMsg, LiftMsg, StatusMsg, OtherMsg
+from utils.engine.strike_tracking import StrikeTracker
+from utils.engine.phase_controller import PhaseAligner, PhaseSettings
+from utils.engine.sensor_health import SensorHealth
 from utils.session.logger import Logger
+from utils.session.sensor_logger import SensorLogger
 from utils.engine.BPM_estimation import BPM_estimation
-from utils.hardware.comms import session_handshake, handle_engine_command, handle_step, send_calibration_command
+from utils.hardware.comms import (session_handshake, handle_engine_command, handle_step, send_calibration_command,
+                                  open_receiver)
 from utils.prediction_model.LGBM_predictor import LGBMPredictor
+from utils.simulation.walker import Walker, parse_scenario
+from utils.simulation.simulated_receiver import SimulatedReceiver
+from utils.session.plotter import generate_post_session_plot
+from utils.paths import get_sim_logs_dir
 # from utils.safety import safe_execute
 
 #parse the arguments
@@ -30,7 +39,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "midi_path",
         nargs="?",
-        default="midi_files\Technion_March1.mid",
+        default=r"midi_files\Technion_March1.mid",
         help="Path to the MIDI file to play",
     )
     parser.add_argument(
@@ -173,6 +182,92 @@ def parse_args() -> argparse.Namespace:
         default=10,
         help="Number of steps to collect before starting music in walk-first mode (default: 10)",
     )
+    parser.add_argument(
+        "--simulate",
+        type=str,
+        default=None,
+        metavar="SCENARIO",
+        help="Run without hardware: a simulated walker replaces the ESP32s. "
+             "Preset (steady, speedup, stop_start, mixed) or 'cadence:seconds,...', e.g. '110:20,130:15,0:5'",
+    )
+    parser.add_argument(
+        "--sim-seed",
+        type=int,
+        default=None,
+        help="Random seed for --simulate, to repeat the exact same walk",
+    )
+    parser.add_argument(
+        "--sim-sharp",
+        action="store_true",
+        help="Stress-test walker for --simulate: instant stops and starts, no natural drift",
+    )
+    parser.add_argument(
+        "--sim-protocol",
+        type=int,
+        choices=(1, 2),
+        default=2,
+        help="Serial protocol of the simulated receiver: 1 = today's step lines only, "
+             "2 = planned IMU firmware (STEP, IMU, LIFT, STATUS, RXSTAT). Default: 2",
+    )
+    parser.add_argument(
+        "--phase-align",
+        choices=("auto", "on", "off"),
+        default="auto",
+        help="Nudge the tempo so beats land on predicted foot strikes (needs IMU firmware). "
+             "auto = on in dynamic and hybrid mode, off in manual and random mode",
+    )
+    parser.add_argument(
+        "--latency-ms",
+        type=float,
+        default=30.0,
+        help="Output latency: time from sending a MIDI note to hearing it (default: 30; "
+             "measure it with server/utils/analysis/measure_latency.py)",
+    )
+    defaults = PhaseSettings()
+    parser.add_argument(
+        "--phase-kp",
+        type=float,
+        default=None,
+        help=f"Share of a beat's timing error corrected per beat (default: {defaults.kp}). "
+             "Lower = calmer tempo, beats less exactly on the steps",
+    )
+    parser.add_argument(
+        "--phase-deadband-ms",
+        type=float,
+        default=None,
+        help=f"Timing errors up to this are left alone (default: {defaults.deadband_s * 1000:.0f})",
+    )
+    parser.add_argument(
+        "--phase-max-nudge",
+        type=float,
+        default=None,
+        help=f"Largest tempo change for alignment, in percent (default: {defaults.delta_max * 100:.0f})",
+    )
+    parser.add_argument(
+        "--phase-reset-ms",
+        type=float,
+        default=None,
+        help=f"From this timing error on (e.g. restarting after standing), the next beat alone is "
+             f"stretched or squeezed to land on the step; 0 = off (default: {defaults.reset_s * 1000:.0f})",
+    )
+    parser.add_argument(
+        "--standing",
+        choices=("hold", "slow"),
+        default=None,
+        help="With phase alignment on, when you stand still: keep the tempo (hold, default) "
+             "or slow the music down as without alignment (slow)",
+    )
+    parser.add_argument(
+        "--baud",
+        type=int,
+        default=None,
+        help="Serial baud rate (default: found automatically, 921600 for the IMU firmware, 115200 before it)",
+    )
+    parser.add_argument(
+        "--no-audio",
+        action="store_true",
+        help="Do not open a MIDI port (silent run, e.g. for simulations)",
+    )
     return parser.parse_args()
 
 def start_stdin_listener(command_queue):
@@ -189,6 +284,76 @@ def start_stdin_listener(command_queue):
     
     t = threading.Thread(target=_listen, daemon=True)
     t.start()
+
+def phase_settings(args) -> PhaseSettings:
+    """Phase controller settings: defaults, with the command-line overrides."""
+    overrides = {"latency_s": args.latency_ms / 1000.0}
+    if getattr(args, "phase_kp", None) is not None:
+        overrides["kp"] = args.phase_kp
+    if getattr(args, "phase_deadband_ms", None) is not None:
+        overrides["deadband_s"] = args.phase_deadband_ms / 1000.0
+    if getattr(args, "phase_max_nudge", None) is not None:
+        overrides["delta_max"] = args.phase_max_nudge / 100.0
+    if getattr(args, "phase_reset_ms", None) is not None:
+        overrides["reset_s"] = args.phase_reset_ms / 1000.0 if args.phase_reset_ms > 0 else None
+    if getattr(args, "standing", None) is not None:
+        overrides["hold_when_standing"] = args.standing == "hold"
+    return PhaseSettings(**overrides)
+
+
+def _process_line(line_str, arrival, stream, tracker, aligner, sensor_logger, bpm_estimation, logger, player,
+                  health=None):
+    """Route one receiver line: steps to the BPM engine and the strike predictor, IMU to the feet."""
+    # TWEAK: Check for BUTTON messages first (BTN,<delta>)
+    if line_str.startswith("BTN,"):
+        parts = line_str.split(",")
+        try:
+            delta = float(parts[1])
+        except (IndexError, ValueError):
+            return
+        logger.log(f"HARDWARE: Button Delta Received: {delta}")
+        bpm_estimation.register_button_delta(delta)
+        return
+
+    msg = stream.feed(line_str, arrival)
+    if health and msg is not None:
+        health.on_message(msg, arrival)
+    if isinstance(msg, ImuMsg):
+        tracker.on_imu(msg)
+        sensor_logger.row("imu_data", [msg.t_us, f"{arrival:.6f}", msg.seq, int(msg.valid_left),
+                                       int(msg.valid_right), *msg.left.tolist(), *msg.right.tolist()])
+        return
+    if isinstance(msg, LiftMsg):
+        sensor_logger.row("gait_events", [f"{msg.sender_s:.4f}", "", msg.foot, "LIFT", ""])
+        return
+    is_step = isinstance(msg, StepMsg) or (isinstance(msg, OtherMsg) and msg.kind == "LEGACY_STEP")
+    if not is_step:
+        return
+
+    try:
+        bpm, instant_bpm, _, _ = handle_step(line_str.encode("utf-8"), player.walkingBPM)
+    except ValueError:
+        return
+
+    # Log using wall-clock processing time to keep CSV strictly monotonic.
+    event_epoch = time.time()
+    if health:
+        health.on_step(arrival)
+
+    use_model = True
+    if isinstance(msg, StepMsg):
+        number, contact_pc = tracker.on_step(msg)
+        aligner.on_strike(number, msg.foot, contact_pc)
+        bpm, use_model = aligner.step_bpm(bpm)
+        sensor_logger.row("strikes", [msg.t_us, f"{arrival:.6f}", msg.seq, msg.foot, msg.interval_ms, msg.fsr_value,
+                                      msg.instant_bpm, msg.avg_bpm, number,
+                                      "" if contact_pc is None else f"{contact_pc:.6f}"])
+
+    # register the step and log the data
+    bpm_estimation.register_step(bpm, instant_bpm, use_model=use_model)
+    logger.log_data(event_epoch, player.walkingBPM, bpm, step_event=True, instant_bpm=instant_bpm)
+    logger.log(f"Processed: BPM={bpm:.2f}")
+
 
 def _notify(status_callback, message):
     """Send notification to GUI and log."""
@@ -272,11 +437,14 @@ def main(args, status_callback=print, stop_event=None, session_dir_callback=None
 
     # Calibration-only flow: open serial, send CAL_WEIGHT, and exit.
     if getattr(args, "calibrate_weight", None) is not None:
+        if getattr(args, "simulate", None):
+            status_callback("Calibration completed (simulated).")
+            return None, None, None
         margin = int(args.calibrate_weight)
         class _Logger:
             def log(self_inner, msg): status_callback(msg)
         try:
-            with serial.Serial(args.serial_port, 115200, timeout=1.0) as ser:
+            with open_receiver(args.serial_port, _Logger(), getattr(args, "baud", None), timeout=1.0) as ser:
                 ok = send_calibration_command(ser, _Logger(), margin=margin, retries=3)
                 status_callback("Calibration completed." if ok else "Calibration failed.")
         except Exception as e:
@@ -290,6 +458,7 @@ def main(args, status_callback=print, stop_event=None, session_dir_callback=None
         smoothing_window=smoothing_window,
         stride=stride,
         run_type=run_type,
+        logs_dir=get_sim_logs_dir() if getattr(args, "simulate", None) else None,
     )
     
     # OUTPUT SESSION DIR FOR GUI PARSING
@@ -306,7 +475,7 @@ def main(args, status_callback=print, stop_event=None, session_dir_callback=None
     logger.log("DEBUG: Attempting to initialize MidiBeatSync...")
     
     try:
-        player = MidiBeatSync(midi_path)
+        player = MidiBeatSync(midi_path, outport=NullOutput() if getattr(args, "no_audio", False) else None)
         
         logger.log("DEBUG: MidiBeatSync initialized successfully.")
     except Exception as e:
@@ -355,6 +524,8 @@ def main(args, status_callback=print, stop_event=None, session_dir_callback=None
         random_simple_threshold=args.random_simple_threshold,
         random_simple_steps=args.random_simple_steps,
         random_simple_timeout=args.random_simple_timeout,
+        smoothing_window=smoothing_window,
+        stride=stride,
     )
     if args.alpha_up is not None:
         bpm_estimation.set_smoothing_alpha_up(args.alpha_up)
@@ -362,18 +533,29 @@ def main(args, status_callback=print, stop_event=None, session_dir_callback=None
         bpm_estimation.set_smoothing_alpha_down(args.alpha_down)
     logger.log("Session started")
     
-    # 6. Open Serial Port
-    port = args.serial_port
+    # 6. Open Serial Port (or the simulated receiver)
     ser = None
-    logger.log(f"DEBUG: Attempting to open serial port {port}...")
-    try:
-        ser = serial.Serial(port, 115200, timeout=0.2)
-        logger.log(f"DEBUG: Serial port {port} opened successfully.")
-    except Exception as e:
-        logger.log(f"Failed to open serial port {port}: {e}")
-        return player, logger, bpm_estimation
+    if getattr(args, "simulate", None):
+        try:
+            walker = Walker(parse_scenario(args.simulate), realistic=not args.sim_sharp, seed=args.sim_seed)
+        except ValueError as e:
+            logger.log(f"Invalid simulation scenario: {e}")
+            return player, logger, bpm_estimation
+        ser = SimulatedReceiver(walker, protocol=args.sim_protocol, seed=args.sim_seed)
+        ser.timeout = 0.2
+        logger.log(f"SIMULATION: scenario '{args.simulate}', {walker.duration:.0f} s, "
+                   f"{len(walker.steps)} steps (seed {args.sim_seed}, protocol {args.sim_protocol})")
+    else:
+        port = args.serial_port
+        logger.log(f"DEBUG: Attempting to open serial port {port}...")
+        try:
+            ser = open_receiver(port, logger, getattr(args, "baud", None))
+        except Exception as e:
+            logger.log(f"Failed to open serial port {port}: {e}")
+            return player, logger, bpm_estimation
 
-    if not session_handshake(ser, logger, smoothing_window=smoothing_window, stride=stride):
+    protocol = session_handshake(ser, logger, smoothing_window=smoothing_window, stride=stride)
+    if not protocol:
         logger.log("Handshake failed; aborting session")
         return player, logger, bpm_estimation
 
@@ -398,7 +580,31 @@ def main(args, status_callback=print, stop_event=None, session_dir_callback=None
         command_queue = SimpleQueue()
         
         start_stdin_listener(command_queue)
-    
+
+    # ------------------------------------------------------------------
+    # SENSOR PIPELINE: reader thread -> IMU strike prediction -> phase alignment
+    # ------------------------------------------------------------------
+    phase_align = args.phase_align
+    if phase_align == "auto":
+        phase_align = "on" if run_type in ("dynamic", "hybrid") else "off"
+    if phase_align == "on" and protocol < 2:
+        logger.log("Phase alignment needs the IMU firmware (protocol 2); following the tempo only")
+        phase_align = "off"
+    stream = SensorStream()
+    sensor_logger = SensorLogger(logger.path)
+    tracker = StrikeTracker(stream, sensor_logger)
+    aligner = PhaseAligner(player, tracker, phase_settings(args), enabled=phase_align == "on",
+                           sensor_logger=sensor_logger)
+    bpm_estimation.phase_aligner = aligner
+    health = SensorHealth(logger, tracker, stream, protocol)
+    s = aligner.settings
+    logger.log(f"Phase alignment {phase_align} (output latency {s.latency_s * 1000:.0f} ms, kp {s.kp}, "
+               f"dead-band {s.deadband_s * 1000:.0f} ms, max nudge {s.delta_max * 100:.0f}%, "
+               f"phase reset {f'{s.reset_s * 1000:.0f} ms' if s.reset_s else 'off'}, "
+               f"standing: {'hold' if s.hold_when_standing else 'slow'})")
+    reader = SerialReader(ser)
+    reader.start()
+
     # ==================================================================================
     # MAIN LOOP
     # ==================================================================================
@@ -406,6 +612,14 @@ def main(args, status_callback=print, stop_event=None, session_dir_callback=None
         # CHECK STOP EVENT
         if stop_event and stop_event.is_set():
             logger.log("Session stopped by user.")
+            break
+
+        if getattr(ser, "finished", False):
+            logger.log("SIMULATION: scenario finished.")
+            break
+
+        if reader.error:
+            logger.log(f"Serial read failed, ending session: {reader.error}")
             break
             
         # PROCESS COMMAND QUEUE (From GUI Pipe or Thread)
@@ -420,47 +634,38 @@ def main(args, status_callback=print, stop_event=None, session_dir_callback=None
         
         # ANIMATION: Run update_bpm() every loop iteration (manual or dynamic).
         # In manual mode this still emits log packets each loop for plotting.
+        # Everything the receiver sent since the last pass (read by the reader thread)
+        for arrival, line_str in reader.drain():
+            _process_line(line_str, arrival, stream, tracker, aligner, sensor_logger, bpm_estimation, logger, player,
+                          health)
+
+        # ANIMATION: Run update_bpm() every loop iteration (manual or dynamic).
+        # In manual mode this still emits log packets each loop for plotting.
         bpm_estimation.update_bpm()
-            
-        # read the step from the serial port
-        raw_line = ser.readline()
-        if not raw_line:
-            time.sleep(0.001)  # yield even when idle to avoid CPU/GIL starvation
-            continue
-
-        # handle the step
-        # TWEAK: Check for BUTTON messages first (BTN,<delta>)
-        try:
-            line_str = raw_line.decode("utf-8", errors="ignore").strip()
-            if line_str.startswith("BTN,"):
-                parts = line_str.split(",")
-                if len(parts) >= 2:
-                    delta = float(parts[1])
-                    logger.log(f"HARDWARE: Button Delta Received: {delta}")
-                    
-                    # Refactored to BPM_estimation
-                    bpm_estimation.register_button_delta(delta)
-                continue
-
-            bpm, instant_bpm, sensor_ts, foot = handle_step(raw_line, player.walkingBPM)
-        except ValueError:
-            time.sleep(0.001)
-            continue
-
-        # Log using wall-clock processing time to keep CSV strictly monotonic.
-        event_epoch = time.time()
-        
-        # register the step and log the data
-        bpm_estimation.register_step(bpm, instant_bpm)
-        logger.log_data(event_epoch, player.walkingBPM, bpm, step_event=True, instant_bpm=instant_bpm)
-        logger.log(f"Processed: BPM={bpm}")
+        sensor_logger.maybe_flush()
+        health.check(time.perf_counter())
 
         # CPU Yield (Prevent 100% core usage)
         time.sleep(0.001)
         
     logger.log("Session ended")
+    reader.stop()
     player.stop()
     player.close()
+    logger.log(f"Link: {stream.stats.summary()}")
+    sensor_logger.close(meta={
+        "strike_tracking": tracker.state(),
+        "phase_alignment": aligner.state(),
+        "link": stream.stats.summary(),
+        "receiver_protocol": protocol,
+        "sensor_health": health.state(),
+        "run_type": run_type,
+        "simulated": bool(getattr(args, "simulate", None)),
+    })
+    if hasattr(ser, "write_truth"):
+        ser.write_truth(logger.path)
+        # The GUI makes this plot for real sessions; simulated runs are started from the CLI
+        generate_post_session_plot(logger.path)
     if ser: ser.close()
     
     print("EXIT_CLEAN")
