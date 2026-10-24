@@ -616,6 +616,8 @@ def main(args, status_callback=print, stop_event=None, session_dir_callback=None
     if phase_align == "auto":
         phase_align = "on" if run_type in ("dynamic", "hybrid") else "off"
     if phase_align == "on" and protocol < 2:
+        _notify(status_callback, "WARNING: the receiver did not answer as IMU firmware (old firmware, or it "
+                                 "missed the VERSION question). Beats follow the tempo only, not your steps.")
         logger.log("Phase alignment needs the IMU firmware (protocol 2); following the tempo only")
         phase_align = "off"
     settings = phase_settings(args)

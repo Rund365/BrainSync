@@ -8,6 +8,7 @@ import shutil
 import subprocess
 import sys
 import tempfile
+import time
 import unittest
 from pathlib import Path
 from types import SimpleNamespace
@@ -386,6 +387,28 @@ class HardwareReadinessTests(unittest.TestCase):
         log = SimpleNamespace(log=lambda msg: None)
         self.assertEqual(query_version(self.receiver(2), log), 2)
         self.assertEqual(query_version(self.receiver(1), log, attempts=1), 1)  # no answer = old firmware
+
+    def test_calibration_counts_only_the_senders_threshold_as_success(self):
+        from utils.hardware.comms import send_calibration_command
+        log = SimpleNamespace(log=lambda msg: None)
+        self.assertTrue(send_calibration_command(self.receiver(2), log, retries=1, wait_s=0.5))
+
+        class SenderNeverAnswers:  # the receiver queued the command, nothing came back
+            timeout = 0.05
+
+            def __init__(self):
+                self.lines = [b"ACK,CAL_WEIGHT\r\n", b"ACK,CAL_WEIGHT,DISPATCHED\r\n"]
+
+            def write(self, data):
+                pass
+
+            def readline(self):
+                if self.lines:
+                    return self.lines.pop(0)
+                time.sleep(self.timeout)
+                return b""
+
+        self.assertFalse(send_calibration_command(SenderNeverAnswers(), log, retries=1, wait_s=0.3))
 
     def test_session_commands_apply_when_the_receiver_answers(self):
         from main import _process_line

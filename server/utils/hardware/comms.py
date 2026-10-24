@@ -74,20 +74,29 @@ def send_config_command(ser: serial.Serial, logger: Logger, cmd_prefix: str,
     logger.log(f"Failed to set {desc} after {retries} attempts")
     return False
 
-def send_calibration_command(ser: serial.Serial, logger: Logger | None = None, margin: int = 150, retries: int = 3) -> bool:
-    """Send weight calibration command to the receiver and wait for ACK."""
+def send_calibration_command(ser: serial.Serial, logger: Logger | None = None, margin: int = 150, retries: int = 3,
+                             wait_s: float = 4.0) -> bool:
+    """Send weight calibration command and wait until the sender reports its new threshold.
+    The receiver's first ACK,CAL_WEIGHT only means the command was handed to the radio;
+    ACK,CAL_WEIGHT,<threshold> comes from the sender after it calibrated (about 1 s)."""
     log = logger.log if logger else print
     cmd = f"CAL_WEIGHT,{int(margin)}\n".encode("utf-8")
     for _ in range(retries):
         log(f"Calibrating weight with margin={margin}...")
         ser.write(cmd)
-        time.sleep(0.2)
-        resp = ser.readline()
-        resp_str = resp.decode("utf-8", errors="ignore").strip() if resp else ""
-        if resp_str.startswith("ACK,CAL_WEIGHT"):
-            log(f"Calibration success: {resp_str}")
-            return True
-        log(f"Unexpected or no ACK (got: {resp_str!r}), retrying...")
+        deadline = time.monotonic() + wait_s
+        while time.monotonic() < deadline:
+            resp = ser.readline()
+            resp_str = resp.decode("utf-8", errors="ignore").strip() if resp else ""
+            if resp_str == "ERR,CAL_WEIGHT":
+                log("Calibration failed: the receiver could not reach the sender, or the sender refused")
+                break
+            parts = resp_str.split(",")
+            if len(parts) == 3 and parts[:2] == ["ACK", "CAL_WEIGHT"] and parts[2].lstrip("-").isdigit():
+                log(f"Calibration success, new threshold {parts[2]}")
+                return True
+        else:
+            log("No answer from the sender: is it on and in range?")
     log("Calibration failed after retries")
     return False
 
