@@ -147,6 +147,21 @@ class PredictorTests(unittest.TestCase):
         t_next, _ = self.walk(p, 12)
         self.assertIsNone(p.predict(t_next + 1.0))
 
+    def test_weight_shift_while_standing_does_not_keep_a_prediction(self):
+        p = StrikePredictor()
+        t_next, foot = self.walk(p, 12)
+        p.on_event(foot, "TO", t_next + 2.0)  # a toe-off without a step: shifting weight
+        self.assertIsNotNone(p.predict(t_next + 2.5))
+        self.assertIsNone(p.predict(t_next + 2.0 + 0.42 + sp.STALE_S + 0.01))
+        self.assertIsNone(p.predict(t_next + 30.0))
+
+    def test_step_lost_on_the_link_keeps_the_prediction_until_the_next_step(self):
+        p = StrikePredictor()
+        t_next, foot = self.walk(p, 12, step_s=0.8)  # slow walk: the next step comes 0.8 s late
+        p.on_event(foot, "TO", t_next - 0.42)
+        p.on_event(foot, "MS", t_next - 0.20)
+        self.assertIsNotNone(p.predict(t_next + 0.8))  # its STEP message never arrived
+
     def test_cadence_trend_follows_a_slowdown_without_lag(self):
         p = StrikePredictor()
         t, foot = 0.0, RIGHT

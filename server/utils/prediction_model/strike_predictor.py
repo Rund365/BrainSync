@@ -33,6 +33,10 @@ SCALE_POWER = 0.75
 # Fusion leaves out an estimate that is more than this many of its own sigmas away from the
 # most precise one (during a pace change B0 / B1 lag, and averaging them in pulls the guess late)
 FUSE_GATE = 3.0
+# A guess this long past means that strike is not coming (a weight shift while standing gives a
+# toe-off without a step). Not sooner: a step lost on the link arrives a whole step late, and
+# until then the music must not take it for a stop
+STALE_S = 1.0
 
 @dataclass
 class StrikePrediction:
@@ -165,6 +169,7 @@ class StrikePredictor:
         # A rhythm guess that is long past (no swing seen) means the person stopped
         if "B0" in estimates and not swing and now_sender_s > estimates["B0"] + 0.15:
             del estimates["B0"]
+        estimates = {m: t for m, t in estimates.items() if now_sender_s <= t + STALE_S}
         if not estimates:
             return None
 
