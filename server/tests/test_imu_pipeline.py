@@ -4,7 +4,10 @@ Unit tests for the IMU pipeline (Integration Plan §23.1). No hardware, no extra
 Run from the repo root:
   .venv\\Scripts\\python.exe -m unittest discover -s server\\tests -v
 """
+import shutil
+import subprocess
 import sys
+import tempfile
 import unittest
 from pathlib import Path
 from types import SimpleNamespace
@@ -15,8 +18,8 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))  # server/
 
 from utils.engine.phase_controller import PhaseController, PhaseSettings
 from utils.hardware.comms import handle_step
-from utils.hardware.sensor_stream import (ClockMapper, ImuMsg, OtherMsg, StepMsg, TimeUnwrapper, T_US_WRAP,
-                                          parse_line)
+from utils.hardware.sensor_stream import (ClockMapper, ImuMsg, LiftMsg, OtherMsg, StatusMsg, StepMsg, TimeUnwrapper,
+                                          T_US_WRAP, parse_line)
 import utils.prediction_model.strike_predictor as sp
 from utils.prediction_model.strike_predictor import StrikePredictor, RIGHT, LEFT, other as other_foot
 
@@ -52,6 +55,47 @@ class ParserTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             handle_step(b"IMU,1,2,3", 100.0)
 
+
+class FirmwareProtocolTests(unittest.TestCase):
+    """The firmware's protocol header against the Python parser."""
+    ESP32 = Path(__file__).resolve().parents[2] / "ESP32"
+
+    def test_header_copies_identical(self):
+        sender = (self.ESP32 / "step_detection_sketch" / "protocol_v2.h").read_bytes()
+        receiver = (self.ESP32 / "step_receiver_sketch" / "protocol_v2.h").read_bytes()
+        self.assertEqual(sender, receiver, "the two protocol_v2.h copies differ")
+
+    @unittest.skipUnless(shutil.which("g++"), "needs g++")
+    def test_firmware_lines_parse(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            exe = Path(tmp) / "protocol_check"
+            subprocess.run(["g++", "-std=gnu++11", "-o", str(exe), str(self.ESP32 / "host_test" / "protocol_check.cpp")],
+                           check=True, capture_output=True)
+            run = subprocess.run([str(exe)], capture_output=True, text=True)
+        lines = run.stdout.splitlines()
+        self.assertEqual(run.returncode, 0, "\n".join(l for l in lines if l.startswith("FAIL")))
+        msgs = [parse_line(l) for l in lines]
+
+        step = msgs[0]
+        self.assertIsInstance(step, StepMsg)
+        self.assertEqual((step.seq, step.t_us, step.foot, step.interval_ms, step.fsr_value), (812, 4000000000, 1, 512, 2210))
+        self.assertAlmostEqual(step.avg_bpm, 116.40)
+
+        imu = [m for m in msgs if isinstance(m, ImuMsg)]
+        self.assertEqual(len(imu), 5)
+        self.assertEqual({m.seq for m in imu}, {65535})
+        self.assertEqual([m.t_us for m in imu], [123460000 + i * 10000 for i in range(5)])
+        self.assertEqual([m.valid_right for m in imu], [True, True, False, True, True])
+        self.assertEqual(imu[0].left.tolist(), [-1570, 12, 981, -32768, 0, 32767])
+        self.assertEqual(imu[4].right.tolist(), [1, 2, 3, 4, 5, -10])
+
+        lift, status, pong = msgs[6:]
+        self.assertIsInstance(lift, LiftMsg)
+        self.assertEqual((lift.seq, lift.foot, lift.fsr_value), (410, 2, 750))
+        self.assertIsInstance(status, StatusMsg)
+        self.assertEqual((status.i2c_err_left, status.i2c_err_right, status.sys_left, status.sys_right),
+                         (3, 70000, 6, 255))
+        self.assertEqual((pong.kind, pong.fields), ("PONG", ["42", "99"]))
 
 
 class ClockTests(unittest.TestCase):

@@ -411,6 +411,13 @@ Note: the FSR threshold crossing is slightly after true initial contact (pressur
 - Remove `Serial.println(triggeredFsr)` and `Serial.println("sent")` from the step path.
 - Keep the button logic unchanged.
 
+### 8.9 Implemented (not yet run on hardware)
+
+- The IMUs run in their own FreeRTOS task on core 1, above `loop()`. An `esp_timer` wakes it every 10 ms; it timestamps the sample, then reads both sensors (one 18-byte burst each), sends a batch every 5 samples and a `STATUS` every second. It owns both I2C buses, so nothing else touches them.
+- BNO055 setup is written register by register (no Adafruit library): ACCGYRO mode, ±16 g / 125 Hz, ±2000 dps / 116 Hz, m/s² and dps. After setup it reads the mode back. **Check the register values against the datasheet before the first hardware test.**
+- A foot that fails 10 reads in a row is marked down; every 2 s the task clocks the bus free (9 SCL pulses) and sets the sensor up again, between samples so the other foot's timestamps stay right. A missing sensor sends invalid samples; the other foot keeps working.
+- FSR steps and lifts carry the `esp_timer` time of the threshold crossing. Commands from the receiver go through a small queue to `loop()`; `PING` is answered with the time it arrived.
+
 ---
 
 ## 9. Wireless Protocol v2 (ESP-NOW)
@@ -481,6 +488,8 @@ typedef struct __attribute__((packed)) {
 
 (Exact field layout may change during implementation — what matters: **header with type/version/seq/timestamp, explicit per-type lengths**.)
 
+**Implemented** in `ESP32/step_*_sketch/protocol_v2.h` (one copy per sketch, a unit test checks they are identical). Differences from the sketch above: every IMU sample carries its own `t_us` instead of a jitter field (154-byte batch); the foot-lift is its own type `MSG_LIFT = 7`; the `STATUS` error counters are 32-bit and count samples lost to bus errors. `ESP32/host_test/protocol_check.cpp` builds every message with this header and prints the receiver's lines; the Python tests compile it with `g++` and parse the lines.
+
 ### 9.3 Validation rules (receiver)
 
 - Reject if `len < sizeof(MsgHeader)`.
@@ -509,6 +518,13 @@ File: `ESP32/step_receiver_sketch/step_receiver_sketch.ino`.
 7. **Queue-overflow counter** reported in a periodic `RXSTAT` line.
 8. **Remove the legacy `StepEvent` fallback** (`len == sizeof(StepEvent)`), which becomes ambiguous with v2.
 9. Optionally add a source-MAC check against `senderMac` (prepares for multi-node later).
+
+**Implemented** (not yet run on hardware), with three additions:
+- Sensor lines (`STEP`, `LIFT`, `IMU`, `STATUS`, `RXSTAT`) are printed only from `START` until the next `RESET`. The PC's handshake reads one line per answer, so a stream of IMU lines before the session would break it. `BTN`, `PONG` and command answers are printed at any time.
+- The receiver adds the sender as an ESP-NOW peer; without it, commands to the sender (`CAL_WEIGHT`, `PING`, `IMU_STREAM`) cannot be sent.
+- Serial commands are read without blocking (the old `readStringUntil` could wait up to 1 s on a partial line).
+
+On the PC, commands sent during a session (`SET_WINDOW`, `SET_STRIDE`, `CAL_WEIGHT` from the GUI) are only written; the reader thread receives the `ACK` like any other line, and window and stride are applied when the receiver confirms them (`main._on_receiver_answer`).
 
 ### 10.2 Serial write budget
 
