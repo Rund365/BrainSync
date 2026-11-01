@@ -17,11 +17,28 @@ const int LEFT_PIN = 32;
 const int DOWN_BUTTON = 25;
 const int UP_BUTTON = 26;
 
-// IMU wiring (Integration Plan §6.3): one I2C bus per foot
+// IMU wiring. Two options:
+//   IMU_ONE_BUS 1: both IMUs on one I2C bus (current lab wiring): right at 0x28 (ADR to GND),
+//                  left at 0x29 (ADR to 3.3V), both on SDA 21 / SCL 22.
+//   IMU_ONE_BUS 0: one bus per foot (Integration Plan §6.3): left on 21/22, right on 18/19,
+//                  both at 0x28. A broken cable on one foot then cannot disturb the other.
+#define IMU_ONE_BUS 1
+
+#if IMU_ONE_BUS
+const int LEFT_SDA = 21;
+const int LEFT_SCL = 22;
+const int RIGHT_SDA = 21;
+const int RIGHT_SCL = 22;
+const uint8_t LEFT_ADDR = 0x29;   // ADR pin high
+const uint8_t RIGHT_ADDR = 0x28;  // ADR pin low
+#else
 const int LEFT_SDA = 21;
 const int LEFT_SCL = 22;
 const int RIGHT_SDA = 18;
 const int RIGHT_SCL = 19;
+const uint8_t LEFT_ADDR = 0x28;   // ADR pin low
+const uint8_t RIGHT_ADDR = 0x28;  // ADR pin low
+#endif
 
 // Foot ID's:
 const uint8_t RIGHT = 1;
@@ -29,7 +46,6 @@ const uint8_t LEFT = 2;
 
 // ---------------- BNO055 ----------------
 // Register map: Bosch BNO055 datasheet, section 4
-const uint8_t BNO055_ADDR = 0x28;  // ADR pin low
 const uint8_t BNO055_CHIP_ID = 0xA0;
 const uint8_t REG_CHIP_ID = 0x00;
 const uint8_t REG_PAGE_ID = 0x07;
@@ -58,16 +74,23 @@ class ImuFoot {
   public:
     TwoWire &bus;
     int sda, scl;
+    uint8_t addr;  // I2C address of this foot's BNO055
     bool ok = false;
     uint8_t failStreak = 0;
     uint32_t errors = 0;
     uint8_t sys = 255;
     uint32_t nextRetryMs = 0;
-    ImuFoot(TwoWire &b, int sdaPin, int sclPin) : bus(b), sda(sdaPin), scl(sclPin) {}
+    ImuFoot(TwoWire &b, int sdaPin, int sclPin, uint8_t address)
+      : bus(b), sda(sdaPin), scl(sclPin), addr(address) {}
 };
 
-ImuFoot imuLeft(Wire, LEFT_SDA, LEFT_SCL);
-ImuFoot imuRight(Wire1, RIGHT_SDA, RIGHT_SCL);
+#if IMU_ONE_BUS
+ImuFoot imuLeft(Wire, LEFT_SDA, LEFT_SCL, LEFT_ADDR);
+ImuFoot imuRight(Wire, RIGHT_SDA, RIGHT_SCL, RIGHT_ADDR);  // same bus as the left foot
+#else
+ImuFoot imuLeft(Wire, LEFT_SDA, LEFT_SCL, LEFT_ADDR);
+ImuFoot imuRight(Wire1, RIGHT_SDA, RIGHT_SCL, RIGHT_ADDR);
+#endif
 TaskHandle_t imuTaskHandle = nullptr;
 volatile bool imuStreaming = true;
 
@@ -295,38 +318,40 @@ void sendLift(uint8_t foot, int fsr, uint32_t t_us) {
 }
 
 // ---------------- IMU (own task, owns both I2C buses) ----------------
-bool bnoWrite(TwoWire &bus, uint8_t reg, uint8_t value) {
-  bus.beginTransmission(BNO055_ADDR);
+bool bnoWrite(ImuFoot &f, uint8_t reg, uint8_t value) {
+  TwoWire &bus = f.bus;
+  bus.beginTransmission(f.addr);
   bus.write(reg);
   bus.write(value);
   return bus.endTransmission() == 0;
 }
 
-bool bnoRead(TwoWire &bus, uint8_t reg, uint8_t *buf, uint8_t n) {
-  bus.beginTransmission(BNO055_ADDR);
+bool bnoRead(ImuFoot &f, uint8_t reg, uint8_t *buf, uint8_t n) {
+  TwoWire &bus = f.bus;
+  bus.beginTransmission(f.addr);
   bus.write(reg);
   if (bus.endTransmission(false) != 0) return false;
-  if (bus.requestFrom(BNO055_ADDR, n) != n) return false;
+  if (bus.requestFrom(f.addr, n) != n) return false;
   for (uint8_t i = 0; i < n; i++) buf[i] = bus.read();
   return true;
 }
 
 bool bnoConfigure(ImuFoot &f) {
   uint8_t id = 0, mode = 0;
-  if (!bnoRead(f.bus, REG_CHIP_ID, &id, 1) || id != BNO055_CHIP_ID) return false;
-  if (!bnoWrite(f.bus, REG_OPR_MODE, MODE_CONFIG)) return false;
+  if (!bnoRead(f, REG_CHIP_ID, &id, 1) || id != BNO055_CHIP_ID) return false;
+  if (!bnoWrite(f, REG_OPR_MODE, MODE_CONFIG)) return false;
   delay(25);
-  bool ok = bnoWrite(f.bus, REG_PAGE_ID, 1)
-            && bnoWrite(f.bus, REG_ACC_CONFIG, ACC_16G_125HZ)
-            && bnoWrite(f.bus, REG_GYR_CONFIG_0, GYR_2000DPS_116HZ)
-            && bnoWrite(f.bus, REG_GYR_CONFIG_1, 0x00)  // normal power
-            && bnoWrite(f.bus, REG_PAGE_ID, 0)
-            && bnoWrite(f.bus, REG_UNIT_SEL, UNITS_MS2_DPS)
-            && bnoWrite(f.bus, REG_PWR_MODE, 0x00)  // normal power
-            && bnoWrite(f.bus, REG_OPR_MODE, MODE_ACCGYRO);
+  bool ok = bnoWrite(f, REG_PAGE_ID, 1)
+            && bnoWrite(f, REG_ACC_CONFIG, ACC_16G_125HZ)
+            && bnoWrite(f, REG_GYR_CONFIG_0, GYR_2000DPS_116HZ)
+            && bnoWrite(f, REG_GYR_CONFIG_1, 0x00)  // normal power
+            && bnoWrite(f, REG_PAGE_ID, 0)
+            && bnoWrite(f, REG_UNIT_SEL, UNITS_MS2_DPS)
+            && bnoWrite(f, REG_PWR_MODE, 0x00)  // normal power
+            && bnoWrite(f, REG_OPR_MODE, MODE_ACCGYRO);
   if (!ok) return false;
   delay(20);
-  return bnoRead(f.bus, REG_OPR_MODE, &mode, 1) && mode == MODE_ACCGYRO;
+  return bnoRead(f, REG_OPR_MODE, &mode, 1) && mode == MODE_ACCGYRO;
 }
 
 void busStart(ImuFoot &f) {
@@ -350,7 +375,7 @@ void busRecover(ImuFoot &f) {
 
 bool imuRead(ImuFoot &f, ImuRaw &out) {
   uint8_t b[18];
-  if (!f.ok || !bnoRead(f.bus, REG_ACC_DATA, b, sizeof(b))) {
+  if (!f.ok || !bnoRead(f, REG_ACC_DATA, b, sizeof(b))) {
     f.errors++;
     if (f.ok && ++f.failStreak >= IMU_MAX_FAILS) {
       f.ok = false;
@@ -380,7 +405,7 @@ void imuRecoverIfDue(ImuFoot &f) {
 
 void readSysStatus(ImuFoot &f) {
   uint8_t sys = 255;
-  if (!f.ok || !bnoRead(f.bus, REG_SYS_STATUS, &sys, 1)) sys = 255;
+  if (!f.ok || !bnoRead(f, REG_SYS_STATUS, &sys, 1)) sys = 255;
   f.sys = sys;
 }
 
@@ -403,7 +428,7 @@ void imuTick(void *) {
 
 void imuTask(void *) {
   busStart(imuLeft);
-  busStart(imuRight);
+  if (&imuRight.bus != &imuLeft.bus) busStart(imuRight);  // one-bus wiring: already started
   delay(700);  // BNO055 boot time after power-on
   imuLeft.ok = bnoConfigure(imuLeft);
   imuRight.ok = bnoConfigure(imuRight);
