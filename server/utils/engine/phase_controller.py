@@ -26,6 +26,7 @@ import time
 from dataclasses import dataclass, asdict
 
 STOP_GAP_S = 1.5  # a longer gap between steps is a stop: the pace is measured again
+RIGHT_FOOT, LEFT_FOOT = 1, 2  # as in prediction_model.strike_predictor
 
 
 @dataclass
@@ -71,7 +72,15 @@ class PhaseSettings:
     start_on_step: bool = True
     # People speed up over their first steps: the pace is a line through the step times since
     # walking began, read at the latest step (1 step ahead overshoots, a plain average lags)
-    start_steps: int = 5
+    start_steps: int = 10
+    # The first start also waits until every IMU that sends data is calibrated (gyro bias,
+    # gravity, swing axis and its sign), so the step prediction uses the IMUs from the first
+    # beat. If an IMU is still not calibrated after start_fallback_steps, the music starts
+    # anyway on the rhythm alone, with a warning
+    start_needs_calibration: bool = True
+    start_fallback_steps: int = 20
+    # Restarts after standing still: the IMUs are calibrated by then, a few steps give the pace
+    restart_steps: int = 5
     start_ahead: float | None = 0.0
     # Standing still: pause the music once no step came for this many step periods, and
     # restart it on the step the same way (takes the place of hold_when_standing)
@@ -177,9 +186,11 @@ class PhaseAligner:
     """Connects the controller to the player and the strike tracker, and logs beats."""
 
     def __init__(self, player, tracker, settings: PhaseSettings | None = None, enabled: bool = True,
-                 sensor_logger=None):
+                 sensor_logger=None, notify=None):
         self.player = player
         self.tracker = tracker
+        self.notify = notify  # shows a message to the user (the GUI's notification), or None
+        self._fallback_warned = False
         self.ctrl = PhaseController(settings)
         self.enabled = enabled
         self.log = sensor_logger
@@ -232,10 +243,21 @@ class PhaseAligner:
                     self._walk_steps = 0
                     self._event(now, "pause", None, self.player.walkingBPM, None)
             return None
-        if not (self._paused_by_us or (s.start_on_step and not self.transport_events)):
+        first_start = s.start_on_step and not self.transport_events
+        if not (self._paused_by_us or first_start):
             return None
-        if self._walk_steps < s.start_steps or self._last_contact is None:
+        if self._walk_steps < (s.start_steps if first_start else s.restart_steps) or self._last_contact is None:
             return None
+        if first_start and s.start_needs_calibration:
+            present, ready = self.imu_calibration()
+            if present and not all(ready.values()):
+                if self._walk_steps < s.start_fallback_steps:
+                    return None
+                if not self._fallback_warned:
+                    self._fallback_warned = True
+                    missing = " and ".join(name for name, ok in ready.items() if not ok)
+                    self._say(f"The {missing} IMU is not calibrated after {self._walk_steps} steps: "
+                              f"the music starts, predicting the steps from the rhythm only")
         predictor = self.tracker.predictor
         steps = min(s.base_steps, self._walk_steps - 1)  # only the steps since walking resumed
         if steps < 1:
@@ -260,6 +282,13 @@ class PhaseAligner:
         self.ctrl.delta = 0.0
         self._paused_by_us = False
         self._event(now, "start", beat, cadence, send)
+        if first_start:
+            present, ready = self.imu_calibration()
+            if present and all(ready.values()):
+                which = "both IMUs" if len(ready) == 2 else f"{next(iter(ready))} IMU"
+                self._say(f"Music started on your step ({which} calibrated)")
+            elif not present:
+                self._say("Music started on your step (no IMU data: predicting from the rhythm only)")
         return cadence
 
     def _event(self, now, kind, beat, bpm, send):
@@ -278,6 +307,33 @@ class PhaseAligner:
                 return cadence, self.settings.base_uses_model
         return receiver_bpm, True
 
+    def imu_calibration(self) -> tuple[bool, dict]:
+        """(whether any IMU sends data, {foot name: calibrated} for the feet whose IMU sends data)."""
+        feet = getattr(self.tracker, "feet", None) or {}
+        ready = {}
+        for foot, name in ((RIGHT_FOOT, "right"), (LEFT_FOOT, "left")):
+            tracker = feet.get(foot)
+            if tracker is not None and tracker.calib.still_samples + tracker.calib.swing_samples > 0:
+                ready[name] = tracker.calib.ready
+        return bool(ready), ready
+
+    def _say(self, message: str):
+        if self.notify:
+            self.notify(message)
+
+    def _progress(self):
+        """Walk-in status for the first start: steps so far and which IMUs are calibrated."""
+        s = self.settings
+        if not (self.transport and s.start_on_step and not self.transport_events) or self.player.playing:
+            return
+        present, ready = self.imu_calibration()
+        imus = " · ".join(f"{name} IMU {'✓' if ok else '…'}" for name, ok in ready.items()) or "no IMU data"
+        if self._walk_steps < s.start_steps:
+            self._say(f"🚶 Calibrating: step {self._walk_steps}/{s.start_steps} · {imus}")
+        elif s.start_needs_calibration and present and not all(ready.values()):
+            self._say(f"🚶 Step {self._walk_steps}: waiting for the IMU calibration · {imus} "
+                      f"(the music starts anyway at step {s.start_fallback_steps})")
+
     def on_strike(self, number: int, foot: int, contact_pc: float | None):
         t = contact_pc if contact_pc is not None else time.perf_counter()
         if self._last_contact is None or t - self._last_contact > STOP_GAP_S:
@@ -286,6 +342,7 @@ class PhaseAligner:
         self._last_contact = t
         if contact_pc is not None:
             self._pending.append((number, foot, contact_pc))
+        self._progress()
 
     def _resolve(self):
         beat_times = self.player.beat_times

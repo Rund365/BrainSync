@@ -648,7 +648,8 @@ def main(args, status_callback=print, stop_event=None, session_dir_callback=None
     stream = SensorStream()
     sensor_logger = SensorLogger(logger.path)
     tracker = StrikeTracker(stream, sensor_logger)
-    aligner = PhaseAligner(player, tracker, settings, enabled=phase_align == "on", sensor_logger=sensor_logger)
+    aligner = PhaseAligner(player, tracker, settings, enabled=phase_align == "on", sensor_logger=sensor_logger,
+                           notify=lambda message: _notify(status_callback, message))
     if getattr(args, "walk_first", False):
         aligner.settings.start_on_step = False  # walk-first already started the music
     bpm_estimation.phase_aligner = aligner

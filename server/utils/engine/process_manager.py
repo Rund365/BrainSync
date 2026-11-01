@@ -15,7 +15,7 @@ class SubprocessManager:
     def __init__(self, midi_path, serial_port, manual_mode, manual_bpm, smoothing_window, stride, log_callback, session_dir_callback, data_callback=None, gui_sync_callback=None, session_name=None, alpha_up=None, alpha_down=None, hybrid_mode=False, random_mode=False, random_span=None, 
                  hybrid_lock_steps=None, hybrid_unlock_time=None, hybrid_stability_threshold=None, hybrid_unlock_threshold=None, random_gamified=None,
                  random_simple_threshold=None, random_simple_steps=None, random_simple_timeout=None, model_path=None, startup_mode=None, walk_steps=None,
-                 phase_align=None, latency_ms=None):
+                 phase_align=None, latency_ms=None, start_steps=None):
         self.log_callback = log_callback
         self.session_dir_callback = session_dir_callback
         self.data_callback = data_callback
@@ -89,6 +89,8 @@ class SubprocessManager:
             cmd.extend(["--phase-align", phase_align])
         if latency_ms is not None:
             cmd.extend(["--latency-ms", f"{float(latency_ms):g}"])
+        if start_steps is not None:
+            cmd.extend(["--start-steps", str(int(start_steps))])
         
         # Launch Process
         try:

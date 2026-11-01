@@ -56,6 +56,7 @@ DEFAULT_UPDATE_STRIDE = 1     # Line 7: int updateStride = 1
 # Beat alignment (IMU firmware): GUI label -> main.py --phase-align value
 PHASE_ALIGN_CHOICES = {"Auto": "auto", "On": "on", "Off": "off"}
 DEFAULT_LATENCY_MS = 30  # main.py's default until the sound delay is measured
+DEFAULT_START_STEPS = 10  # steps (with the IMUs calibrated) before the music starts, as in PhaseSettings
 USER_SETTINGS_FILE = "user_settings.json"  # in server/, remembered between runs (not in git)
 
 # Get smoothing alpha defaults from BPM_estimation (will be set after class check)
@@ -560,6 +561,16 @@ class GuiApp:
         latency_entry.bind("<Return>", self._save_user_settings)
         latency_entry.bind("<FocusOut>", self._save_user_settings)
         ttk.Label(latency_row, text="ms", style="CardLabel.TLabel", font=("Segoe UI", 9)).pack(side="left")
+
+        steps_row = ttk.Frame(sidebar, style="Card.TFrame")
+        steps_row.pack(fill="x", pady=(0, 6))
+        ttk.Label(steps_row, text="Steps before music:", style="CardLabel.TLabel",
+                  font=("Segoe UI", 9)).pack(side="left", padx=(0, 5))
+        self.start_steps_var = tk.StringVar(value=str(self.user_settings.get("start_steps", DEFAULT_START_STEPS)))
+        steps_entry = ttk.Entry(steps_row, textvariable=self.start_steps_var, width=4, font=("Segoe UI", 10))
+        steps_entry.pack(side="left", padx=(0, 5))
+        steps_entry.bind("<Return>", self._save_user_settings)
+        steps_entry.bind("<FocusOut>", self._save_user_settings)
 
         self.btn_measure_latency = ttk.Button(sidebar, text="🎤  Measure sound delay", style="Compact.TButton",
                                               command=self.measure_latency)
@@ -1164,8 +1175,21 @@ class GuiApp:
             return None
         return value if 0 <= value <= 1000 else None
 
+    def _get_start_steps(self):
+        """Steps before the music starts (0 = right away), or None if it is not a sensible number."""
+        try:
+            value = int(self.start_steps_var.get().strip())
+        except ValueError:
+            return None
+        return value if 0 <= value <= 50 else None
+
     def _save_user_settings(self, *_):
         self.user_settings["phase_align"] = self.phase_align_var.get()
+        steps = self._get_start_steps()
+        if steps is None:
+            self.start_steps_var.set(str(self.user_settings.get("start_steps", DEFAULT_START_STEPS)))
+        else:
+            self.user_settings["start_steps"] = steps
         latency = self._get_latency_ms()
         if latency is None:
             self.latency_ms_var.set(f"{self.user_settings.get('latency_ms', DEFAULT_LATENCY_MS):g}")
@@ -1180,7 +1204,7 @@ class GuiApp:
     def _latency_status_text(self) -> str:
         latency = self.user_settings.get("latency_ms")
         measured = self.user_settings.get("latency_measured_ms")
-        if latency is None:
+        if latency is None or (measured is None and latency == DEFAULT_LATENCY_MS):
             return f"Not measured yet: the default {DEFAULT_LATENCY_MS} ms is used"
         if measured is not None and abs(latency - measured) < 0.5:
             return f"Measured on {self.user_settings.get('latency_measured_at', '?')}"
@@ -1193,6 +1217,9 @@ class GuiApp:
             "On / Off: force it, e.g. to record a session without alignment for comparison.\n\n"
             "When it is on, the music waits for the first steps and starts on a step, pauses when you\n"
             "stand still, and changes tempo by at most 5% per beat.\n\n"
+            "Steps before music: the music starts after this many steps AND once every IMU is\n"
+            "calibrated (the top-right message shows the progress). If an IMU is still not calibrated\n"
+            "after 20 steps, the music starts anyway without it. 0 = start right away.\n\n"
             "Sound delay: the time from sending a MIDI note to hearing it. Measure it once with\n"
             "'Measure sound delay' (microphone next to the speaker); it is used for every session.\n\n"
             "With the old firmware (no IMUs) alignment is always off."))
@@ -1432,6 +1459,7 @@ class GuiApp:
             walk_steps=walk_steps,
             phase_align=PHASE_ALIGN_CHOICES.get(self.phase_align_var.get(), "auto"),
             latency_ms=self._get_latency_ms(),
+            start_steps=self._get_start_steps(),
         )
         
         # Update UI state

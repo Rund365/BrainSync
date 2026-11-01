@@ -275,6 +275,60 @@ class PhaseControllerTests(unittest.TestCase):
         old = fast_loop.run("110:15", 1, False, use_model=False)
         self.assertTrue(old.with_music.all())  # today's system: music right away
 
+    def _walk_in(self, calibrated_after: dict, steps: int):
+        """Feeds `steps` strikes 0.5 s apart to a PhaseAligner whose IMUs calibrate after the given
+        number of steps (None = never, missing = no IMU data). Returns (start step or None, messages)."""
+        from utils.engine.phase_controller import PhaseAligner
+        import utils.engine.phase_controller as pc
+        messages, played = [], []
+        player = SimpleNamespace(playing=False, walkingBPM=100.0, beat_times={})
+        player.play_at = lambda send, bpm: (played.append(send), setattr(player, "playing", True), 0)[2]
+        calibs = {}
+        for foot, after in calibrated_after.items():
+            calibs[foot] = SimpleNamespace(after=after, ready=False, still_samples=0, swing_samples=0)
+        tracker = SimpleNamespace(
+            feet={foot: SimpleNamespace(calib=c) for foot, c in calibs.items()},
+            predictor=SimpleNamespace(strike_count=0, cadence_bpm=lambda *a: 120.0),
+            next_strike=lambda now: None)
+        aligner = PhaseAligner(player, tracker, PhaseSettings(), enabled=True, notify=messages.append)
+        saved = pc.time
+        try:
+            for step in range(1, steps + 1):
+                t = 100.0 + 0.5 * step
+                pc.time = SimpleNamespace(perf_counter=lambda t=t: t)
+                for c in calibs.values():
+                    c.swing_samples += 25  # the IMU sends data
+                    c.ready = c.after is not None and step >= c.after
+                tracker.predictor.strike_count = step
+                aligner.on_strike(step, 1, t)
+                aligner.update_transport()
+                if played:
+                    return step, messages
+        finally:
+            pc.time = saved
+        return None, messages
+
+    def test_first_start_waits_for_steps_and_imu_calibration(self):
+        s = PhaseSettings()
+        start, messages = self._walk_in({1: 5, 2: 7}, 30)
+        self.assertEqual(start, s.start_steps)  # both calibrated before step 10: starts at 10
+        self.assertIn("both IMUs calibrated", messages[-1])
+        start, messages = self._walk_in({1: 5, 2: 14}, 30)
+        self.assertEqual(start, 14)  # waits for the left IMU
+        self.assertTrue(any("waiting for the IMU calibration" in m for m in messages))
+
+    def test_first_start_falls_back_when_an_imu_never_calibrates(self):
+        s = PhaseSettings()
+        start, messages = self._walk_in({1: 5, 2: None}, 30)
+        self.assertEqual(start, s.start_fallback_steps)
+        self.assertTrue(any("left IMU is not calibrated" in m for m in messages))
+
+    def test_first_start_without_imu_data_does_not_wait_for_calibration(self):
+        s = PhaseSettings()
+        start, messages = self._walk_in({}, 30)
+        self.assertEqual(start, s.start_steps)
+        self.assertIn("no IMU data", messages[-1])
+
     def test_music_pauses_while_standing_and_restarts_on_the_step(self):
         from utils.simulation import fast_loop
         r = fast_loop.run("105:10,0:4,115:12", 1, True, use_model=False)
