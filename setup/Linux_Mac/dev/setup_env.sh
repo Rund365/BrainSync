@@ -17,10 +17,11 @@ echo "      BRAIN MUSIC INTERFACE - SETUP WIZARD"
 echo "=================================================="
 echo
 echo "This script will:"
-echo "  1. Create a Python Virtual Environment (.venv)"
+echo "  1. Find Python 3.10-3.12 (and offer to install 3.12 if there is none)"
+echo "     and create a Python Virtual Environment (.venv)"
 echo "  2. Upgrade pip"
 echo "  3. Install all dependencies"
-echo "  4. Train initial KNN model (if session data exists)"
+echo "  4. Check the environment (libraries, MIDI, serial ports, model)"
 echo
 read -p "Press Enter to continue..."
 
@@ -28,16 +29,57 @@ read -p "Press Enter to continue..."
 echo
 echo "[1/4] Creating virtual environment..."
 
-PYTHON_CMD="python3"
-if ! command -v python3 &> /dev/null; then
-    if command -v python &> /dev/null; then
-        PYTHON_CMD="python"
-        echo "python3 not found, using python..."
-    else
-        echo "Error: Neither 'python3' nor 'python' found."
-        echo "Please install Python 3."
-        exit 1
+# The MIDI library (python-rtmidi) has ready-made packages only for Python 3.10-3.12;
+# on newer versions pip would have to build it, which needs a compiler.
+PYTHON_CMD=""
+GOOD_PYTHON=""
+for candidate in python3.11 python3.12 python3.10; do
+    if command -v "$candidate" &> /dev/null; then
+        PYTHON_CMD="$candidate"
+        GOOD_PYTHON=1
+        break
     fi
+done
+
+if [ -z "$PYTHON_CMD" ]; then
+    echo "No Python 3.10, 3.11 or 3.12 found. The MIDI library (python-rtmidi) only has ready-made"
+    echo "packages for these versions, so Python 3.12 is needed. It is installed next to any other"
+    echo "Python; nothing is removed."
+    if command -v brew &> /dev/null; then
+        read -p "Install Python 3.12 now with 'brew install python@3.12 python-tk@3.12'? [y/N]: " REPLY
+        if [[ "$REPLY" =~ ^[Yy]$ ]]; then
+            brew install python@3.12 python-tk@3.12 && command -v python3.12 &> /dev/null && PYTHON_CMD="python3.12" && GOOD_PYTHON=1
+        fi
+    elif command -v apt-get &> /dev/null; then
+        read -p "Install Python 3.12 now with 'sudo apt-get install -y python3.12 python3.12-venv python3.12-tk'? [y/N]: " REPLY
+        if [[ "$REPLY" =~ ^[Yy]$ ]]; then
+            sudo apt-get update && sudo apt-get install -y python3.12 python3.12-venv python3.12-tk \
+                && PYTHON_CMD="python3.12" && GOOD_PYTHON=1
+            if [ -z "$GOOD_PYTHON" ]; then
+                echo "python3.12 is not in this system's package list (older Ubuntu/Debian):"
+                echo "install it from python.org or the deadsnakes PPA, then rerun this setup."
+            fi
+        fi
+    else
+        echo "Install Python 3.12 from https://www.python.org/downloads/ and rerun this setup."
+    fi
+fi
+
+if [ -z "$PYTHON_CMD" ]; then
+    for candidate in python3 python; do
+        if command -v "$candidate" &> /dev/null; then
+            PYTHON_CMD="$candidate"
+            break
+        fi
+    done
+fi
+if [ -z "$PYTHON_CMD" ]; then
+    echo "Error: no Python found. Please install Python 3.12."
+    exit 1
+fi
+echo "Using: $PYTHON_CMD ($($PYTHON_CMD --version))"
+if [ -z "$GOOD_PYTHON" ]; then
+    echo "WARNING: this is not Python 3.10-3.12, so installing the MIDI library may fail."
 fi
 
 # Ensure the venv module is available (needed on Debian/Ubuntu: python3-venv)
@@ -45,6 +87,17 @@ if ! $PYTHON_CMD -c "import venv, ensurepip" 2> /dev/null; then
     echo "Error: Python venv/ensurepip modules not available."
     echo "Install them (e.g., 'sudo apt install -y python3.10-venv') and rerun."
     exit 1
+fi
+
+# An existing .venv made with an unsuitable Python cannot install the MIDI library
+if [ -n "$GOOD_PYTHON" ] && [ -x ".venv/bin/python" ]; then
+    if ! .venv/bin/python -c "import sys; sys.exit(0 if (3, 10) <= sys.version_info[:2] <= (3, 12) else 1)"; then
+        echo "The existing .venv uses a Python version the MIDI library has no package for."
+        read -p "Delete .venv and make it again with $PYTHON_CMD? [y/N]: " REPLY
+        if [[ "$REPLY" =~ ^[Yy]$ ]]; then
+            rm -rf .venv
+        fi
+    fi
 fi
 
 if [ ! -d ".venv" ]; then
@@ -104,24 +157,23 @@ fi
 # 3. Install Dependencies
 echo
 echo "[3/4] Installing dependencies..."
-pip install -r requirements.txt
+python -m pip install -r requirements.txt
 if [ $? -ne 0 ]; then
     echo "Error installing dependencies!"
+    echo "If python-rtmidi failed to build, remove .venv and rerun: it offers to install Python 3.12."
     exit 1
 fi
+python setup/check_env.py --mark
 echo "Dependencies installed successfully."
 
-# 4. Train Initial KNN Model
+# 4. Check the environment
 echo
-echo "[4/4] Training KNN model..."
-
-if [ -d "server/logs/Default" ]; then
-    cd research
-    python analyze_data.py
-    python train_knn.py
-    cd ..
-else
-    echo "No session data found yet. KNN will train after your first session."
+echo "[4/4] Checking the environment..."
+python setup/check_env.py
+if [ $? -ne 0 ]; then
+    echo
+    echo "Setup finished with problems, see [FAIL] above."
+    exit 1
 fi
 
 echo

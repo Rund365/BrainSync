@@ -21,6 +21,9 @@ else
     exit 1
 fi
 
+# Update the libraries if requirements.txt changed since the last install
+python setup/check_env.py --sync || exit 1
+
 # Launch Application
 echo "Launching GUI..."
 # Ensure we are in the directory of the script or the project root

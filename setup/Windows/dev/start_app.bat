@@ -2,8 +2,9 @@
 :: ======================================================================================
 :: BRAIN MUSIC INTERFACE - LAUNCHER SCRIPT
 :: ======================================================================================
-:: This script is the entry point for the user. It ensures the application runs
-:: inside the correct Python Virtual Environment (.venv) to avoid missing libraries.
+:: Runs the GUI inside the project's virtual environment (.venv). If requirements.txt
+:: changed since the last install (for example after pulling a new branch), the libraries
+:: are updated first.
 
 :: Navigate to project root (three levels up from setup/Windows/dev/)
 cd /d "%~dp0..\..\..\"
@@ -11,34 +12,33 @@ cd /d "%~dp0..\..\..\"
 title BRAIN MUSIC INTERFACE
 cls
 
-:: 1. Header Display
 echo ==================================================
 echo       STARTING BRAIN MUSIC INTERFACE...
 echo ==================================================
 echo.
 
-:: 2. Check for Virtual Environment
-:: We look for the 'activate.bat' script. If it exists, we run it to switch 
-:: python versions to the one in '.venv'.
+:: 1. Check for Virtual Environment
 if exist .venv\Scripts\activate.bat (
     call .venv\Scripts\activate.bat
 ) else (
-    :: Error Handler: If the user hasn't run setup_env.bat yet
     echo Error: Virtual environment '.venv' not found.
     echo Please run 'setup_env.bat' first!
     pause
-    exit /b
+    exit /b 1
+)
+
+:: 2. Update the libraries if requirements.txt changed
+python setup\check_env.py --sync
+if errorlevel 1 (
+    pause
+    exit /b 1
 )
 
 :: 3. Launch Application
-:: Now that venv is active, 'python' refers to the isolated version with all libraries.
 echo Launching GUI...
 python server\gui_app.py
 
-:: 4. Exit Handling
-:: 'errorlevel' checks the exit code of the previous command (python).
-:: If python crashed (code != 0), we pause so the user can see the error message.
-:: If python exited cleanly (code 0, e.g. clicking Quit), we close the window immediately.
+:: 4. Exit Handling: keep the window open after a crash so the error can be read
 if errorlevel 1 (
     echo.
     echo Application crashed or exited with error.
