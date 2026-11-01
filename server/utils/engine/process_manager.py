@@ -14,7 +14,8 @@ class SubprocessManager:
     """
     def __init__(self, midi_path, serial_port, manual_mode, manual_bpm, smoothing_window, stride, log_callback, session_dir_callback, data_callback=None, gui_sync_callback=None, session_name=None, alpha_up=None, alpha_down=None, hybrid_mode=False, random_mode=False, random_span=None, 
                  hybrid_lock_steps=None, hybrid_unlock_time=None, hybrid_stability_threshold=None, hybrid_unlock_threshold=None, random_gamified=None,
-                 random_simple_threshold=None, random_simple_steps=None, random_simple_timeout=None, model_path=None, startup_mode=None, walk_steps=None):
+                 random_simple_threshold=None, random_simple_steps=None, random_simple_timeout=None, model_path=None, startup_mode=None, walk_steps=None,
+                 phase_align=None, latency_ms=None):
         self.log_callback = log_callback
         self.session_dir_callback = session_dir_callback
         self.data_callback = data_callback
@@ -82,6 +83,12 @@ class SubprocessManager:
             cmd.append("--walk-first")
             if walk_steps is not None:
                 cmd.extend(["--walk-steps", str(walk_steps)])
+
+        # Beat alignment (IMU firmware): "auto" = on in dynamic/hybrid, off otherwise
+        if phase_align in ("auto", "on", "off"):
+            cmd.extend(["--phase-align", phase_align])
+        if latency_ms is not None:
+            cmd.extend(["--latency-ms", f"{float(latency_ms):g}"])
         
         # Launch Process
         try:
@@ -242,11 +249,15 @@ class SubprocessManager:
         self.send_command(f"SET_HYBRID_UNLOCK_THRESHOLD:{bpm}")
 
     def stop(self):
+        if self.process:
+            # QUIT must go out while running is still True: send_command() drops it otherwise,
+            # and the engine was killed without saving its last data (meta.json, sensor logs)
+            self.send_command("QUIT")
         self.running = False
         if self.process:
-            self.send_command("QUIT")
             try:
-                self.process.wait(timeout=2)
+                # The engine writes the sensor logs and meta.json on its way out; give it time
+                self.process.wait(timeout=10)
             except subprocess.TimeoutExpired:
                 self.process.kill()
             self.process = None

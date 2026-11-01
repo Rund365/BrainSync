@@ -42,6 +42,14 @@ def get_sim_logs_dir():
     return logs
 
 
+def get_latency_logs_dir():
+    """Sound-delay measurements (utils/analysis/measure_latency.py), outside the logs directory
+    for the same reason as the simulated sessions."""
+    logs = get_app_root() / "server" / "latency_logs"
+    logs.mkdir(parents=True, exist_ok=True)
+    return logs
+
+
 def get_models_dir():
     """Get the models directory (always external, writable)."""
     models = get_app_root() / "server" / "utils" / "prediction_model" / "results" / "models"

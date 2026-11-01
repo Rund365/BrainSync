@@ -6,6 +6,10 @@ from tkinter import ttk, filedialog, messagebox
 import time
 import sys
 import shutil
+import json
+import os
+import subprocess
+from datetime import datetime
 
 import pandas as pd
 from matplotlib.figure import Figure
@@ -48,6 +52,11 @@ except ImportError:
 # Default values matching ESP32 step_receiver_sketch.ino
 DEFAULT_SMOOTHING_WINDOW = 3  # Line 6: int smoothingWindow = 3
 DEFAULT_UPDATE_STRIDE = 1     # Line 7: int updateStride = 1
+
+# Beat alignment (IMU firmware): GUI label -> main.py --phase-align value
+PHASE_ALIGN_CHOICES = {"Auto": "auto", "On": "on", "Off": "off"}
+DEFAULT_LATENCY_MS = 30  # main.py's default until the sound delay is measured
+USER_SETTINGS_FILE = "user_settings.json"  # in server/, remembered between runs (not in git)
 
 # Get smoothing alpha defaults from BPM_estimation (will be set after class check)
 DEFAULT_SMOOTHING_UP = 0.1    # Will try to read from BPM_estimation
@@ -524,6 +533,41 @@ class GuiApp:
                  style="CardLabel.TLabel", font=("Segoe UI", 9)).pack(side="left")
         # Initially hidden
         
+        # --- BEAT ALIGNMENT (IMU) ---
+        section("Beat Alignment (IMU)")
+        self.user_settings = self._load_user_settings()
+
+        align_row = ttk.Frame(sidebar, style="Card.TFrame")
+        align_row.pack(fill="x", pady=(0, 6))
+        ttk.Label(align_row, text="Align beats:", style="CardLabel.TLabel",
+                  font=("Segoe UI", 9)).pack(side="left", padx=(0, 5))
+        saved_align = self.user_settings.get("phase_align", "Auto")
+        self.phase_align_var = tk.StringVar(value=saved_align if saved_align in PHASE_ALIGN_CHOICES else "Auto")
+        align_combo = ttk.Combobox(align_row, textvariable=self.phase_align_var, state="readonly", width=7,
+                                   values=list(PHASE_ALIGN_CHOICES))
+        align_combo.pack(side="left")
+        align_combo.bind("<<ComboboxSelected>>", self._save_user_settings)
+        ttk.Button(align_row, text="i", style="Help.TButton", width=2,
+                   command=self.show_alignment_help).pack(side="left", padx=5)
+
+        latency_row = ttk.Frame(sidebar, style="Card.TFrame")
+        latency_row.pack(fill="x", pady=(0, 6))
+        ttk.Label(latency_row, text="Sound delay:", style="CardLabel.TLabel",
+                  font=("Segoe UI", 9)).pack(side="left", padx=(0, 5))
+        self.latency_ms_var = tk.StringVar(value=f"{self.user_settings.get('latency_ms', DEFAULT_LATENCY_MS):g}")
+        latency_entry = ttk.Entry(latency_row, textvariable=self.latency_ms_var, width=6, font=("Segoe UI", 10))
+        latency_entry.pack(side="left", padx=(0, 5))
+        latency_entry.bind("<Return>", self._save_user_settings)
+        latency_entry.bind("<FocusOut>", self._save_user_settings)
+        ttk.Label(latency_row, text="ms", style="CardLabel.TLabel", font=("Segoe UI", 9)).pack(side="left")
+
+        self.btn_measure_latency = ttk.Button(sidebar, text="🎤  Measure sound delay", style="Compact.TButton",
+                                              command=self.measure_latency)
+        self.btn_measure_latency.pack(fill="x", pady=(2, 0))
+        self.latency_status_var = tk.StringVar(value=self._latency_status_text())
+        ttk.Label(sidebar, textvariable=self.latency_status_var, style="CardSub.TLabel", font=("Segoe UI", 8),
+                  wraplength=230, justify="left").pack(anchor="w", pady=(4, 0))
+
         # --- INFO ABOUT MODE SETTINGS TAB ---
         info_frame = ttk.Frame(sidebar, style="Card.TFrame", padding=10)
         info_frame.pack(fill="x", pady=(15, 0))
@@ -1102,6 +1146,181 @@ class GuiApp:
         else:
             self.walk_steps_frame.pack_forget()
 
+    # ====================== BEAT ALIGNMENT SETTINGS ======================
+    def _settings_path(self) -> Path:
+        return get_app_root() / "server" / USER_SETTINGS_FILE
+
+    def _load_user_settings(self) -> dict:
+        try:
+            return json.loads(self._settings_path().read_text(encoding="utf-8"))
+        except Exception:
+            return {}
+
+    def _get_latency_ms(self):
+        """The sound delay typed in the sidebar, or None if it is not a sensible number."""
+        try:
+            value = float(self.latency_ms_var.get().strip())
+        except ValueError:
+            return None
+        return value if 0 <= value <= 1000 else None
+
+    def _save_user_settings(self, *_):
+        self.user_settings["phase_align"] = self.phase_align_var.get()
+        latency = self._get_latency_ms()
+        if latency is None:
+            self.latency_ms_var.set(f"{self.user_settings.get('latency_ms', DEFAULT_LATENCY_MS):g}")
+        else:
+            self.user_settings["latency_ms"] = latency
+        try:
+            self._settings_path().write_text(json.dumps(self.user_settings, indent=2), encoding="utf-8")
+        except Exception as e:
+            self.log(f"Could not save settings: {e}")
+        self.latency_status_var.set(self._latency_status_text())
+
+    def _latency_status_text(self) -> str:
+        latency = self.user_settings.get("latency_ms")
+        measured = self.user_settings.get("latency_measured_ms")
+        if latency is None:
+            return f"Not measured yet: the default {DEFAULT_LATENCY_MS} ms is used"
+        if measured is not None and abs(latency - measured) < 0.5:
+            return f"Measured on {self.user_settings.get('latency_measured_at', '?')}"
+        return "Set by hand (not measured)"
+
+    def show_alignment_help(self):
+        messagebox.showinfo("Beat alignment", (
+            "With the IMU firmware, the music can put each beat on the moment the foot hits the ground.\n\n"
+            "Auto: on in Dynamic and Hybrid mode, off in Manual and Random.\n"
+            "On / Off: force it, e.g. to record a session without alignment for comparison.\n\n"
+            "When it is on, the music waits for the first steps and starts on a step, pauses when you\n"
+            "stand still, and changes tempo by at most 5% per beat.\n\n"
+            "Sound delay: the time from sending a MIDI note to hearing it. Measure it once with\n"
+            "'Measure sound delay' (microphone next to the speaker); it is used for every session.\n\n"
+            "With the old firmware (no IMUs) alignment is always off."))
+
+    def measure_latency(self):
+        """Runs utils/analysis/measure_latency.py and stores the result as the sound delay."""
+        if self.is_running:
+            messagebox.showinfo("Measure sound delay", "Stop the session first.")
+            return
+        if not messagebox.askokcancel("Measure sound delay", (
+                "This plays 40 short clicks through the MIDI output and records them with the microphone.\n\n"
+                "Put the microphone right next to the speaker, turn the volume up and keep the room quiet.\n"
+                "It takes about 30 seconds.")):
+            return
+        python_exe = get_python_executable()
+        script = Path(__file__).resolve().parent / "utils" / "analysis" / "measure_latency.py"
+        if not python_exe or not script.exists():
+            messagebox.showerror("Measure sound delay", f"Cannot run {script.name}.")
+            return
+        self.btn_measure_latency.configure(state="disabled", text="🎤  Measuring... keep quiet")
+        self.log("Measuring the sound delay...")
+        started = time.time()
+
+        def _worker():
+            try:
+                proc = subprocess.run([python_exe, str(script)], cwd=str(script.parents[2]),
+                                      capture_output=True, text=True, timeout=180)
+                lines = (proc.stdout + proc.stderr).strip().splitlines()
+            except Exception as e:
+                lines = [f"Measurement failed: {e}"]
+            result = self._newest_latency_result(started)
+            self.root.after(0, lambda: self._finish_latency(result, lines))
+
+        threading.Thread(target=_worker, daemon=True).start()
+
+    def _newest_latency_result(self, since: float):
+        folder = get_app_root() / "server" / "latency_logs"  # utils.paths.get_latency_logs_dir()
+        if not folder.exists():
+            return None
+        for path in sorted(folder.glob("*/latency.json"), reverse=True):
+            if path.stat().st_mtime >= since - 1:
+                try:
+                    result = json.loads(path.read_text(encoding="utf-8"))
+                    result["folder"] = str(path.parent)
+                    return result
+                except Exception:
+                    return None
+        return None
+
+    def _finish_latency(self, result, lines):
+        self.btn_measure_latency.configure(state="normal", text="🎤  Measure sound delay")
+        if result and "median_ms" in result and result.get("found", 0) >= 5:
+            ms = round(result["median_ms"])
+            self.latency_ms_var.set(str(ms))
+            self.user_settings["latency_measured_ms"] = ms
+            self.user_settings["latency_measured_at"] = datetime.now().strftime("%Y-%m-%d %H:%M")
+            self._save_user_settings()
+            self.log(f"Sound delay measured: {ms} ms")
+            messagebox.showinfo("Sound delay", (
+                f"Measured: {ms} ms (middle half {result['p25_ms']:.0f}-{result['p75_ms']:.0f} ms, "
+                f"{result['found']} of {result['clicks']} clicks heard).\n\n"
+                f"It is now used for every session.\n\nGraph: {Path(result['folder']) / 'latency.png'}"))
+        else:
+            self.log("Sound delay measurement failed")
+            detail = "\n".join(lines[-6:]) or "No output."
+            messagebox.showwarning("Sound delay", (
+                "Not enough clicks were heard to measure the delay.\n"
+                "Turn the volume up, put the microphone closer, or check the default microphone.\n\n" + detail))
+
+    # ====================== POST-SESSION REPORT ======================
+    def _start_session_report(self, session_dir):
+        """Session report (utils/analysis/session_report.py) for sessions with IMU data, in the background."""
+        session_dir = Path(session_dir)
+        imu_file = session_dir / "imu_data.csv"
+        if not imu_file.exists() or imu_file.stat().st_size < 500:
+            return  # old firmware or no IMU data: the old plot is all there is
+        python_exe = get_python_executable()
+        script = Path(__file__).resolve().parent / "utils" / "analysis" / "session_report.py"
+        if not python_exe or not script.exists():
+            return
+        self.log("Making the session report...")
+
+        def _worker():
+            try:
+                # Own process: the report uses pyplot, which must not run in the GUI's threads
+                proc = subprocess.run([python_exe, str(script), str(session_dir)], cwd=str(script.parents[2]),
+                                      capture_output=True, text=True, timeout=300)
+                text = proc.stdout.strip()
+                if proc.returncode != 0 or not (session_dir / "report.png").exists():
+                    err = (proc.stderr.strip().splitlines() or ["unknown error"])[-1]
+                    self.root.after(0, lambda: self.log(f"Session report failed: {err}"))
+                    return
+                (session_dir / "report_summary.txt").write_text(text, encoding="utf-8")
+                self.root.after(0, lambda: self._show_session_report(session_dir, text))
+            except Exception as e:
+                self.root.after(0, lambda e=e: self.log(f"Session report failed: {e}"))
+
+        threading.Thread(target=_worker, daemon=True).start()
+
+    def _open_path(self, path):
+        try:
+            if os.name == "nt":
+                os.startfile(str(path))
+            elif sys.platform == "darwin":
+                subprocess.Popen(["open", str(path)])
+            else:
+                subprocess.Popen(["xdg-open", str(path)])
+        except Exception as e:
+            self.log(f"Cannot open {path}: {e}")
+
+    def _show_session_report(self, session_dir: Path, text: str):
+        self.log(f"Session report saved to {session_dir.name}")
+        win = tk.Toplevel(self.root)
+        win.title(f"Session report - {session_dir.name}")
+        win.configure(bg=self.P["card_bg"])
+        box = tk.Text(win, width=110, height=min(24, text.count("\n") + 3), wrap="word", font=("Consolas", 10),
+                      bg=self.P["card_bg"], fg=self.P["text_main"], relief="flat", padx=12, pady=12)
+        box.insert("1.0", text)
+        box.configure(state="disabled")
+        box.pack(fill="both", expand=True)
+        buttons = ttk.Frame(win, style="Card.TFrame", padding=10)
+        buttons.pack(fill="x")
+        ttk.Button(buttons, text="Open report graphs", style="Compact.TButton",
+                   command=lambda: self._open_path(session_dir / "report.png")).pack(side="left", padx=(0, 8))
+        ttk.Button(buttons, text="Open session folder", style="Compact.TButton",
+                   command=lambda: self._open_path(session_dir)).pack(side="left", padx=(0, 8))
+        ttk.Button(buttons, text="Close", style="Compact.TButton", command=win.destroy).pack(side="right")
+
     def start_session(self):
         """Action for the 'START SESSION' button."""
         if self.is_running: return
@@ -1211,12 +1430,16 @@ class GuiApp:
             model_path=model_path,
             startup_mode=startup_mode,
             walk_steps=walk_steps,
+            phase_align=PHASE_ALIGN_CHOICES.get(self.phase_align_var.get(), "auto"),
+            latency_ms=self._get_latency_ms(),
         )
         
         # Update UI state
         self.is_running = True
         self.btn_start.configure(state="disabled"); self.btn_stop.configure(state="normal")
-        self._set_led(self.led_run, True, self.P["warning"]); self.log(f"Session running on {port}")
+        self._set_led(self.led_run, True, self.P["warning"])
+        self.log(f"Session running on {port} (beat alignment {self.phase_align_var.get()}, "
+                 f"sound delay {self._get_latency_ms() or DEFAULT_LATENCY_MS:g} ms)")
 
     def refresh_ports(self):
         """Populate the combobox with detected serial ports."""
@@ -1454,6 +1677,7 @@ class GuiApp:
                 self.log(f"Saved plot to {self.current_session_dir.name}")
             except Exception as e:
                 self.log(f"Plot failed: {e}")
+            self._start_session_report(self.current_session_dir)
 
         # Reset live buffers and plot for next session
         # self.live_data_buffer = [] # Retain buffer so user can see last session

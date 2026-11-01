@@ -14,7 +14,8 @@ Needs the sounddevice package (in requirements.txt).
 Usage (from the repo root):
   .venv\\Scripts\\python.exe server\\utils\\analysis\\measure_latency.py            measure
   .venv\\Scripts\\python.exe server\\utils\\analysis\\measure_latency.py --list     show devices
-Results go to server/logs/latency/<time>/ (latency.json, latency.png).
+Results go to server/latency_logs/<time>/ (latency.json, latency.png); outside server/logs so the
+GUI's session lists and the model training never pick them up.
 """
 import argparse
 import json
@@ -27,7 +28,7 @@ import numpy as np
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))  # server/, so "utils." imports work
 
-from utils.paths import get_logs_dir
+from utils.paths import get_latency_logs_dir
 
 RATE = 48000
 NOTE, CHANNEL = 76, 9  # high wood block on the General MIDI drum channel: short and sharp
@@ -145,7 +146,7 @@ def main():
     print(f"Playing {args.clicks} clicks. Keep the microphone next to the speaker and the room quiet ...")
     blocks, sends = record_clicks(args.midi, device, args.clicks, args.gap)
     delays, segments = find_delays(blocks, sends)
-    out_dir = get_logs_dir() / "latency" / datetime.now().strftime("%Y%m%d_%H%M%S")
+    out_dir = get_latency_logs_dir() / datetime.now().strftime("%Y%m%d_%H%M%S")
     result = save(delays, segments, out_dir)
     if result["found"] < max(5, args.clicks // 2):
         print(f"Only {result['found']} of {result['clicks']} clicks heard: turn the volume up, move the "
