@@ -1,0 +1,10 @@
+Session log started at 2026-11-01_19-47-40 (t=0.000)
+[00:00:00.000] DEBUG: Attempting to initialize MidiBeatSync...
+[00:00:00.000] DEBUG: MidiBeatSync initialized successfully.
+[00:00:00.000] Starting in DYNAMIC MODE
+[00:00:00.000] Run type: dynamic
+[00:00:00.000] Prediction model enabled: lgbm_model.joblib
+[00:00:00.000] Mode Activated: DynamicMode
+[00:00:00.000] Session started
+[00:00:00.000] DEBUG: Attempting to open serial port COM4...
+[00:00:00.000] Failed to open serial port COM4: could not open port 'COM4': OSError(22, 'The semaphore timeout period has expired.', None, 121)

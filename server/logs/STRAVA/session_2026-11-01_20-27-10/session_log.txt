@@ -1,0 +1,171 @@
+Session log started at 2026-11-01_20-27-10 (t=0.000)
+[00:00:00.000] DEBUG: Attempting to initialize MidiBeatSync...
+[00:00:00.000] DEBUG: MidiBeatSync initialized successfully.
+[00:00:00.000] Starting in DYNAMIC MODE
+[00:00:00.000] Run type: dynamic
+[00:00:00.000] Prediction model enabled: lgbm_model.joblib
+[00:00:00.000] Mode Activated: DynamicMode
+[00:00:00.000] Session started
+[00:00:00.000] DEBUG: Attempting to open serial port COM5...
+[00:00:00.000] Receiver on COM5 at 921600 baud
+[00:00:00.000] Receiver firmware: protocol 2 (IMU)
+[00:00:00.000] Setting smoothing window to 3
+[00:00:00.000] Smoothing window set response: ACK,WINDOW,3
+[00:00:00.000] Setting update stride to 1
+[00:00:00.000] Update stride set response: ACK,STRIDE,1
+[00:00:00.000] ACK,RESET received
+[00:00:00.000] ACK,START received
+[00:00:00.000] Session handshake completed
+[00:00:00.000] Music starts on your steps, once the pace is known
+[00:00:00.000] Session timer started - music is now playing
+[00:00:00.015] Phase alignment on (output latency 30 ms, kp 1.0, dead-band 0 ms, max nudge 15%, phase reset 100 ms, start: on the step after 10 steps, standing: pause, max tempo change 5% per beat)
+[00:00:00.141] Processed: BPM=120.00
+[00:00:00.815] Processed: BPM=88.07
+[00:00:01.337] Processed: BPM=99.91
+[00:00:01.918] Processed: BPM=108.60
+[00:00:02.389] Processed: BPM=119.93
+[00:00:03.046] Processed: BPM=108.15
+[00:00:03.506] Processed: BPM=110.57
+[00:00:04.136] Processed: BPM=108.48
+[00:00:04.613] Processed: BPM=110.47
+[00:00:05.245] Processed: BPM=107.55
+[00:00:05.768] Processed: BPM=104.84
+[00:00:06.365] Processed: BPM=106.34
+[00:00:06.854] Processed: BPM=108.05
+[00:00:07.439] Processed: BPM=109.68
+[00:00:07.905] Processed: BPM=112.98
+[00:00:08.493] Processed: BPM=115.78
+[00:00:08.962] Processed: BPM=117.04
+[00:00:09.517] Processed: BPM=117.12
+[00:00:10.049] Processed: BPM=114.27
+[00:00:10.590] Processed: BPM=112.89
+[00:00:11.026] SENSORS: WARNING: The right IMU is not calibrated after 20 steps: check that it is fixed firmly to the foot
+[00:00:11.026] SENSORS: WARNING: The left IMU is not calibrated after 20 steps: check that it is fixed firmly to the foot
+[00:00:11.071] Processed: BPM=113.96
+[00:00:11.640] Processed: BPM=114.69
+[00:00:12.158] Processed: BPM=112.90
+[00:00:12.785] Processed: BPM=107.50
+[00:00:13.243] Processed: BPM=108.32
+[00:00:13.762] Processed: BPM=113.78
+[00:00:14.298] Processed: BPM=113.59
+[00:00:14.797] Processed: BPM=116.35
+[00:00:15.304] Processed: BPM=122.51
+[00:00:15.770] Processed: BPM=126.30
+[00:00:16.243] Processed: BPM=125.43
+[00:00:16.766] Processed: BPM=123.17
+[00:00:17.259] Processed: BPM=123.09
+[00:00:17.820] Processed: BPM=117.48
+[00:00:18.345] Processed: BPM=111.44
+[00:00:18.852] Processed: BPM=111.39
+[00:00:19.319] Processed: BPM=115.55
+[00:00:19.822] Processed: BPM=120.57
+[00:00:20.034] SENSORS: The left IMU is calibrated (after 38 steps)
+[00:00:20.351] Processed: BPM=120.65
+[00:00:20.920] Processed: BPM=116.51
+[00:00:21.401] Processed: BPM=114.95
+[00:00:21.956] Processed: BPM=113.32
+[00:00:22.439] Processed: BPM=112.57
+[00:00:22.927] Processed: BPM=117.42
+[00:00:23.466] Processed: BPM=119.63
+[00:00:23.996] Processed: BPM=117.52
+[00:00:24.596] Processed: BPM=110.35
+[00:00:25.093] Processed: BPM=108.20
+[00:00:25.650] Processed: BPM=109.01
+[00:00:26.201] Processed: BPM=107.76
+[00:00:26.817] Processed: BPM=105.45
+[00:00:27.276] Processed: BPM=107.10
+[00:00:27.907] Processed: BPM=108.52
+[00:00:28.405] Processed: BPM=106.22
+[00:00:28.957] Processed: BPM=109.48
+[00:00:29.475] Processed: BPM=112.57
+[00:00:30.151] Processed: BPM=108.89
+[00:00:30.590] Processed: BPM=106.72
+[00:00:31.163] Processed: BPM=110.83
+[00:00:31.672] Processed: BPM=111.59
+[00:00:32.207] Processed: BPM=112.71
+[00:00:32.712] Processed: BPM=116.34
+[00:00:33.236] Processed: BPM=119.84
+[00:00:33.744] Processed: BPM=118.87
+[00:00:34.374] Processed: BPM=111.30
+[00:00:34.817] Processed: BPM=110.62
+[00:00:35.047] SENSORS: The right IMU is calibrated (after 66 steps)
+[00:00:35.372] Processed: BPM=113.36
+[00:00:35.821] Processed: BPM=116.13
+[00:00:36.501] Processed: BPM=111.71
+[00:00:36.966] Processed: BPM=108.33
+[00:00:37.508] Processed: BPM=113.88
+[00:00:38.087] Processed: BPM=109.08
+[00:00:38.741] Processed: BPM=101.15
+[00:00:39.190] Processed: BPM=102.97
+[00:00:39.811] Processed: BPM=107.60
+[00:00:40.304] Processed: BPM=107.29
+[00:00:40.972] Processed: BPM=103.92
+[00:00:41.436] Processed: BPM=107.16
+[00:00:41.967] Processed: BPM=115.12
+[00:00:42.517] Processed: BPM=112.34
+[00:00:43.115] Processed: BPM=108.95
+[00:00:43.636] Processed: BPM=109.00
+[00:00:44.157] Processed: BPM=112.35
+[00:00:44.688] Processed: BPM=112.15
+[00:00:45.313] Processed: BPM=106.69
+[00:00:45.796] Processed: BPM=109.02
+[00:00:46.347] Processed: BPM=113.03
+[00:00:46.861] Processed: BPM=112.30
+[00:00:47.445] Processed: BPM=110.52
+[00:00:47.917] Processed: BPM=113.09
+[00:00:48.489] Processed: BPM=116.49
+[00:00:48.944] Processed: BPM=116.26
+[00:00:49.469] Processed: BPM=118.55
+[00:00:49.986] Processed: BPM=119.46
+[00:00:50.520] Processed: BPM=118.21
+[00:00:51.039] Processed: BPM=115.62
+[00:00:51.597] Processed: BPM=113.31
+[00:00:52.109] Processed: BPM=111.18
+[00:00:52.658] Processed: BPM=109.90
+[00:00:53.106] Processed: BPM=114.87
+[00:00:53.747] Processed: BPM=113.14
+[00:00:54.216] Processed: BPM=110.58
+[00:00:54.745] Processed: BPM=115.11
+[00:00:55.292] Processed: BPM=113.86
+[00:00:55.851] Processed: BPM=111.33
+[00:00:56.340] Processed: BPM=112.16
+[00:00:56.869] Processed: BPM=115.96
+[00:00:57.411] Processed: BPM=113.78
+[00:00:57.941] Processed: BPM=111.50
+[00:00:58.438] Processed: BPM=115.93
+[00:00:59.095] Processed: BPM=109.68
+[00:00:59.562] Processed: BPM=105.74
+[00:01:00.162] Processed: BPM=107.49
+[00:01:00.603] Processed: BPM=111.15
+[00:01:01.198] Processed: BPM=114.88
+[00:01:01.640] Processed: BPM=116.92
+[00:01:02.302] Processed: BPM=115.40
+[00:01:02.854] Processed: BPM=105.69
+[00:01:03.310] Processed: BPM=108.38
+[00:01:03.737] Processed: BPM=119.59
+[00:01:04.274] Processed: BPM=124.79
+[00:01:04.769] Processed: BPM=125.43
+[00:01:05.256] Processed: BPM=129.46
+[00:01:05.800] Processed: BPM=124.79
+[00:01:06.290] Processed: BPM=115.23
+[00:01:06.836] Processed: BPM=112.12
+[00:01:07.340] Processed: BPM=114.39
+[00:01:07.914] Processed: BPM=113.14
+[00:01:08.394] Processed: BPM=110.90
+[00:01:09.011] Processed: BPM=109.61
+[00:01:09.491] Processed: BPM=108.57
+[00:01:10.035] Processed: BPM=111.99
+[00:01:10.550] Processed: BPM=112.83
+[00:01:11.105] Processed: BPM=113.68
+[00:01:11.607] Processed: BPM=114.36
+[00:01:12.143] Processed: BPM=115.53
+[00:01:12.612] Processed: BPM=117.28
+[00:01:13.202] Processed: BPM=116.53
+[00:01:13.594] Processed: BPM=120.97
+[00:01:14.115] Processed: BPM=126.34
+[00:01:14.590] Processed: BPM=125.93
+[00:01:15.094] Processed: BPM=125.44
+[00:01:15.561] Processed: BPM=124.46
+[00:01:15.668] Session stopped by user.
+[00:01:15.668] Session ended
+[00:01:15.797] Link: IMU: 1515 received, 0 lost; LIFT: 142 received, 0 lost; STEP: 143 received, 0 lost; parse errors 0, unknown lines 0

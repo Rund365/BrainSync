@@ -1,0 +1,840 @@
+session,imu_label,event,excel_time_s,rate_dps,class,gyro_above_15hz_dps
+session_2026-11-01_20-16-12,right,TO,14.673,-69.6,correct foot,13.38
+session_2026-11-01_20-16-12,right,TO,15.413,-69.5,at a heel strike,21.47
+session_2026-11-01_20-16-12,right,TO,22.543,-73.9,correct foot,11.25
+session_2026-11-01_20-16-12,right,TO,24.103,-77.7,at a heel strike,12.25
+session_2026-11-01_20-16-12,right,MS,30.453,151.8,at a heel strike,21.08
+session_2026-11-01_20-16-12,right,TO,31.243,-77.3,at a heel strike,18.23
+session_2026-11-01_20-16-12,right,TO,32.033,-69.2,at a heel strike,14.9
+session_2026-11-01_20-16-12,right,TO,32.803,-81.5,at a heel strike,11.55
+session_2026-11-01_20-16-12,right,TO,33.563,-60.6,at a heel strike,16.64
+session_2026-11-01_20-16-12,right,TO,35.073,-85.7,at a heel strike,13.46
+session_2026-11-01_20-16-12,right,TO,35.813,-88.2,at a heel strike,13.06
+session_2026-11-01_20-16-12,right,MS,37.403,155.3,at a heel strike,20.31
+session_2026-11-01_20-16-12,right,MS,38.223,210.2,at a heel strike,23.02
+session_2026-11-01_20-16-12,right,TO,41.583,-69.2,at a heel strike,10.04
+session_2026-11-01_20-16-12,right,TO,45.033,-65.5,at a heel strike,10.99
+session_2026-11-01_20-16-12,right,TO,45.903,-73.0,at a heel strike,9.75
+session_2026-11-01_20-16-12,right,MS,46.723,151.0,at a heel strike,18.13
+session_2026-11-01_20-16-12,right,TO,49.493,-120.1,at a heel strike,12.56
+session_2026-11-01_20-16-12,right,TO,50.393,-65.6,at a heel strike,12.91
+session_2026-11-01_20-16-12,right,TO,54.713,-77.8,at a heel strike,11.32
+session_2026-11-01_20-16-12,right,TO,58.973,-63.0,at a heel strike,9.35
+session_2026-11-01_20-16-12,right,MS,60.613,203.5,other foot,23.24
+session_2026-11-01_20-16-12,right,TO,64.083,-94.7,at a heel strike,16.12
+session_2026-11-01_20-16-12,right,TO,65.833,-86.2,at a heel strike,19.56
+session_2026-11-01_20-16-12,right,MS,72.773,172.4,other foot,21.64
+session_2026-11-01_20-16-12,right,MS,76.283,164.7,other foot,17.88
+session_2026-11-01_20-16-12,right,TO,83.103,-61.8,at a heel strike,8.92
+session_2026-11-01_20-16-12,right,MS,84.823,182.5,at a heel strike,20.98
+session_2026-11-01_20-16-12,right,TO,87.413,-68.7,at a heel strike,10.34
+session_2026-11-01_20-16-12,right,TO,94.923,-63.9,at a heel strike,9.59
+session_2026-11-01_20-16-12,right,TO,109.923,-67.2,at a heel strike,10.43
+session_2026-11-01_20-16-12,right,MS,120.353,180.9,at a heel strike,21.24
+session_2026-11-01_20-16-12,right,TO,125.513,-76.4,at a heel strike,6.56
+session_2026-11-01_20-16-12,right,TO,129.083,-92.5,at a heel strike,11.97
+session_2026-11-01_20-16-12,right,TO,130.583,-60.6,other foot,6.89
+session_2026-11-01_20-16-12,right,TO,133.203,-60.6,other foot,8.63
+session_2026-11-01_20-16-12,left,TO,13.243,-62.8,at a heel strike,23.69
+session_2026-11-01_20-16-12,left,TO,13.883,-67.0,other foot,7.11
+session_2026-11-01_20-16-12,left,MS,14.143,191.8,at a heel strike,34.01
+session_2026-11-01_20-16-12,left,TO,14.753,-66.4,other foot,5.69
+session_2026-11-01_20-16-12,left,MS,15.003,201.8,at a heel strike,34.71
+session_2026-11-01_20-16-12,left,TO,15.603,-70.2,other foot,8.3
+session_2026-11-01_20-16-12,left,MS,15.893,182.3,at a heel strike,34.9
+session_2026-11-01_20-16-12,left,TO,16.503,-69.0,other foot,6.64
+session_2026-11-01_20-16-12,left,MS,16.763,223.2,at a heel strike,31.92
+session_2026-11-01_20-16-12,left,TO,17.603,-88.1,at a heel strike,30.45
+session_2026-11-01_20-16-12,left,TO,18.223,-60.1,other foot,4.08
+session_2026-11-01_20-16-12,left,TO,19.093,-69.8,other foot,8.83
+session_2026-11-01_20-16-12,left,MS,19.323,158.7,at a heel strike,32.58
+session_2026-11-01_20-16-12,left,TO,20.803,-67.5,other foot,3.83
+session_2026-11-01_20-16-12,left,TO,21.703,-106.3,other foot,9.86
+session_2026-11-01_20-16-12,left,MS,22.013,172.7,at a heel strike,34.29
+session_2026-11-01_20-16-12,left,TO,22.583,-82.6,other foot,6.63
+session_2026-11-01_20-16-12,left,TO,23.423,-60.3,other foot,7.11
+session_2026-11-01_20-16-12,left,TO,24.513,-85.8,at a heel strike,25.36
+session_2026-11-01_20-16-12,left,TO,26.103,-108.1,at a heel strike,30.87
+session_2026-11-01_20-16-12,left,TO,26.913,-127.4,at a heel strike,37.41
+session_2026-11-01_20-16-12,left,TO,27.723,-144.0,at a heel strike,31.14
+session_2026-11-01_20-16-12,left,MS,27.753,162.5,at a heel strike,30.86
+session_2026-11-01_20-16-12,left,MS,29.313,167.8,at a heel strike,25.12
+session_2026-11-01_20-16-12,left,TO,29.853,-61.7,other foot,4.94
+session_2026-11-01_20-16-12,left,TO,30.833,-66.2,at a heel strike,36.33
+session_2026-11-01_20-16-12,left,TO,32.413,-175.7,at a heel strike,38.75
+session_2026-11-01_20-16-12,left,MS,32.443,166.8,at a heel strike,38.39
+session_2026-11-01_20-16-12,left,TO,32.963,-63.8,other foot,6.5
+session_2026-11-01_20-16-12,left,MS,33.173,167.3,at a heel strike,21.77
+session_2026-11-01_20-16-12,left,MS,34.693,181.7,at a heel strike,20.83
+session_2026-11-01_20-16-12,left,TO,35.233,-63.8,other foot,6.73
+session_2026-11-01_20-16-12,left,MS,35.433,196.7,at a heel strike,28.81
+session_2026-11-01_20-16-12,left,TO,36.183,-112.1,at a heel strike,35.84
+session_2026-11-01_20-16-12,left,TO,37.003,-72.5,at a heel strike,22.39
+session_2026-11-01_20-16-12,left,TO,41.173,-67.6,at a heel strike,28.6
+session_2026-11-01_20-16-12,left,MS,42.003,157.2,at a heel strike,20.25
+session_2026-11-01_20-16-12,left,MS,43.743,197.5,at a heel strike,23.99
+session_2026-11-01_20-16-12,left,TO,45.473,-62.4,at a heel strike,20.56
+session_2026-11-01_20-16-12,left,TO,47.163,-128.3,at a heel strike,32.89
+session_2026-11-01_20-16-12,left,TO,47.813,-72.7,other foot,6.24
+session_2026-11-01_20-16-12,left,MS,48.123,158.6,at a heel strike,30.83
+session_2026-11-01_20-16-12,left,TO,48.743,-67.9,other foot,4.57
+session_2026-11-01_20-16-12,left,MS,49.043,218.2,at a heel strike,27.8
+session_2026-11-01_20-16-12,left,TO,49.693,-76.2,other foot,7.46
+session_2026-11-01_20-16-12,left,TO,51.393,-70.7,other foot,4.26
+session_2026-11-01_20-16-12,left,MS,52.523,157.9,at a heel strike,22.13
+session_2026-11-01_20-16-12,left,TO,53.093,-60.6,other foot,4.09
+session_2026-11-01_20-16-12,left,MS,53.363,183.2,at a heel strike,26.29
+session_2026-11-01_20-16-12,left,MS,54.283,181.1,at a heel strike,24.03
+session_2026-11-01_20-16-12,left,MS,55.133,172.0,at a heel strike,20.45
+session_2026-11-01_20-16-12,left,TO,55.943,-150.8,at a heel strike,33.47
+session_2026-11-01_20-16-12,left,TO,57.503,-66.7,other foot,6.3
+session_2026-11-01_20-16-12,left,MS,57.723,158.8,at a heel strike,21.55
+session_2026-11-01_20-16-12,left,TO,58.283,-60.0,other foot,5.02
+session_2026-11-01_20-16-12,left,TO,59.153,-62.7,other foot,4.13
+session_2026-11-01_20-16-12,left,TO,60.003,-67.1,other foot,6.73
+session_2026-11-01_20-16-12,left,MS,61.053,174.5,at a heel strike,26.06
+session_2026-11-01_20-16-12,left,TO,62.533,-67.9,other foot,5.37
+session_2026-11-01_20-16-12,left,TO,63.393,-61.2,other foot,3.66
+session_2026-11-01_20-16-12,left,TO,65.383,-100.6,at a heel strike,31.35
+session_2026-11-01_20-16-12,left,TO,66.263,-85.0,at a heel strike,32.74
+session_2026-11-01_20-16-12,left,TO,66.863,-64.0,other foot,3.13
+session_2026-11-01_20-16-12,left,TO,67.743,-76.1,other foot,7.85
+session_2026-11-01_20-16-12,left,MS,67.963,198.3,at a heel strike,27.57
+session_2026-11-01_20-16-12,left,TO,69.383,-67.2,other foot,5.02
+session_2026-11-01_20-16-12,left,TO,70.293,-81.4,other foot,5.38
+session_2026-11-01_20-16-12,left,TO,71.203,-64.4,other foot,3.83
+session_2026-11-01_20-16-12,left,TO,72.063,-66.3,other foot,7.35
+session_2026-11-01_20-16-12,left,TO,72.983,-61.8,other foot,2.57
+session_2026-11-01_20-16-12,left,MS,73.283,154.7,at a heel strike,28.07
+session_2026-11-01_20-16-12,left,TO,74.753,-61.9,other foot,5.27
+session_2026-11-01_20-16-12,left,MS,75.023,161.9,at a heel strike,17.81
+session_2026-11-01_20-16-12,left,TO,75.864,-157.2,at a heel strike,34.69
+session_2026-11-01_20-16-12,left,TO,77.613,-60.7,at a heel strike,24.84
+session_2026-11-01_20-16-12,left,MS,79.323,160.4,at a heel strike,18.11
+session_2026-11-01_20-16-12,left,TO,80.703,-66.5,other foot,6.16
+session_2026-11-01_20-16-12,left,MS,80.973,197.1,at a heel strike,34.28
+session_2026-11-01_20-16-12,left,TO,81.553,-60.9,other foot,4.46
+session_2026-11-01_20-16-12,left,TO,82.443,-64.2,other foot,3.89
+session_2026-11-01_20-16-12,left,TO,83.533,-83.6,at a heel strike,25.02
+session_2026-11-01_20-16-12,left,MS,84.403,183.9,at a heel strike,24.54
+session_2026-11-01_20-16-12,left,TO,85.013,-73.0,other foot,4.75
+session_2026-11-01_20-16-12,left,MS,85.303,163.0,at a heel strike,23.89
+session_2026-11-01_20-16-12,left,MS,88.663,192.1,at a heel strike,27.41
+session_2026-11-01_20-16-12,left,MS,89.503,191.7,at a heel strike,26.08
+session_2026-11-01_20-16-12,left,MS,90.343,156.4,at a heel strike,24.91
+session_2026-11-01_20-16-12,left,TO,90.953,-67.4,other foot,5.84
+session_2026-11-01_20-16-12,left,MS,91.203,231.8,at a heel strike,35.17
+session_2026-11-01_20-16-12,left,TO,91.873,-74.4,other foot,6.94
+session_2026-11-01_20-16-12,left,MS,92.103,166.2,at a heel strike,21.65
+session_2026-11-01_20-16-12,left,TO,92.683,-62.1,other foot,6.42
+session_2026-11-01_20-16-12,left,MS,92.933,158.4,at a heel strike,22.8
+session_2026-11-01_20-16-12,left,TO,93.483,-64.0,other foot,6.7
+session_2026-11-01_20-16-12,left,MS,93.723,198.3,at a heel strike,29.52
+session_2026-11-01_20-16-12,left,TO,94.513,-69.9,at a heel strike,24.97
+session_2026-11-01_20-16-12,left,TO,96.133,-108.0,at a heel strike,27.61
+session_2026-11-01_20-16-12,left,TO,96.773,-69.1,other foot,4.61
+session_2026-11-01_20-16-12,left,TO,97.593,-65.7,other foot,6.67
+session_2026-11-01_20-16-12,left,MS,97.813,221.0,at a heel strike,30.71
+session_2026-11-01_20-16-12,left,MS,98.653,163.3,at a heel strike,28.17
+session_2026-11-01_20-16-12,left,TO,99.243,-64.2,other foot,3.95
+session_2026-11-01_20-16-12,left,TO,100.173,-64.7,other foot,5.33
+session_2026-11-01_20-16-12,left,TO,101.143,-74.3,other foot,5.38
+session_2026-11-01_20-16-12,left,MS,101.433,163.0,at a heel strike,20.17
+session_2026-11-01_20-16-12,left,TO,102.063,-64.7,other foot,7.07
+session_2026-11-01_20-16-12,left,MS,102.343,192.7,at a heel strike,35.46
+session_2026-11-01_20-16-12,left,TO,103.003,-71.9,other foot,6.24
+session_2026-11-01_20-16-12,left,TO,103.943,-79.8,other foot,5.43
+session_2026-11-01_20-16-12,left,TO,104.813,-71.3,other foot,4.51
+session_2026-11-01_20-16-12,left,MS,105.083,151.3,at a heel strike,25.28
+session_2026-11-01_20-16-12,left,TO,108.383,-77.3,other foot,6.21
+session_2026-11-01_20-16-12,left,TO,109.183,-63.3,other foot,4.57
+session_2026-11-01_20-16-12,left,MS,109.483,171.5,at a heel strike,29.83
+session_2026-11-01_20-16-12,left,TO,110.083,-62.4,other foot,4.11
+session_2026-11-01_20-16-12,left,TO,111.003,-67.1,other foot,5.43
+session_2026-11-01_20-16-12,left,MS,111.283,179.1,at a heel strike,26.91
+session_2026-11-01_20-16-12,left,MS,113.893,154.9,at a heel strike,17.38
+session_2026-11-01_20-16-12,left,MS,117.353,156.2,at a heel strike,21.76
+session_2026-11-01_20-16-12,left,TO,118.183,-123.0,at a heel strike,26.25
+session_2026-11-01_20-16-12,left,MS,119.073,163.2,at a heel strike,20.92
+session_2026-11-01_20-16-12,left,TO,119.683,-64.4,other foot,7.01
+session_2026-11-01_20-16-12,left,TO,121.383,-64.2,other foot,4.39
+session_2026-11-01_20-16-12,left,TO,122.253,-69.8,other foot,3.1
+session_2026-11-01_20-16-12,left,TO,124.813,-77.2,other foot,4.91
+session_2026-11-01_20-16-12,left,TO,125.693,-68.9,other foot,6.08
+session_2026-11-01_20-16-12,left,TO,126.573,-69.0,other foot,3.71
+session_2026-11-01_20-16-12,left,MS,126.853,168.5,at a heel strike,19.39
+session_2026-11-01_20-16-12,left,TO,127.483,-69.3,other foot,3.92
+session_2026-11-01_20-16-12,left,MS,128.643,153.7,at a heel strike,22.59
+session_2026-11-01_20-16-12,left,TO,130.103,-64.1,other foot,4.14
+session_2026-11-01_20-16-12,left,TO,130.973,-60.8,other foot,4.46
+session_2026-11-01_20-16-12,left,TO,131.843,-74.1,other foot,4.79
+session_2026-11-01_20-16-12,left,TO,132.743,-64.3,other foot,3.33
+session_2026-11-01_20-16-12,left,TO,134.443,-68.3,other foot,2.88
+session_2026-11-01_20-16-12,left,TO,135.323,-75.4,other foot,2.26
+session_2026-11-01_20-16-12,left,TO,136.243,-83.2,other foot,3.83
+session_2026-11-01_20-16-12,left,TO,137.173,-69.5,other foot,3.01
+session_2026-11-01_20-16-12,left,TO,138.123,-64.2,other foot,4.62
+session_2026-11-01_20-20-09,right,TO,19.628,-78.5,at a heel strike,14.21
+session_2026-11-01_20-20-09,right,TO,20.928,-75.2,correct foot,8.41
+session_2026-11-01_20-20-09,right,TO,21.678,-76.8,at a heel strike,8.1
+session_2026-11-01_20-20-09,right,TO,22.718,-75.3,at a heel strike,11.54
+session_2026-11-01_20-20-09,right,TO,23.818,-108.8,at a heel strike,12.45
+session_2026-11-01_20-20-09,right,TO,26.938,-73.3,no gait event,10.3
+session_2026-11-01_20-20-09,right,TO,28.048,-64.9,at a heel strike,5.97
+session_2026-11-01_20-20-09,right,TO,29.478,-100.3,no gait event,8.82
+session_2026-11-01_20-20-09,right,TO,30.058,-77.6,at a heel strike,19.39
+session_2026-11-01_20-20-09,right,TO,35.378,-99.3,no gait event,7.06
+session_2026-11-01_20-20-09,right,TO,37.468,-67.3,no gait event,10.4
+session_2026-11-01_20-20-09,right,TO,40.568,-92.8,no gait event,3.53
+session_2026-11-01_20-20-09,right,TO,49.878,-94.3,no gait event,8.89
+session_2026-11-01_20-20-09,right,TO,50.938,-75.0,correct foot,7.67
+session_2026-11-01_20-20-09,right,TO,52.068,-73.4,correct foot,5.56
+session_2026-11-01_20-20-09,right,TO,55.418,-80.3,correct foot,8.64
+session_2026-11-01_20-20-09,right,TO,56.478,-69.1,correct foot,7.0
+session_2026-11-01_20-20-09,right,TO,57.668,-99.7,no gait event,5.44
+session_2026-11-01_20-20-09,right,TO,60.938,-119.8,no gait event,5.05
+session_2026-11-01_20-20-09,right,TO,61.908,-85.2,correct foot,4.88
+session_2026-11-01_20-20-09,right,TO,63.998,-74.4,correct foot,6.26
+session_2026-11-01_20-20-09,right,TO,72.258,-60.7,no gait event,8.93
+session_2026-11-01_20-20-09,right,TO,75.308,-93.7,correct foot,5.32
+session_2026-11-01_20-20-09,right,TO,84.248,-73.7,correct foot,10.14
+session_2026-11-01_20-20-09,right,TO,85.328,-104.8,no gait event,7.39
+session_2026-11-01_20-20-09,right,TO,90.308,-120.9,correct foot,8.01
+session_2026-11-01_20-20-09,right,TO,93.298,-134.5,no gait event,8.04
+session_2026-11-01_20-20-09,right,TO,93.988,-65.9,at a heel strike,12.07
+session_2026-11-01_20-20-09,right,TO,97.678,-88.8,correct foot,6.04
+session_2026-11-01_20-20-09,right,TO,102.198,-62.5,no gait event,8.23
+session_2026-11-01_20-20-09,right,TO,102.808,-64.2,at a heel strike,10.88
+session_2026-11-01_20-20-09,right,TO,105.418,-87.4,correct foot,7.2
+session_2026-11-01_20-20-09,right,TO,106.598,-95.6,no gait event,7.9
+session_2026-11-01_20-20-09,right,TO,107.648,-119.7,no gait event,8.98
+session_2026-11-01_20-20-09,right,TO,113.018,-144.6,no gait event,10.86
+session_2026-11-01_20-20-09,right,TO,116.008,-131.5,correct foot,7.06
+session_2026-11-01_20-20-09,left,TO,13.418,-76.3,other foot,4.43
+session_2026-11-01_20-20-09,left,TO,14.478,-94.1,other foot,7.31
+session_2026-11-01_20-20-09,left,TO,15.608,-83.2,other foot,4.58
+session_2026-11-01_20-20-09,left,TO,16.638,-84.0,other foot,3.53
+session_2026-11-01_20-20-09,left,TO,18.048,-89.9,at a heel strike,29.31
+session_2026-11-01_20-20-09,left,TO,18.738,-83.8,other foot,3.34
+session_2026-11-01_20-20-09,left,TO,19.808,-80.4,other foot,6.47
+session_2026-11-01_20-20-09,left,TO,20.788,-85.6,other foot,4.43
+session_2026-11-01_20-20-09,left,TO,21.858,-85.0,other foot,3.8
+session_2026-11-01_20-20-09,left,TO,22.918,-93.2,other foot,3.49
+session_2026-11-01_20-20-09,left,TO,24.018,-84.1,other foot,3.81
+session_2026-11-01_20-20-09,left,TO,25.048,-80.3,other foot,5.31
+session_2026-11-01_20-20-09,left,TO,26.108,-87.4,other foot,3.83
+session_2026-11-01_20-20-09,left,TO,27.178,-87.2,other foot,4.07
+session_2026-11-01_20-20-09,left,TO,28.258,-100.4,other foot,3.95
+session_2026-11-01_20-20-09,left,MS,28.588,166.9,at a heel strike,28.08
+session_2026-11-01_20-20-09,left,TO,29.268,-74.8,other foot,3.63
+session_2026-11-01_20-20-09,left,TO,30.248,-85.2,other foot,5.68
+session_2026-11-01_20-20-09,left,TO,31.238,-64.5,other foot,5.76
+session_2026-11-01_20-20-09,left,MS,31.568,204.8,at a heel strike,31.56
+session_2026-11-01_20-20-09,left,TO,32.188,-60.2,other foot,4.66
+session_2026-11-01_20-20-09,left,TO,33.138,-72.0,other foot,4.42
+session_2026-11-01_20-20-09,left,TO,34.128,-67.2,other foot,2.69
+session_2026-11-01_20-20-09,left,TO,35.148,-89.4,other foot,6.76
+session_2026-11-01_20-20-09,left,MS,35.478,164.8,at a heel strike,31.48
+session_2026-11-01_20-20-09,left,TO,36.168,-91.4,other foot,4.43
+session_2026-11-01_20-20-09,left,TO,37.238,-68.9,other foot,2.59
+session_2026-11-01_20-20-09,left,MS,37.588,154.6,at a heel strike,25.55
+session_2026-11-01_20-20-09,left,TO,38.278,-60.3,other foot,5.03
+session_2026-11-01_20-20-09,left,MS,38.628,153.9,at a heel strike,32.24
+session_2026-11-01_20-20-09,left,TO,39.298,-93.1,other foot,3.17
+session_2026-11-01_20-20-09,left,TO,40.318,-73.8,other foot,5.96
+session_2026-11-01_20-20-09,left,MS,40.648,182.1,at a heel strike,36.85
+session_2026-11-01_20-20-09,left,TO,41.318,-83.4,other foot,2.6
+session_2026-11-01_20-20-09,left,TO,42.348,-74.9,other foot,4.75
+session_2026-11-01_20-20-09,left,MS,42.688,159.7,at a heel strike,27.97
+session_2026-11-01_20-20-09,left,TO,43.328,-60.7,other foot,3.56
+session_2026-11-01_20-20-09,left,TO,44.308,-84.3,other foot,3.96
+session_2026-11-01_20-20-09,left,TO,45.378,-81.2,other foot,3.66
+session_2026-11-01_20-20-09,left,TO,46.448,-91.5,other foot,4.08
+session_2026-11-01_20-20-09,left,TO,47.498,-71.6,other foot,3.5
+session_2026-11-01_20-20-09,left,TO,48.608,-90.9,other foot,3.81
+session_2026-11-01_20-20-09,left,TO,49.618,-85.8,other foot,4.87
+session_2026-11-01_20-20-09,left,TO,50.768,-90.7,other foot,4.6
+session_2026-11-01_20-20-09,left,TO,51.918,-72.1,other foot,4.23
+session_2026-11-01_20-20-09,left,TO,53.078,-61.8,other foot,3.14
+session_2026-11-01_20-20-09,left,TO,54.178,-68.4,other foot,3.44
+session_2026-11-01_20-20-09,left,TO,55.298,-84.8,other foot,2.68
+session_2026-11-01_20-20-09,left,TO,56.428,-62.8,other foot,4.28
+session_2026-11-01_20-20-09,left,TO,57.468,-75.2,other foot,4.27
+session_2026-11-01_20-20-09,left,TO,58.538,-73.7,other foot,3.94
+session_2026-11-01_20-20-09,left,TO,59.698,-92.0,other foot,5.58
+session_2026-11-01_20-20-09,left,MS,60.028,159.2,at a heel strike,18.59
+session_2026-11-01_20-20-09,left,TO,60.708,-79.1,other foot,3.51
+session_2026-11-01_20-20-09,left,MS,61.078,168.4,at a heel strike,22.71
+session_2026-11-01_20-20-09,left,TO,61.758,-62.9,other foot,2.52
+session_2026-11-01_20-20-09,left,MS,62.088,150.5,at a heel strike,29.01
+session_2026-11-01_20-20-09,left,TO,63.868,-80.5,other foot,5.73
+session_2026-11-01_20-20-09,left,MS,64.188,156.5,at a heel strike,24.57
+session_2026-11-01_20-20-09,left,TO,64.858,-82.6,other foot,4.29
+session_2026-11-01_20-20-09,left,TO,65.898,-70.9,other foot,6.83
+session_2026-11-01_20-20-09,left,TO,66.928,-78.2,other foot,3.25
+session_2026-11-01_20-20-09,left,TO,67.938,-60.2,other foot,3.2
+session_2026-11-01_20-20-09,left,TO,68.998,-70.8,other foot,3.19
+session_2026-11-01_20-20-09,left,TO,71.108,-76.4,other foot,5.83
+session_2026-11-01_20-20-09,left,TO,72.078,-75.1,other foot,2.87
+session_2026-11-01_20-20-09,left,TO,73.118,-68.1,other foot,3.33
+session_2026-11-01_20-20-09,left,TO,74.138,-83.5,other foot,5.22
+session_2026-11-01_20-20-09,left,MS,74.468,198.0,at a heel strike,23.75
+session_2026-11-01_20-20-09,left,TO,75.128,-72.4,other foot,4.59
+session_2026-11-01_20-20-09,left,MS,75.468,165.3,at a heel strike,25.54
+session_2026-11-01_20-20-09,left,TO,76.138,-93.8,other foot,4.94
+session_2026-11-01_20-20-09,left,MS,76.468,179.6,at a heel strike,35.43
+session_2026-11-01_20-20-09,left,TO,77.118,-100.7,other foot,4.31
+session_2026-11-01_20-20-09,left,TO,78.138,-90.7,other foot,4.65
+session_2026-11-01_20-20-09,left,MS,78.508,153.4,at a heel strike,21.56
+session_2026-11-01_20-20-09,left,TO,79.128,-78.6,other foot,4.45
+session_2026-11-01_20-20-09,left,MS,79.498,210.2,at a heel strike,24.39
+session_2026-11-01_20-20-09,left,TO,80.148,-92.9,other foot,5.06
+session_2026-11-01_20-20-09,left,MS,80.489,178.9,at a heel strike,39.21
+session_2026-11-01_20-20-09,left,TO,81.148,-85.4,other foot,6.57
+session_2026-11-01_20-20-09,left,MS,81.458,213.0,at a heel strike,29.72
+session_2026-11-01_20-20-09,left,TO,82.078,-68.5,other foot,3.23
+session_2026-11-01_20-20-09,left,TO,83.128,-77.7,other foot,5.67
+session_2026-11-01_20-20-09,left,TO,84.108,-87.6,other foot,4.96
+session_2026-11-01_20-20-09,left,TO,85.138,-80.8,other foot,4.37
+session_2026-11-01_20-20-09,left,TO,86.148,-65.2,other foot,5.01
+session_2026-11-01_20-20-09,left,TO,87.188,-78.5,other foot,6.05
+session_2026-11-01_20-20-09,left,TO,88.168,-73.3,other foot,2.99
+session_2026-11-01_20-20-09,left,TO,89.148,-84.8,other foot,4.02
+session_2026-11-01_20-20-09,left,MS,89.478,153.3,at a heel strike,18.0
+session_2026-11-01_20-20-09,left,TO,90.128,-81.4,other foot,3.84
+session_2026-11-01_20-20-09,left,TO,91.138,-75.1,other foot,4.4
+session_2026-11-01_20-20-09,left,MS,91.468,167.5,at a heel strike,22.0
+session_2026-11-01_20-20-09,left,TO,92.108,-86.7,other foot,2.36
+session_2026-11-01_20-20-09,left,TO,93.108,-72.4,other foot,4.28
+session_2026-11-01_20-20-09,left,TO,94.238,-62.4,other foot,4.84
+session_2026-11-01_20-20-09,left,MS,94.558,173.2,at a heel strike,29.28
+session_2026-11-01_20-20-09,left,TO,95.278,-71.1,other foot,3.51
+session_2026-11-01_20-20-09,left,TO,96.328,-70.8,other foot,4.46
+session_2026-11-01_20-20-09,left,TO,98.618,-82.7,other foot,5.74
+session_2026-11-01_20-20-09,left,MS,98.968,165.4,at a heel strike,29.19
+session_2026-11-01_20-20-09,left,TO,99.788,-75.1,other foot,7.04
+session_2026-11-01_20-20-09,left,TO,100.878,-68.0,other foot,3.12
+session_2026-11-01_20-20-09,left,TO,101.968,-90.6,other foot,5.28
+session_2026-11-01_20-20-09,left,TO,102.978,-79.0,other foot,6.59
+session_2026-11-01_20-20-09,left,TO,104.118,-77.7,other foot,5.53
+session_2026-11-01_20-20-09,left,MS,104.478,168.3,at a heel strike,23.49
+session_2026-11-01_20-20-09,left,TO,105.268,-67.3,other foot,4.41
+session_2026-11-01_20-20-09,left,MS,105.618,189.3,at a heel strike,38.77
+session_2026-11-01_20-20-09,left,TO,106.428,-69.6,other foot,5.98
+session_2026-11-01_20-20-09,left,MS,106.738,179.0,at a heel strike,26.77
+session_2026-11-01_20-20-09,left,TO,107.438,-60.1,other foot,3.65
+session_2026-11-01_20-20-09,left,MS,107.788,172.1,at a heel strike,30.89
+session_2026-11-01_20-20-09,left,TO,108.458,-60.8,other foot,3.01
+session_2026-11-01_20-20-09,left,TO,109.598,-65.6,other foot,4.53
+session_2026-11-01_20-20-09,left,TO,110.978,-66.3,at a heel strike,13.18
+session_2026-11-01_20-20-09,left,TO,111.738,-64.4,other foot,4.58
+session_2026-11-01_20-20-09,left,MS,112.068,166.5,at a heel strike,26.88
+session_2026-11-01_20-20-09,left,TO,112.748,-75.8,other foot,3.06
+session_2026-11-01_20-20-09,left,MS,113.078,176.1,at a heel strike,33.25
+session_2026-11-01_20-20-09,left,TO,113.858,-78.9,other foot,6.03
+session_2026-11-01_20-20-09,left,TO,114.868,-68.9,other foot,4.35
+session_2026-11-01_20-20-09,left,TO,115.918,-87.2,other foot,6.83
+session_2026-11-01_20-20-09,left,TO,116.948,-75.5,other foot,3.51
+session_2026-11-01_20-20-09,left,TO,118.028,-81.2,other foot,5.32
+session_2026-11-01_20-20-09,left,MS,118.348,160.2,at a heel strike,21.95
+session_2026-11-01_20-20-09,left,TO,119.088,-85.6,other foot,4.18
+session_2026-11-01_20-23-15,right,TO,21.617,-61.3,other foot,6.65
+session_2026-11-01_20-23-15,right,TO,22.897,-74.9,at a heel strike,7.83
+session_2026-11-01_20-23-15,right,TO,24.587,-64.5,other foot,4.63
+session_2026-11-01_20-23-15,right,TO,38.637,-72.0,at a heel strike,12.9
+session_2026-11-01_20-23-15,right,TO,40.527,-62.6,at a heel strike,14.32
+session_2026-11-01_20-23-15,right,TO,76.907,-64.8,other foot,6.01
+session_2026-11-01_20-23-15,right,TO,90.787,-69.6,other foot,7.96
+session_2026-11-01_20-23-15,right,TO,110.417,-81.6,other foot,5.09
+session_2026-11-01_20-23-15,right,TO,118.267,-88.7,other foot,9.31
+session_2026-11-01_20-23-15,left,TO,15.047,-62.9,other foot,4.74
+session_2026-11-01_20-23-15,left,TO,16.057,-69.5,other foot,3.44
+session_2026-11-01_20-23-15,left,TO,18.067,-88.0,other foot,7.01
+session_2026-11-01_20-23-15,left,MS,18.307,204.2,at a heel strike,26.55
+session_2026-11-01_20-23-15,left,TO,19.057,-73.0,other foot,5.1
+session_2026-11-01_20-23-15,left,TO,20.117,-69.3,other foot,3.32
+session_2026-11-01_20-23-15,left,TO,21.097,-73.3,other foot,4.58
+session_2026-11-01_20-23-15,left,TO,22.127,-76.8,other foot,5.82
+session_2026-11-01_20-23-15,left,TO,23.137,-68.6,other foot,3.85
+session_2026-11-01_20-23-15,left,TO,24.087,-65.9,other foot,2.73
+session_2026-11-01_20-23-15,left,TO,25.027,-61.4,other foot,2.56
+session_2026-11-01_20-23-15,left,TO,27.267,-74.6,at a heel strike,22.55
+session_2026-11-01_20-23-15,left,TO,27.957,-71.2,other foot,4.53
+session_2026-11-01_20-23-15,left,TO,28.937,-66.7,other foot,3.98
+session_2026-11-01_20-23-15,left,TO,29.957,-60.0,other foot,3.56
+session_2026-11-01_20-23-15,left,TO,32.017,-62.5,other foot,2.43
+session_2026-11-01_20-23-15,left,TO,33.157,-76.3,other foot,5.31
+session_2026-11-01_20-23-15,left,MS,33.437,159.1,at a heel strike,20.88
+session_2026-11-01_20-23-15,left,TO,34.157,-75.1,other foot,5.44
+session_2026-11-01_20-23-15,left,TO,35.067,-80.3,other foot,5.74
+session_2026-11-01_20-23-15,left,MS,36.297,152.4,at a heel strike,22.01
+session_2026-11-01_20-23-15,left,TO,37.937,-68.3,other foot,5.65
+session_2026-11-01_20-23-15,left,MS,38.207,166.1,at a heel strike,23.58
+session_2026-11-01_20-23-15,left,TO,38.828,-64.5,other foot,4.07
+session_2026-11-01_20-23-15,left,TO,39.727,-63.0,other foot,3.16
+session_2026-11-01_20-23-15,left,TO,40.707,-60.1,other foot,3.55
+session_2026-11-01_20-23-15,left,MS,41.017,164.1,at a heel strike,18.47
+session_2026-11-01_20-23-15,left,TO,41.717,-73.6,other foot,5.19
+session_2026-11-01_20-23-15,left,TO,42.697,-74.2,other foot,4.13
+session_2026-11-01_20-23-15,left,MS,43.007,160.0,at a heel strike,25.38
+session_2026-11-01_20-23-15,left,TO,43.667,-62.2,other foot,3.48
+session_2026-11-01_20-23-15,left,TO,44.607,-70.6,other foot,3.74
+session_2026-11-01_20-23-15,left,TO,45.547,-66.7,other foot,4.06
+session_2026-11-01_20-23-15,left,MS,45.817,169.6,at a heel strike,34.31
+session_2026-11-01_20-23-15,left,TO,46.527,-89.9,other foot,5.61
+session_2026-11-01_20-23-15,left,TO,47.457,-83.3,other foot,5.14
+session_2026-11-01_20-23-15,left,MS,47.787,151.4,at a heel strike,23.17
+session_2026-11-01_20-23-15,left,TO,48.457,-65.1,other foot,4.5
+session_2026-11-01_20-23-15,left,TO,49.577,-66.5,other foot,4.13
+session_2026-11-01_20-23-15,left,TO,50.537,-67.1,other foot,3.51
+session_2026-11-01_20-23-15,left,TO,51.627,-60.8,other foot,3.74
+session_2026-11-01_20-23-15,left,TO,52.757,-69.8,other foot,5.64
+session_2026-11-01_20-23-15,left,MS,53.047,153.7,at a heel strike,28.23
+session_2026-11-01_20-23-15,left,TO,53.807,-69.0,other foot,3.95
+session_2026-11-01_20-23-15,left,TO,54.917,-63.2,other foot,4.62
+session_2026-11-01_20-23-15,left,TO,55.927,-70.0,other foot,5.05
+session_2026-11-01_20-23-15,left,TO,56.977,-74.9,other foot,4.58
+session_2026-11-01_20-23-15,left,TO,57.957,-66.9,other foot,2.74
+session_2026-11-01_20-23-15,left,TO,59.137,-67.1,other foot,4.56
+session_2026-11-01_20-23-15,left,TO,60.127,-65.3,other foot,3.99
+session_2026-11-01_20-23-15,left,TO,61.187,-64.5,other foot,3.2
+session_2026-11-01_20-23-15,left,MS,61.507,159.5,at a heel strike,18.18
+session_2026-11-01_20-23-15,left,TO,62.247,-68.3,other foot,4.54
+session_2026-11-01_20-23-15,left,TO,63.287,-69.8,other foot,5.97
+session_2026-11-01_20-23-15,left,TO,64.267,-73.5,other foot,4.21
+session_2026-11-01_20-23-15,left,TO,65.267,-80.3,other foot,5.11
+session_2026-11-01_20-23-15,left,TO,66.257,-78.2,other foot,5.22
+session_2026-11-01_20-23-15,left,TO,67.247,-81.6,other foot,5.49
+session_2026-11-01_20-23-15,left,TO,68.277,-61.3,other foot,3.19
+session_2026-11-01_20-23-15,left,TO,69.317,-63.3,other foot,3.65
+session_2026-11-01_20-23-15,left,TO,70.337,-93.0,other foot,5.83
+session_2026-11-01_20-23-15,left,MS,70.597,182.5,at a heel strike,28.82
+session_2026-11-01_20-23-15,left,TO,71.327,-65.6,other foot,4.74
+session_2026-11-01_20-23-15,left,TO,72.347,-77.1,other foot,4.24
+session_2026-11-01_20-23-15,left,TO,73.397,-73.6,other foot,7.76
+session_2026-11-01_20-23-15,left,MS,73.647,151.5,at a heel strike,29.69
+session_2026-11-01_20-23-15,left,TO,74.337,-73.1,other foot,5.2
+session_2026-11-01_20-23-15,left,MS,74.647,169.5,at a heel strike,24.3
+session_2026-11-01_20-23-15,left,TO,75.397,-74.2,other foot,6.67
+session_2026-11-01_20-23-15,left,MS,75.627,187.4,at a heel strike,25.99
+session_2026-11-01_20-23-15,left,TO,76.367,-67.5,other foot,2.82
+session_2026-11-01_20-23-15,left,TO,77.357,-82.2,other foot,5.53
+session_2026-11-01_20-23-15,left,TO,78.347,-89.4,other foot,6.86
+session_2026-11-01_20-23-15,left,TO,79.297,-70.1,other foot,4.56
+session_2026-11-01_20-23-15,left,TO,80.337,-65.4,other foot,3.24
+session_2026-11-01_20-23-15,left,MS,80.607,157.7,at a heel strike,18.64
+session_2026-11-01_20-23-15,left,TO,81.327,-88.0,other foot,5.97
+session_2026-11-01_20-23-15,left,TO,82.337,-84.5,other foot,7.11
+session_2026-11-01_20-23-15,left,MS,82.577,157.3,at a heel strike,16.83
+session_2026-11-01_20-23-15,left,TO,83.327,-71.2,other foot,5.82
+session_2026-11-01_20-23-15,left,TO,84.297,-70.3,other foot,2.89
+session_2026-11-01_20-23-15,left,TO,85.347,-71.1,other foot,4.24
+session_2026-11-01_20-23-15,left,TO,86.397,-67.1,other foot,4.96
+session_2026-11-01_20-23-15,left,MS,86.667,156.0,at a heel strike,25.13
+session_2026-11-01_20-23-15,left,TO,87.417,-78.8,other foot,5.12
+session_2026-11-01_20-23-15,left,MS,87.687,155.4,at a heel strike,31.62
+session_2026-11-01_20-23-15,left,TO,88.437,-78.5,other foot,4.88
+session_2026-11-01_20-23-15,left,TO,89.327,-70.9,other foot,4.57
+session_2026-11-01_20-23-15,left,MS,89.567,169.2,at a heel strike,15.41
+session_2026-11-01_20-23-15,left,TO,90.217,-63.4,other foot,4.22
+session_2026-11-01_20-23-15,left,TO,91.217,-74.1,other foot,4.93
+session_2026-11-01_20-23-15,left,MS,91.477,154.6,at a heel strike,21.99
+session_2026-11-01_20-23-15,left,TO,92.137,-68.4,other foot,5.78
+session_2026-11-01_20-23-15,left,TO,93.197,-74.1,other foot,6.87
+session_2026-11-01_20-23-15,left,TO,94.127,-71.0,other foot,4.5
+session_2026-11-01_20-23-15,left,MS,94.397,157.3,at a heel strike,29.32
+session_2026-11-01_20-23-15,left,TO,95.197,-97.0,other foot,5.83
+session_2026-11-01_20-23-15,left,TO,96.137,-71.2,other foot,4.48
+session_2026-11-01_20-23-15,left,TO,97.067,-85.4,other foot,7.21
+session_2026-11-01_20-23-15,left,TO,98.027,-74.2,other foot,4.96
+session_2026-11-01_20-23-15,left,MS,98.307,170.8,at a heel strike,20.05
+session_2026-11-01_20-23-15,left,TO,98.957,-66.3,other foot,3.45
+session_2026-11-01_20-23-15,left,TO,99.847,-66.6,other foot,5.31
+session_2026-11-01_20-23-15,left,TO,100.747,-76.5,other foot,5.53
+session_2026-11-01_20-23-15,left,TO,101.637,-72.1,other foot,3.49
+session_2026-11-01_20-23-15,left,MS,101.927,159.3,at a heel strike,18.83
+session_2026-11-01_20-23-15,left,TO,102.707,-87.4,other foot,5.7
+session_2026-11-01_20-23-15,left,TO,103.777,-73.5,other foot,5.31
+session_2026-11-01_20-23-15,left,TO,104.747,-71.2,other foot,4.7
+session_2026-11-01_20-23-15,left,TO,105.747,-63.0,other foot,3.2
+session_2026-11-01_20-23-15,left,TO,106.747,-76.0,other foot,3.91
+session_2026-11-01_20-23-15,left,TO,107.817,-61.4,other foot,4.67
+session_2026-11-01_20-23-15,left,MS,108.097,163.2,at a heel strike,19.63
+session_2026-11-01_20-23-15,left,TO,108.807,-71.9,other foot,5.26
+session_2026-11-01_20-23-15,left,MS,109.097,150.6,at a heel strike,25.11
+session_2026-11-01_20-23-15,left,TO,109.817,-78.1,other foot,3.48
+session_2026-11-01_20-23-15,left,TO,110.907,-70.2,other foot,5.59
+session_2026-11-01_20-23-15,left,TO,112.037,-64.0,other foot,5.03
+session_2026-11-01_20-23-15,left,TO,113.077,-74.1,other foot,4.28
+session_2026-11-01_20-23-15,left,TO,114.247,-67.7,other foot,5.54
+session_2026-11-01_20-23-15,left,TO,115.387,-80.2,other foot,4.5
+session_2026-11-01_20-23-15,left,TO,116.567,-66.2,other foot,6.04
+session_2026-11-01_20-23-15,left,TO,117.667,-62.2,other foot,3.16
+session_2026-11-01_20-23-15,left,TO,118.797,-80.3,other foot,5.31
+session_2026-11-01_20-23-15,left,TO,120.007,-84.0,other foot,3.69
+session_2026-11-01_20-23-15,left,TO,121.157,-74.1,other foot,5.78
+session_2026-11-01_20-27-10,right,MS,35.666,151.5,at a heel strike,17.06
+session_2026-11-01_20-27-10,right,TO,37.586,-67.7,other foot,4.0
+session_2026-11-01_20-27-10,right,TO,40.996,-62.7,other foot,5.15
+session_2026-11-01_20-27-10,right,TO,42.046,-62.9,other foot,2.91
+session_2026-11-01_20-27-10,right,TO,43.166,-62.1,other foot,2.98
+session_2026-11-01_20-27-10,right,TO,47.466,-69.4,other foot,3.46
+session_2026-11-01_20-27-10,right,TO,48.506,-62.3,other foot,4.5
+session_2026-11-01_20-27-10,right,TO,50.596,-60.3,other foot,3.39
+session_2026-11-01_20-27-10,right,TO,54.806,-61.7,other foot,3.22
+session_2026-11-01_20-27-10,right,TO,55.866,-66.3,other foot,4.64
+session_2026-11-01_20-27-10,right,TO,56.956,-75.9,other foot,4.5
+session_2026-11-01_20-27-10,right,TO,58.006,-67.7,other foot,4.03
+session_2026-11-01_20-27-10,right,TO,60.196,-81.2,other foot,4.11
+session_2026-11-01_20-27-10,right,TO,61.226,-80.3,other foot,5.34
+session_2026-11-01_20-27-10,right,TO,62.386,-102.0,other foot,12.01
+session_2026-11-01_20-27-10,right,TO,64.366,-60.5,other foot,6.88
+session_2026-11-01_20-27-10,right,TO,65.276,-89.4,other foot,8.54
+session_2026-11-01_20-27-10,right,TO,66.356,-118.7,other foot,17.85
+session_2026-11-01_20-27-10,right,MS,66.646,162.1,other foot,26.97
+session_2026-11-01_20-27-10,right,TO,67.366,-92.2,other foot,18.18
+session_2026-11-01_20-27-10,right,TO,68.446,-103.7,other foot,15.46
+session_2026-11-01_20-27-10,right,MS,68.826,173.0,other foot,29.72
+session_2026-11-01_20-27-10,right,TO,69.596,-124.3,other foot,11.61
+session_2026-11-01_20-27-10,right,MS,69.826,164.6,other foot,24.65
+session_2026-11-01_20-27-10,right,TO,70.666,-141.8,other foot,15.92
+session_2026-11-01_20-27-10,right,MS,70.936,153.2,at a heel strike,32.31
+session_2026-11-01_20-27-10,right,TO,71.666,-147.1,other foot,14.69
+session_2026-11-01_20-27-10,right,MS,71.966,230.3,at a heel strike,40.9
+session_2026-11-01_20-27-10,right,TO,72.706,-91.5,other foot,8.68
+session_2026-11-01_20-27-10,right,MS,73.006,177.9,at a heel strike,26.7
+session_2026-11-01_20-27-10,right,TO,73.646,-94.0,other foot,15.15
+session_2026-11-01_20-27-10,right,MS,73.936,177.1,at a heel strike,28.63
+session_2026-11-01_20-27-10,right,TO,74.656,-100.8,other foot,17.2
+session_2026-11-01_20-27-10,right,MS,74.906,178.4,other foot,25.47
+session_2026-11-01_20-27-10,left,TO,20.196,-129.1,at a heel strike,20.34
+session_2026-11-01_20-27-10,left,TO,21.236,-139.9,at a heel strike,25.66
+session_2026-11-01_20-27-10,left,TO,22.286,-150.4,at a heel strike,19.14
+session_2026-11-01_20-27-10,left,TO,23.316,-76.6,at a heel strike,8.38
+session_2026-11-01_20-27-10,left,TO,24.396,-115.3,no gait event,13.66
+session_2026-11-01_20-27-10,left,TO,25.476,-130.3,at a heel strike,17.37
+session_2026-11-01_20-27-10,left,TO,26.536,-63.0,no gait event,15.27
+session_2026-11-01_20-27-10,left,TO,27.666,-152.7,no gait event,18.42
+session_2026-11-01_20-27-10,left,TO,28.796,-144.0,at a heel strike,18.33
+session_2026-11-01_20-27-10,left,TO,29.866,-119.5,no gait event,22.61
+session_2026-11-01_20-27-10,left,TO,31.006,-120.5,at a heel strike,14.31
+session_2026-11-01_20-27-10,left,TO,32.046,-156.2,at a heel strike,19.1
+session_2026-11-01_20-27-10,left,TO,33.056,-98.3,at a heel strike,9.78
+session_2026-11-01_20-27-10,left,TO,34.136,-138.4,no gait event,23.25
+session_2026-11-01_20-27-10,left,TO,35.196,-91.7,at a heel strike,13.16
+session_2026-11-01_20-27-10,left,TO,36.256,-75.6,no gait event,9.22
+session_2026-11-01_20-27-10,left,TO,37.356,-141.2,at a heel strike,20.47
+session_2026-11-01_20-27-10,left,TO,38.486,-95.3,no gait event,20.46
+session_2026-11-01_20-27-10,left,TO,39.646,-89.1,at a heel strike,9.38
+session_2026-11-01_20-27-10,left,TO,40.716,-117.5,no gait event,21.11
+session_2026-11-01_20-27-10,left,TO,41.826,-135.8,at a heel strike,13.03
+session_2026-11-01_20-27-10,left,TO,42.906,-62.4,no gait event,20.59
+session_2026-11-01_20-27-10,left,TO,43.986,-108.0,at a heel strike,19.49
+session_2026-11-01_20-27-10,left,TO,45.056,-112.0,no gait event,12.55
+session_2026-11-01_20-27-10,left,TO,46.176,-113.4,at a heel strike,20.26
+session_2026-11-01_20-27-10,left,TO,47.216,-122.3,no gait event,18.48
+session_2026-11-01_20-27-10,left,TO,48.306,-175.9,at a heel strike,19.69
+session_2026-11-01_20-27-10,left,TO,49.316,-151.7,at a heel strike,21.65
+session_2026-11-01_20-27-10,left,TO,50.366,-173.0,at a heel strike,21.94
+session_2026-11-01_20-27-10,left,TO,51.416,-150.3,at a heel strike,22.79
+session_2026-11-01_20-27-10,left,TO,52.486,-100.8,at a heel strike,20.02
+session_2026-11-01_20-27-10,left,TO,53.546,-159.8,no gait event,19.95
+session_2026-11-01_20-27-10,left,TO,54.586,-130.6,at a heel strike,25.88
+session_2026-11-01_20-27-10,left,TO,55.686,-179.4,at a heel strike,35.55
+session_2026-11-01_20-27-10,left,TO,56.706,-156.3,at a heel strike,25.45
+session_2026-11-01_20-27-10,left,TO,57.796,-147.4,at a heel strike,22.05
+session_2026-11-01_20-27-10,left,TO,58.826,-129.4,no gait event,20.14
+session_2026-11-01_20-27-10,left,TO,59.956,-131.6,no gait event,17.95
+session_2026-11-01_20-27-10,left,TO,61.006,-146.4,at a heel strike,21.65
+session_2026-11-01_20-27-10,left,TO,62.126,-69.4,at a heel strike,4.84
+session_2026-11-01_20-27-10,left,TO,63.176,-119.6,at a heel strike,16.68
+session_2026-11-01_20-27-10,left,TO,64.106,-93.8,at a heel strike,16.59
+session_2026-11-01_20-27-10,left,TO,66.176,-96.3,at a heel strike,9.76
+session_2026-11-01_20-27-10,left,TO,67.186,-106.0,at a heel strike,13.76
+session_2026-11-01_20-27-10,left,TO,68.266,-144.7,at a heel strike,17.32
+session_2026-11-01_20-27-10,left,TO,69.346,-132.3,at a heel strike,20.16
+session_2026-11-01_20-27-10,left,TO,70.416,-199.8,at a heel strike,19.45
+session_2026-11-01_20-27-10,left,TO,71.466,-168.4,at a heel strike,20.84
+session_2026-11-01_20-27-10,left,TO,72.486,-106.8,at a heel strike,12.57
+session_2026-11-01_20-27-10,left,TO,73.466,-160.0,at a heel strike,15.65
+session_2026-11-01_20-27-10,left,TO,74.466,-77.9,at a heel strike,7.68
+session_2026-11-01_20-27-10,left,TO,75.436,-189.7,at a heel strike,25.08
+session_2026-11-01_20-29-33,right,TO,20.615,-74.2,at a heel strike,10.36
+session_2026-11-01_20-29-33,right,TO,21.645,-65.4,at a heel strike,8.82
+session_2026-11-01_20-29-33,right,TO,22.725,-74.9,at a heel strike,10.66
+session_2026-11-01_20-29-33,right,TO,23.775,-85.0,at a heel strike,9.16
+session_2026-11-01_20-29-33,right,TO,24.845,-97.4,at a heel strike,9.2
+session_2026-11-01_20-29-33,right,TO,25.835,-80.6,at a heel strike,9.46
+session_2026-11-01_20-29-33,right,TO,26.905,-90.9,at a heel strike,7.67
+session_2026-11-01_20-29-33,right,TO,27.995,-117.7,at a heel strike,15.07
+session_2026-11-01_20-29-33,right,TO,29.215,-75.8,at a heel strike,6.92
+session_2026-11-01_20-29-33,right,TO,30.355,-110.7,at a heel strike,12.14
+session_2026-11-01_20-29-33,right,TO,31.315,-88.5,other foot,10.62
+session_2026-11-01_20-29-33,right,TO,32.725,-97.0,at a heel strike,11.66
+session_2026-11-01_20-29-33,right,TO,35.265,-72.5,at a heel strike,5.79
+session_2026-11-01_20-29-33,right,TO,36.395,-82.3,at a heel strike,7.24
+session_2026-11-01_20-29-33,right,TO,37.625,-70.0,at a heel strike,12.49
+session_2026-11-01_20-29-33,right,TO,38.875,-89.7,at a heel strike,8.04
+session_2026-11-01_20-29-33,right,TO,40.075,-71.9,at a heel strike,5.09
+session_2026-11-01_20-29-33,right,TO,41.185,-75.6,at a heel strike,7.24
+session_2026-11-01_20-29-33,right,TO,42.345,-74.2,at a heel strike,10.0
+session_2026-11-01_20-29-33,right,TO,43.485,-95.0,at a heel strike,8.61
+session_2026-11-01_20-29-33,right,TO,44.625,-60.5,at a heel strike,9.22
+session_2026-11-01_20-29-33,right,TO,45.715,-73.4,at a heel strike,10.17
+session_2026-11-01_20-29-33,right,TO,46.785,-81.3,at a heel strike,7.97
+session_2026-11-01_20-29-33,right,TO,47.925,-89.9,at a heel strike,9.03
+session_2026-11-01_20-29-33,right,TO,49.105,-93.1,at a heel strike,8.02
+session_2026-11-01_20-29-33,right,TO,50.135,-75.4,at a heel strike,6.5
+session_2026-11-01_20-29-33,right,TO,51.305,-65.9,at a heel strike,6.85
+session_2026-11-01_20-29-33,right,TO,52.425,-83.1,at a heel strike,7.42
+session_2026-11-01_20-29-33,right,TO,53.565,-95.0,at a heel strike,14.64
+session_2026-11-01_20-29-33,right,TO,54.725,-99.2,at a heel strike,9.09
+session_2026-11-01_20-29-33,right,TO,55.725,-89.8,at a heel strike,8.63
+session_2026-11-01_20-29-33,right,TO,56.805,-77.6,at a heel strike,7.43
+session_2026-11-01_20-29-33,right,TO,57.845,-93.1,at a heel strike,5.46
+session_2026-11-01_20-29-33,right,TO,58.955,-72.7,at a heel strike,6.61
+session_2026-11-01_20-29-33,right,TO,59.985,-76.4,at a heel strike,8.1
+session_2026-11-01_20-29-33,right,TO,60.975,-69.4,at a heel strike,6.06
+session_2026-11-01_20-29-33,right,TO,62.025,-73.0,at a heel strike,6.38
+session_2026-11-01_20-29-33,right,TO,63.085,-79.1,at a heel strike,6.44
+session_2026-11-01_20-29-33,right,TO,64.205,-69.6,at a heel strike,5.79
+session_2026-11-01_20-29-33,right,TO,64.975,-62.8,other foot,7.32
+session_2026-11-01_20-29-33,right,TO,66.435,-92.2,at a heel strike,7.97
+session_2026-11-01_20-29-33,right,TO,67.635,-64.6,at a heel strike,8.78
+session_2026-11-01_20-29-33,right,TO,68.755,-77.7,at a heel strike,8.68
+session_2026-11-01_20-29-33,right,TO,69.875,-98.5,at a heel strike,9.4
+session_2026-11-01_20-29-33,right,TO,71.015,-90.6,at a heel strike,9.37
+session_2026-11-01_20-29-33,right,TO,72.105,-99.3,at a heel strike,9.25
+session_2026-11-01_20-29-33,right,TO,73.155,-106.4,at a heel strike,8.37
+session_2026-11-01_20-29-33,right,TO,74.305,-85.8,at a heel strike,6.79
+session_2026-11-01_20-29-33,right,TO,75.455,-71.6,at a heel strike,5.26
+session_2026-11-01_20-29-33,right,TO,76.545,-81.6,at a heel strike,9.91
+session_2026-11-01_20-29-33,right,TO,77.655,-95.6,at a heel strike,7.67
+session_2026-11-01_20-29-33,right,TO,78.755,-96.1,at a heel strike,11.78
+session_2026-11-01_20-29-33,right,TO,79.885,-73.6,at a heel strike,6.37
+session_2026-11-01_20-29-33,right,TO,81.025,-81.0,at a heel strike,11.04
+session_2026-11-01_20-29-33,right,TO,81.995,-72.1,other foot,5.83
+session_2026-11-01_20-29-33,right,TO,83.405,-82.3,at a heel strike,10.33
+session_2026-11-01_20-29-33,right,TO,84.485,-78.7,at a heel strike,8.83
+session_2026-11-01_20-29-33,right,TO,85.565,-102.5,at a heel strike,6.84
+session_2026-11-01_20-29-33,right,TO,86.785,-72.7,at a heel strike,7.16
+session_2026-11-01_20-29-33,right,TO,87.895,-96.6,at a heel strike,10.49
+session_2026-11-01_20-29-33,right,TO,89.045,-61.4,at a heel strike,2.94
+session_2026-11-01_20-29-33,right,TO,90.115,-96.8,at a heel strike,7.68
+session_2026-11-01_20-29-33,right,TO,91.215,-91.0,at a heel strike,7.39
+session_2026-11-01_20-29-33,right,TO,92.415,-74.5,at a heel strike,6.49
+session_2026-11-01_20-29-33,right,TO,93.595,-90.6,at a heel strike,13.53
+session_2026-11-01_20-29-33,right,TO,96.025,-83.1,at a heel strike,6.86
+session_2026-11-01_20-29-33,right,TO,97.205,-65.0,at a heel strike,8.74
+session_2026-11-01_20-29-33,right,TO,98.305,-83.6,at a heel strike,9.47
+session_2026-11-01_20-29-33,right,TO,99.505,-82.2,at a heel strike,5.34
+session_2026-11-01_20-29-33,right,TO,100.515,-67.3,at a heel strike,4.94
+session_2026-11-01_20-29-33,right,TO,101.545,-93.7,at a heel strike,8.7
+session_2026-11-01_20-29-33,right,TO,102.655,-84.0,at a heel strike,6.16
+session_2026-11-01_20-29-33,right,TO,103.735,-84.5,at a heel strike,4.83
+session_2026-11-01_20-29-33,right,TO,104.825,-116.1,at a heel strike,10.08
+session_2026-11-01_20-29-33,right,TO,105.895,-101.5,at a heel strike,11.24
+session_2026-11-01_20-29-33,right,TO,107.005,-88.1,at a heel strike,5.29
+session_2026-11-01_20-29-33,right,TO,108.095,-93.9,at a heel strike,6.21
+session_2026-11-01_20-29-33,right,TO,109.215,-121.8,at a heel strike,9.45
+session_2026-11-01_20-29-33,right,TO,110.315,-100.3,at a heel strike,8.81
+session_2026-11-01_20-29-33,right,TO,111.355,-92.3,at a heel strike,8.95
+session_2026-11-01_20-29-33,right,TO,112.415,-112.6,at a heel strike,8.79
+session_2026-11-01_20-29-33,right,TO,113.535,-87.2,at a heel strike,8.28
+session_2026-11-01_20-29-33,right,TO,114.705,-95.7,at a heel strike,8.1
+session_2026-11-01_20-29-33,right,TO,115.825,-83.3,at a heel strike,7.21
+session_2026-11-01_20-29-33,right,TO,116.895,-110.4,at a heel strike,12.14
+session_2026-11-01_20-29-33,right,TO,118.035,-116.2,at a heel strike,8.12
+session_2026-11-01_20-29-33,right,TO,119.225,-79.9,at a heel strike,5.95
+session_2026-11-01_20-29-33,right,TO,119.935,-120.3,other foot,7.84
+session_2026-11-01_20-29-33,right,TO,121.355,-135.2,at a heel strike,10.28
+session_2026-11-01_20-29-33,right,TO,122.435,-137.8,at a heel strike,14.94
+session_2026-11-01_20-29-33,right,TO,123.475,-115.7,at a heel strike,9.85
+session_2026-11-01_20-29-33,right,TO,124.485,-80.8,at a heel strike,12.48
+session_2026-11-01_20-29-33,right,TO,125.505,-69.7,at a heel strike,5.98
+session_2026-11-01_20-29-33,right,TO,126.595,-76.4,at a heel strike,6.39
+session_2026-11-01_20-29-33,right,TO,127.685,-81.9,at a heel strike,7.19
+session_2026-11-01_20-29-33,right,TO,128.785,-88.2,at a heel strike,8.29
+session_2026-11-01_20-29-33,right,TO,129.895,-87.5,at a heel strike,4.5
+session_2026-11-01_20-29-33,right,TO,130.965,-66.3,at a heel strike,7.66
+session_2026-11-01_20-29-33,right,TO,132.045,-60.3,at a heel strike,5.52
+session_2026-11-01_20-29-33,right,TO,133.085,-86.8,at a heel strike,8.86
+session_2026-11-01_20-29-33,right,TO,135.285,-63.0,at a heel strike,4.58
+session_2026-11-01_20-29-33,right,TO,136.365,-101.3,at a heel strike,13.4
+session_2026-11-01_20-29-33,right,TO,137.485,-93.9,at a heel strike,8.38
+session_2026-11-01_20-29-33,right,TO,139.865,-64.7,at a heel strike,12.28
+session_2026-11-01_20-29-33,right,TO,140.905,-70.4,at a heel strike,8.68
+session_2026-11-01_20-29-33,right,TO,142.035,-70.6,at a heel strike,7.33
+session_2026-11-01_20-29-33,right,TO,143.185,-66.9,at a heel strike,9.63
+session_2026-11-01_20-29-33,right,TO,144.375,-92.5,at a heel strike,11.22
+session_2026-11-01_20-29-33,right,TO,145.495,-68.8,at a heel strike,9.63
+session_2026-11-01_20-29-33,right,TO,147.855,-64.6,at a heel strike,5.17
+session_2026-11-01_20-29-33,right,TO,148.925,-63.9,at a heel strike,7.91
+session_2026-11-01_20-29-33,right,MS,151.465,151.4,correct foot,14.67
+session_2026-11-01_20-29-33,right,TO,153.575,-72.6,at a heel strike,5.64
+session_2026-11-01_20-29-33,right,TO,154.645,-103.1,at a heel strike,11.44
+session_2026-11-01_20-29-33,right,TO,155.795,-86.5,at a heel strike,5.51
+session_2026-11-01_20-29-33,right,TO,157.005,-62.3,at a heel strike,5.6
+session_2026-11-01_20-29-33,right,TO,158.115,-71.3,at a heel strike,4.48
+session_2026-11-01_20-29-33,right,TO,159.175,-87.4,at a heel strike,14.64
+session_2026-11-01_20-29-33,right,TO,160.325,-67.9,at a heel strike,7.36
+session_2026-11-01_20-29-33,right,TO,161.465,-84.1,at a heel strike,7.37
+session_2026-11-01_20-29-33,right,TO,162.485,-90.9,at a heel strike,8.74
+session_2026-11-01_20-29-33,right,TO,165.705,-70.8,at a heel strike,5.22
+session_2026-11-01_20-29-33,right,TO,169.265,-70.2,at a heel strike,4.9
+session_2026-11-01_20-29-33,right,MS,171.925,150.8,correct foot,18.19
+session_2026-11-01_20-29-33,right,TO,172.845,-65.8,at a heel strike,9.47
+session_2026-11-01_20-29-33,right,TO,175.355,-71.7,no gait event,12.46
+session_2026-11-01_20-29-33,right,TO,177.875,-61.2,at a heel strike,5.61
+session_2026-11-01_20-29-33,right,TO,185.165,-65.0,no gait event,15.08
+session_2026-11-01_20-29-33,left,TO,13.985,-178.7,at a heel strike,16.27
+session_2026-11-01_20-29-33,left,TO,15.055,-139.3,at a heel strike,9.45
+session_2026-11-01_20-29-33,left,TO,16.075,-146.8,at a heel strike,27.92
+session_2026-11-01_20-29-33,left,TO,17.095,-163.3,at a heel strike,20.82
+session_2026-11-01_20-29-33,left,TO,18.075,-146.8,at a heel strike,33.23
+session_2026-11-01_20-29-33,left,TO,19.125,-163.3,at a heel strike,23.38
+session_2026-11-01_20-29-33,left,TO,20.135,-165.3,at a heel strike,25.5
+session_2026-11-01_20-29-33,left,TO,21.165,-115.1,at a heel strike,15.08
+session_2026-11-01_20-29-33,left,TO,22.215,-147.7,at a heel strike,21.97
+session_2026-11-01_20-29-33,left,TO,23.285,-183.3,at a heel strike,18.33
+session_2026-11-01_20-29-33,left,TO,24.325,-127.2,at a heel strike,16.51
+session_2026-11-01_20-29-33,left,TO,25.395,-140.8,at a heel strike,22.99
+session_2026-11-01_20-29-33,left,TO,26.415,-167.4,at a heel strike,12.63
+session_2026-11-01_20-29-33,left,TO,27.465,-139.0,no gait event,16.79
+session_2026-11-01_20-29-33,left,TO,28.685,-138.9,at a heel strike,15.15
+session_2026-11-01_20-29-33,left,TO,29.865,-127.6,at a heel strike,13.47
+session_2026-11-01_20-29-33,left,TO,30.975,-64.1,at a heel strike,12.98
+session_2026-11-01_20-29-33,left,TO,32.195,-91.7,at a heel strike,7.38
+session_2026-11-01_20-29-33,left,TO,33.395,-62.0,at a heel strike,7.3
+session_2026-11-01_20-29-33,left,TO,34.745,-61.3,at a heel strike,23.28
+session_2026-11-01_20-29-33,left,TO,35.835,-146.8,at a heel strike,15.98
+session_2026-11-01_20-29-33,left,TO,37.045,-104.4,at a heel strike,14.85
+session_2026-11-01_20-29-33,left,TO,38.305,-101.2,at a heel strike,14.15
+session_2026-11-01_20-29-33,left,TO,39.465,-135.9,at a heel strike,13.56
+session_2026-11-01_20-29-33,left,TO,40.665,-109.2,at a heel strike,14.39
+session_2026-11-01_20-29-33,left,TO,41.805,-129.6,at a heel strike,16.98
+session_2026-11-01_20-29-33,left,TO,42.965,-102.1,at a heel strike,19.99
+session_2026-11-01_20-29-33,left,TO,44.075,-151.5,at a heel strike,13.08
+session_2026-11-01_20-29-33,left,TO,45.195,-120.1,at a heel strike,13.19
+session_2026-11-01_20-29-33,left,TO,46.295,-151.5,at a heel strike,24.19
+session_2026-11-01_20-29-33,left,TO,47.355,-61.6,at a heel strike,17.28
+session_2026-11-01_20-29-33,left,TO,48.575,-78.8,at a heel strike,9.96
+session_2026-11-01_20-29-33,left,TO,49.645,-134.8,at a heel strike,23.44
+session_2026-11-01_20-29-33,left,TO,50.745,-77.1,at a heel strike,7.85
+session_2026-11-01_20-29-33,left,TO,51.875,-103.9,at a heel strike,17.35
+session_2026-11-01_20-29-33,left,TO,53.045,-106.1,at a heel strike,13.03
+session_2026-11-01_20-29-33,left,TO,54.165,-93.0,at a heel strike,11.72
+session_2026-11-01_20-29-33,left,TO,55.255,-119.2,at a heel strike,13.96
+session_2026-11-01_20-29-33,left,TO,56.295,-99.0,at a heel strike,11.71
+session_2026-11-01_20-29-33,left,TO,57.365,-96.8,at a heel strike,10.64
+session_2026-11-01_20-29-33,left,TO,58.415,-87.0,at a heel strike,9.28
+session_2026-11-01_20-29-33,left,TO,59.455,-108.8,at a heel strike,23.85
+session_2026-11-01_20-29-33,left,TO,60.495,-167.6,at a heel strike,20.69
+session_2026-11-01_20-29-33,left,TO,61.515,-136.5,at a heel strike,26.62
+session_2026-11-01_20-29-33,left,TO,62.575,-156.6,at a heel strike,17.53
+session_2026-11-01_20-29-33,left,TO,63.685,-105.1,at a heel strike,15.65
+session_2026-11-01_20-29-33,left,TO,64.805,-139.2,at a heel strike,15.34
+session_2026-11-01_20-29-33,left,TO,65.945,-87.2,at a heel strike,8.91
+session_2026-11-01_20-29-33,left,TO,67.025,-114.2,at a heel strike,10.58
+session_2026-11-01_20-29-33,left,TO,68.205,-66.6,no gait event,14.83
+session_2026-11-01_20-29-33,left,TO,69.305,-90.2,at a heel strike,23.2
+session_2026-11-01_20-29-33,left,TO,70.485,-123.9,at a heel strike,14.65
+session_2026-11-01_20-29-33,left,TO,71.585,-125.8,at a heel strike,9.31
+session_2026-11-01_20-29-33,left,TO,72.675,-89.4,at a heel strike,10.88
+session_2026-11-01_20-29-33,left,TO,73.785,-75.0,at a heel strike,11.75
+session_2026-11-01_20-29-33,left,TO,74.885,-118.8,at a heel strike,13.23
+session_2026-11-01_20-29-33,left,TO,76.045,-90.2,at a heel strike,12.19
+session_2026-11-01_20-29-33,left,TO,77.135,-92.3,at a heel strike,16.69
+session_2026-11-01_20-29-33,left,TO,78.225,-126.8,at a heel strike,17.48
+session_2026-11-01_20-29-33,left,TO,79.335,-84.9,at a heel strike,11.64
+session_2026-11-01_20-29-33,left,TO,80.495,-95.9,at a heel strike,12.45
+session_2026-11-01_20-29-33,left,TO,82.905,-99.4,at a heel strike,9.26
+session_2026-11-01_20-29-33,left,TO,83.975,-85.9,at a heel strike,14.72
+session_2026-11-01_20-29-33,left,TO,85.065,-122.8,at a heel strike,24.19
+session_2026-11-01_20-29-33,left,TO,86.235,-94.4,at a heel strike,18.63
+session_2026-11-01_20-29-33,left,TO,87.405,-140.0,at a heel strike,26.1
+session_2026-11-01_20-29-33,left,TO,88.515,-96.2,at a heel strike,12.09
+session_2026-11-01_20-29-33,left,TO,89.625,-107.2,at a heel strike,15.21
+session_2026-11-01_20-29-33,left,TO,90.705,-123.0,at a heel strike,23.0
+session_2026-11-01_20-29-33,left,TO,93.085,-78.9,at a heel strike,15.37
+session_2026-11-01_20-29-33,left,TO,94.235,-77.5,at a heel strike,6.63
+session_2026-11-01_20-29-33,left,TO,95.515,-161.8,at a heel strike,14.02
+session_2026-11-01_20-29-33,left,TO,96.715,-85.0,at a heel strike,15.94
+session_2026-11-01_20-29-33,left,TO,97.815,-110.0,at a heel strike,22.75
+session_2026-11-01_20-29-33,left,TO,98.985,-61.0,at a heel strike,4.78
+session_2026-11-01_20-29-33,left,TO,100.045,-139.8,at a heel strike,16.8
+session_2026-11-01_20-29-33,left,TO,101.055,-118.1,at a heel strike,14.19
+session_2026-11-01_20-29-33,left,TO,102.115,-112.1,at a heel strike,18.53
+session_2026-11-01_20-29-33,left,TO,103.225,-153.2,at a heel strike,16.49
+session_2026-11-01_20-29-33,left,TO,104.325,-106.7,at a heel strike,12.04
+session_2026-11-01_20-29-33,left,TO,105.395,-91.9,at a heel strike,9.35
+session_2026-11-01_20-29-33,left,TO,106.485,-102.8,at a heel strike,11.25
+session_2026-11-01_20-29-33,left,TO,107.595,-111.7,at a heel strike,16.12
+session_2026-11-01_20-29-33,left,TO,108.725,-65.9,at a heel strike,12.45
+session_2026-11-01_20-29-33,left,TO,109.845,-104.2,at a heel strike,10.85
+session_2026-11-01_20-29-33,left,TO,110.865,-110.2,at a heel strike,13.81
+session_2026-11-01_20-29-33,left,TO,111.935,-162.9,at a heel strike,18.15
+session_2026-11-01_20-29-33,left,TO,112.995,-91.8,at a heel strike,15.99
+session_2026-11-01_20-29-33,left,TO,115.315,-126.6,at a heel strike,24.17
+session_2026-11-01_20-29-33,left,TO,116.485,-162.6,at a heel strike,21.82
+session_2026-11-01_20-29-33,left,TO,119.675,-83.3,no gait event,17.53
+session_2026-11-01_20-29-33,left,TO,120.855,-146.0,at a heel strike,23.88
+session_2026-11-01_20-29-33,left,TO,121.935,-65.3,at a heel strike,3.69
+session_2026-11-01_20-29-33,left,TO,122.995,-140.0,at a heel strike,19.16
+session_2026-11-01_20-29-33,left,TO,123.995,-151.5,at a heel strike,25.35
+session_2026-11-01_20-29-33,left,TO,124.995,-130.3,at a heel strike,12.35
+session_2026-11-01_20-29-33,left,TO,126.085,-95.9,at a heel strike,11.5
+session_2026-11-01_20-29-33,left,TO,127.215,-152.7,at a heel strike,19.67
+session_2026-11-01_20-29-33,left,TO,128.295,-93.1,at a heel strike,15.66
+session_2026-11-01_20-29-33,left,TO,129.385,-67.5,at a heel strike,5.34
+session_2026-11-01_20-29-33,left,TO,130.465,-136.0,at a heel strike,14.23
+session_2026-11-01_20-29-33,left,TO,131.555,-63.3,at a heel strike,7.16
+session_2026-11-01_20-29-33,left,TO,132.625,-113.6,at a heel strike,20.89
+session_2026-11-01_20-29-33,left,TO,133.655,-138.2,at a heel strike,16.34
+session_2026-11-01_20-29-33,left,TO,134.765,-124.6,at a heel strike,15.65
+session_2026-11-01_20-29-33,left,TO,135.885,-132.2,at a heel strike,15.75
+session_2026-11-01_20-29-33,left,TO,137.005,-115.9,at a heel strike,20.67
+session_2026-11-01_20-29-33,left,TO,138.075,-143.6,at a heel strike,15.16
+session_2026-11-01_20-29-33,left,TO,139.275,-76.5,at a heel strike,12.7
+session_2026-11-01_20-29-33,left,TO,140.445,-155.7,at a heel strike,14.46
+session_2026-11-01_20-29-33,left,TO,141.535,-138.8,at a heel strike,24.5
+session_2026-11-01_20-29-33,left,TO,142.655,-116.9,at a heel strike,11.9
+session_2026-11-01_20-29-33,left,TO,143.875,-120.7,at a heel strike,21.75
+session_2026-11-01_20-29-33,left,TO,144.955,-136.7,at a heel strike,22.81
+session_2026-11-01_20-29-33,left,TO,146.185,-95.9,at a heel strike,11.61
+session_2026-11-01_20-29-33,left,TO,146.825,-61.4,other foot,4.0
+session_2026-11-01_20-29-33,left,TO,148.485,-61.2,at a heel strike,6.81
+session_2026-11-01_20-29-33,left,TO,149.495,-64.1,at a heel strike,9.45
+session_2026-11-01_20-29-33,left,TO,150.635,-164.1,at a heel strike,13.83
+session_2026-11-01_20-29-33,left,TO,151.765,-112.5,at a heel strike,13.77
+session_2026-11-01_20-29-33,left,TO,153.025,-112.8,at a heel strike,15.14
+session_2026-11-01_20-29-33,left,TO,154.175,-148.6,at a heel strike,14.4
+session_2026-11-01_20-29-33,left,TO,155.245,-109.5,at a heel strike,12.13
+session_2026-11-01_20-29-33,left,TO,156.445,-86.1,at a heel strike,21.74
+session_2026-11-01_20-29-33,left,TO,157.595,-134.9,at a heel strike,14.97
+session_2026-11-01_20-29-33,left,TO,158.715,-113.2,at a heel strike,9.95
+session_2026-11-01_20-29-33,left,TO,159.785,-103.6,at a heel strike,12.36
+session_2026-11-01_20-29-33,left,TO,160.995,-90.9,at a heel strike,11.91
+session_2026-11-01_20-29-33,left,TO,161.995,-135.4,at a heel strike,17.33
+session_2026-11-01_20-29-33,left,TO,163.015,-145.2,at a heel strike,16.65
+session_2026-11-01_20-29-33,left,TO,164.135,-135.8,at a heel strike,16.53
+session_2026-11-01_20-29-33,left,TO,165.195,-106.4,at a heel strike,12.33
+session_2026-11-01_20-29-33,left,TO,166.395,-113.4,at a heel strike,16.69
+session_2026-11-01_20-29-33,left,TO,167.575,-143.5,at a heel strike,21.32
+session_2026-11-01_20-29-33,left,TO,168.745,-77.1,at a heel strike,10.19
+session_2026-11-01_20-29-33,left,TO,169.895,-130.7,at a heel strike,10.06
+session_2026-11-01_20-29-33,left,TO,171.005,-117.1,at a heel strike,12.81
+session_2026-11-01_20-29-33,left,TO,172.295,-74.2,at a heel strike,7.36
+session_2026-11-01_20-29-33,left,TO,173.535,-92.5,no gait event,8.14
+session_2026-11-01_20-29-33,left,TO,174.765,-90.3,at a heel strike,9.81
+session_2026-11-01_20-29-33,left,TO,176.085,-118.7,at a heel strike,22.83
+session_2026-11-01_20-29-33,left,TO,177.365,-154.7,at a heel strike,18.11
+session_2026-11-01_20-29-33,left,TO,178.525,-79.6,at a heel strike,9.47
+session_2026-11-01_20-29-33,left,TO,179.695,-121.0,at a heel strike,21.23
+session_2026-11-01_20-29-33,left,TO,180.875,-115.2,at a heel strike,13.07
+session_2026-11-01_20-29-33,left,TO,182.075,-75.1,at a heel strike,7.32
+session_2026-11-01_20-29-33,left,TO,183.335,-66.7,at a heel strike,9.93
+session_2026-11-01_20-29-33,left,TO,184.585,-102.5,at a heel strike,12.74
+session_2026-11-01_20-29-33,left,TO,185.945,-72.1,at a heel strike,13.97
+session_2026-11-01_20-29-33,left,TO,187.205,-143.3,at a heel strike,17.26
+session_2026-11-01_20-29-33,left,MS,189.595,153.4,at a heel strike,31.8

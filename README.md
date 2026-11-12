@@ -11,13 +11,60 @@ A neuro-adaptive music controller that synchronizes music tempo to walking caden
 
 ---
 
-## 🔬 IMU Research (in progress)
+## 🦶 BrainSync 2.0 – beat on the heel strike (branch `imu-hardware-test`)
 
-Research and design for adding BNO055 IMUs to predict foot strikes and align the music's beats to the steps. The Python side is implemented and tested in simulation; testing on the hardware is pending:
+**Goal:** the music's beat should sound at the moment the heel touches the ground. The FSR in each heel is the ground truth; the FSRs plus a BNO055 IMU on each shoe sole are used to predict the next heel strike.
 
-- [IMU Research Summary](Documentation/IMU_Research_Summary.md) — decisions and flow in short
-- [IMU Integration Plan](Documentation/IMU_Integration_Plan.md) — full plan
-- [IMU Software Architecture](Documentation/IMU_Software_Architecture.md) — how the software works, with diagrams
+### Where each part of the algorithm lives
+
+| Stage | What it does | Code |
+|---|---|---|
+| Firmware, shoes | FSR step/lift detection (threshold + hysteresis), IMU sampling at 100 Hz, ESP-NOW | [`ESP32/step_detection_sketch`](ESP32/step_detection_sketch/step_detection_sketch.ino) |
+| Firmware, receiver | Relays everything to the PC over serial (921600 baud) | [`ESP32/step_receiver_sketch`](ESP32/step_receiver_sketch/step_receiver_sketch.ino) |
+| Clock sync, parsing | Shoe clock → PC clock, raw → physical units | [`server/utils/hardware/sensor_stream.py`](server/utils/hardware/sensor_stream.py) |
+| IMU calibration | Gyro bias and gravity while standing, foot rotation axis by PCA, rotation direction | [`server/utils/gait/calibration.py`](server/utils/gait/calibration.py) |
+| Gait events | Toe-off (rotation speed < −60 °/s) and mid-swing (> +150 °/s) | [`server/utils/gait/events.py`](server/utils/gait/events.py) |
+| Strike prediction | Next heel strike from the step rhythm, toe-off and mid-swing, weighted by accuracy | [`server/utils/prediction_model/strike_predictor.py`](server/utils/prediction_model/strike_predictor.py) |
+| Tempo and phase alignment | Base tempo from the last 8 steps, PI controller that moves the beat onto the predicted strike | [`server/utils/engine/phase_controller.py`](server/utils/engine/phase_controller.py) |
+| Glue | Runs a session, logs everything | [`server/main.py`](server/main.py), [`server/utils/engine/strike_tracking.py`](server/utils/engine/strike_tracking.py) |
+
+### Running a session
+
+1. `setup/Windows/dev/setup_env.bat` once (Linux/Mac: `setup/Linux_Mac/dev/setup_env.sh`), then `start_app.bat`.
+2. In the GUI: choose the serial port, press **CALIBRATE WEIGHT** while standing, then **Start**.
+3. Every session is saved in `server/logs/<name>/session_<date>_<time>/`.
+
+**Prediction-only test (music does not follow the walker):**
+
+| Test | GUI setting | Command line |
+|---|---|---|
+| Constant tempo | Mode **Manual**, fixed BPM, *Align beats* = Off | `python main.py --manual --bpm 110 --phase-align off` |
+| Tempo change every 15–20 s | Mode **Random**, simple, timeout 15–20 s, *Align beats* = Off | — |
+
+The strike predictor runs and logs in every mode, so its accuracy can be measured against the FSR without the music reacting.
+
+### Files in a session folder
+
+| File | Contents |
+|---|---|
+| `strikes.csv` | Every FSR heel strike (time, foot, step interval, FSR value) |
+| `gait_events.csv` | FSR lifts, IMU toe-off and mid-swing events |
+| `imu_data.csv` | Raw IMU samples, both feet, 100 Hz |
+| `predictions.csv` | Every prediction of the next strike, by method |
+| `beats.csv` | Every beat played and the tempo at that moment |
+| `phase_errors.csv` | Beat heard minus heel strike, per step (alignment on) |
+| `meta.json` | Settings and the IMU calibration result |
+
+### Analysis
+
+- `server/utils/analysis/session_report.py` – full report of a session
+- `server/utils/analysis/alignment_plot.py` – beat vs. heel strike, one graph per session
+- `server/tests/` – unit tests (`python -m pytest server/tests`)
+
+### Known issues (Nov 2026)
+
+- The two IMUs are swapped relative to the FSR feet (IMU at address 0x29 sits on the right foot). Being fixed in firmware.
+- The IMU mounting is loose; a rigid mount is being made.
 
 ---
 

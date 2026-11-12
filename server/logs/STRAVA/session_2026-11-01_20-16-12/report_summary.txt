@@ -1,0 +1,13 @@
+Session C:\Users\Rund\Desktop\computer science\BrainSync\BrainSync\server\logs\STRAVA\session_2026-11-01_20-16-12
+  320 steps, 300 beats, 138 s, alignment on, receiver protocol 2
+  Link: IMU: 2773 received, 1 lost; LIFT: 319 received, 0 lost; STEP: 320 received, 0 lost; parse errors 0, unknown lines 0
+  IMU: 100 lines/s, valid right 100%, left 100%, calibrated {'right': True, 'left': True}
+  Beat vs estimated contact: median 21 ms, 61% within ±30 ms, 83% within ±50 ms, mean +329 ms
+  Prediction 400ms_ahead: median error (ms) fused 16, B0 16, B1 30, B2 24; missed 0
+  Prediction 200ms_ahead: median error (ms) fused 16, B0 17, B1 40, B2 28; missed 0
+  Prediction 100ms_ahead: median error (ms) fused 16, B0 17, B1 40, B2 28; missed 0
+  Sensors: WARNING: The right IMU is not calibrated after 20 steps: check that it is fixed firmly to the foot
+  Sensors: WARNING: The left IMU is not calibrated after 20 steps: check that it is fixed firmly to the foot
+  Sensors: The left IMU is calibrated (after 25 steps)
+  Sensors: The right IMU is calibrated (after 29 steps)
+Report: C:\Users\Rund\Desktop\computer science\BrainSync\BrainSync\server\logs\STRAVA\session_2026-11-01_20-16-12\report.png

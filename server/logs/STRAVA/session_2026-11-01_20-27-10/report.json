@@ -1,0 +1,217 @@
+{
+  "session": "C:\\Users\\Rund\\Desktop\\computer science\\BrainSync\\BrainSync\\server\\logs\\STRAVA\\session_2026-11-01_20-27-10",
+  "latency_ms": 30.0,
+  "alignment_enabled": true,
+  "receiver_protocol": 2,
+  "steps": 143,
+  "beats": 123,
+  "duration_s": 75.40176999999676,
+  "link": "IMU: 1515 received, 0 lost; LIFT: 142 received, 0 lost; STEP: 143 received, 0 lost; parse errors 0, unknown lines 0",
+  "sensor_health": {
+    "open_problems": [],
+    "log": [
+      [
+        319953.478,
+        "WARNING: The right IMU is not calibrated after 20 steps: check that it is fixed firmly to the foot"
+      ],
+      [
+        319953.478,
+        "WARNING: The left IMU is not calibrated after 20 steps: check that it is fixed firmly to the foot"
+      ],
+      [
+        319962.486,
+        "The left IMU is calibrated (after 38 steps)"
+      ],
+      [
+        319977.499,
+        "The right IMU is calibrated (after 66 steps)"
+      ]
+    ]
+  },
+  "tracking": {
+    "calibration": {
+      "right": {
+        "gyro_bias_dps": [
+          0.486,
+          0.217,
+          -0.108
+        ],
+        "gravity_ms2": [
+          3.328,
+          9.176,
+          1.513
+        ],
+        "pitch_axis": [
+          0.1999,
+          -0.2341,
+          -0.9514
+        ],
+        "still_samples": 1588,
+        "swing_samples": 180
+      },
+      "left": {
+        "gyro_bias_dps": [
+          2.913,
+          -0.623,
+          1.388
+        ],
+        "gravity_ms2": [
+          -5.427,
+          -8.2,
+          2.935
+        ],
+        "pitch_axis": [
+          0.7866,
+          -0.0379,
+          0.6162
+        ],
+        "still_samples": 1966,
+        "swing_samples": 160
+      }
+    },
+    "fsr_delay_ms": {
+      "right": 0.0,
+      "left": 0.0
+    },
+    "predictor": {
+      "step_ms": {
+        "right": 472.3,
+        "left": 546.4
+      },
+      "to_delay_ms": {
+        "right": 767.6,
+        "left": 553.6
+      },
+      "ms_delay_ms": {
+        "right": 458.4,
+        "left": null
+      },
+      "sigma_ms": {
+        "B0": 32.6,
+        "B1": 30.6,
+        "B2": 12.0
+      }
+    },
+    "clock": {
+      "offset_s": 317999.3958077079,
+      "drift_ppm": -31.886741294562945,
+      "ref_sender_s": 2018.300158
+    }
+  },
+  "beat_vs_estimated_contact_ms": {
+    "n": 143,
+    "median_abs": 45.184000045992434,
+    "mean": 778.1492727519651,
+    "sd": 2280.793712188503,
+    "within30": 41.25874125874126,
+    "within50": 52.44755244755245
+  },
+  "prediction": {
+    "400ms_ahead": {
+      "fused": {
+        "n": 135,
+        "median_abs": 30.489999999872452,
+        "mean": -2.5986296296297144,
+        "sd": 47.372911634867606,
+        "within30": 48.888888888888886,
+        "within50": 70.37037037037037
+      },
+      "B0": {
+        "n": 135,
+        "median_abs": 32.295999999860214,
+        "mean": -1.7741851851850596,
+        "sd": 50.07529121249511,
+        "within30": 45.925925925925924,
+        "within50": 65.18518518518519
+      },
+      "B1": {
+        "n": 46,
+        "median_abs": 27.986000000055355,
+        "mean": -5.340391304368653,
+        "sd": 36.29677547870007,
+        "within30": 56.52173913043478,
+        "within50": 84.78260869565217
+      },
+      "B2": {
+        "n": 0
+      },
+      "missed": 0
+    },
+    "200ms_ahead": {
+      "fused": {
+        "n": 136,
+        "median_abs": 30.74099999992086,
+        "mean": -1.6721397058829017,
+        "sd": 48.149412392581915,
+        "within30": 48.529411764705884,
+        "within50": 69.11764705882352
+      },
+      "B0": {
+        "n": 136,
+        "median_abs": 32.30299999995623,
+        "mean": -1.2449338235301985,
+        "sd": 50.268394441458675,
+        "within30": 45.588235294117645,
+        "within50": 64.70588235294117
+      },
+      "B1": {
+        "n": 49,
+        "median_abs": 28.087000000141416,
+        "mean": -0.9316938775722222,
+        "sd": 40.465049414654516,
+        "within30": 55.10204081632652,
+        "within50": 81.63265306122449
+      },
+      "B2": {
+        "n": 0
+      },
+      "missed": 0
+    },
+    "100ms_ahead": {
+      "fused": {
+        "n": 136,
+        "median_abs": 30.74099999992086,
+        "mean": -1.6721397058829017,
+        "sd": 48.149412392581915,
+        "within30": 48.529411764705884,
+        "within50": 69.11764705882352
+      },
+      "B0": {
+        "n": 136,
+        "median_abs": 32.30299999995623,
+        "mean": -1.2449338235301985,
+        "sd": 50.268394441458675,
+        "within30": 45.588235294117645,
+        "within50": 64.70588235294117
+      },
+      "B1": {
+        "n": 49,
+        "median_abs": 28.087000000141416,
+        "mean": -0.9316938775722222,
+        "sd": 40.465049414654516,
+        "within30": 55.10204081632652,
+        "within50": 81.63265306122449
+      },
+      "B2": {
+        "n": 0
+      },
+      "missed": 0
+    }
+  },
+  "imu": {
+    "lines": 7575,
+    "rate_hz": 100.18556217736352,
+    "valid_right_pct": 100.0,
+    "valid_left_pct": 100.0
+  },
+  "event_lead_s": {
+    "right_TO": 0.8490954999998621,
+    "right_MS": 0.5307009999999082,
+    "left_TO": 0.5534420000001319,
+    "left_MS": null
+  },
+  "calibrated": {
+    "right": true,
+    "left": true
+  }
+}

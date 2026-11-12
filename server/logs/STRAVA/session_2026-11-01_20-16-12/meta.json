@@ -1,0 +1,136 @@
+{
+  "strike_tracking": {
+    "calibration": {
+      "right": {
+        "gyro_bias_dps": [
+          0.319,
+          3.425,
+          -0.54
+        ],
+        "gravity_ms2": [
+          1.941,
+          9.416,
+          2.09
+        ],
+        "pitch_axis": [
+          -0.1079,
+          -0.1712,
+          -0.9793
+        ],
+        "still_samples": 1104,
+        "swing_samples": 304
+      },
+      "left": {
+        "gyro_bias_dps": [
+          -3.349,
+          2.454,
+          1.392
+        ],
+        "gravity_ms2": [
+          -1.471,
+          -8.105,
+          6.15
+        ],
+        "pitch_axis": [
+          -0.9967,
+          -0.0422,
+          0.0692
+        ],
+        "still_samples": 3526,
+        "swing_samples": 463
+      }
+    },
+    "fsr_delay_ms": {
+      "right": 0.0,
+      "left": 0.0
+    },
+    "predictor": {
+      "step_ms": {
+        "right": 460.3,
+        "left": 436.7
+      },
+      "to_delay_ms": {
+        "right": 454.3,
+        "left": 730.7
+      },
+      "ms_delay_ms": {
+        "right": 453.6,
+        "left": 448.0
+      },
+      "sigma_ms": {
+        "B0": 44.8,
+        "B1": 78.8,
+        "B2": 22.4
+      }
+    },
+    "clock": {
+      "offset_s": 317999.414965468,
+      "drift_ppm": -39.05659410153802,
+      "ref_sender_s": 1422.217307
+    }
+  },
+  "phase_alignment": {
+    "enabled": true,
+    "settings": {
+      "latency_s": 0.03,
+      "kp": 1.0,
+      "ki": 0.1,
+      "delta_max": 0.15,
+      "delta_rate_per_s": 2.0,
+      "deadband_s": 0.0,
+      "catchup_s": 0.03,
+      "reset_s": 0.1,
+      "reset_delta_max": 0.5,
+      "t_min_s": 0.05,
+      "bias_max_s": 0.05,
+      "bias_window_s": 0.06,
+      "max_sigma_s": 0.08,
+      "beats_per_step": 1,
+      "base_from_strikes": true,
+      "base_steps": 8,
+      "base_ahead": 0.0,
+      "base_min_steps": 1,
+      "base_uses_model": false,
+      "decay_grace": 1.5,
+      "hold_when_standing": true,
+      "start_on_step": true,
+      "start_steps": 10,
+      "start_needs_calibration": true,
+      "start_fallback_steps": 20,
+      "restart_steps": 5,
+      "start_ahead": 0.0,
+      "pause_when_standing": true,
+      "pause_after_periods": 1.75,
+      "max_change_per_beat": 0.05,
+      "max_change_far": null,
+      "far_error_s": 0.08,
+      "near_error_s": 0.03
+    },
+    "bias_ms": -14.2
+  },
+  "link": "IMU: 2773 received, 1 lost; LIFT: 319 received, 0 lost; STEP: 320 received, 0 lost; parse errors 0, unknown lines 0",
+  "receiver_protocol": 2,
+  "sensor_health": {
+    "open_problems": [],
+    "log": [
+      [
+        319294.409,
+        "WARNING: The right IMU is not calibrated after 20 steps: check that it is fixed firmly to the foot"
+      ],
+      [
+        319294.409,
+        "WARNING: The left IMU is not calibrated after 20 steps: check that it is fixed firmly to the foot"
+      ],
+      [
+        319296.41,
+        "The left IMU is calibrated (after 25 steps)"
+      ],
+      [
+        319298.412,
+        "The right IMU is calibrated (after 29 steps)"
+      ]
+    ]
+  },
+  "run_type": "dynamic",
+  "simulated": false
+}
