@@ -1,0 +1,52 @@
+1. Recomputed rotation speed vs. the value the engine logged at each event (°/s)
+   session 1: 175 events, median difference 0.6
+   session 2: 164 events, median difference 0.6
+   session 3: 135 events, median difference 1.8
+   session 4: 86 events, median difference 1.6
+   session 5: 279 events, median difference 2.0
+
+2. Every IMU detection checked against the FSR
+   correct foot         17     2%
+   other foot          311    37%
+   at a heel strike    476    57%
+   no gait event        35     4%
+   total               839
+
+3. Toe-offs of the IMU labelled 'left': time from the nearest FSR lift
+   session 1: right-foot lift median   +49 ms, within 100 ms  76% | left-foot lift median  -371 ms, within 100 ms   5%
+   session 2: right-foot lift median   +12 ms, within 100 ms  97% | left-foot lift median  -480 ms, within 100 ms   0%
+   session 3: right-foot lift median   +54 ms, within 100 ms  99% | left-foot lift median  -431 ms, within 100 ms   0%
+   session 4: right-foot lift median  +344 ms, within 100 ms   0% | left-foot lift median  -173 ms, within 100 ms   2%
+   session 5: right-foot lift median  +402 ms, within 100 ms   1% | left-foot lift median  -163 ms, within 100 ms   1%
+
+4. Median rotation speed (°/s) in the 150 ms after a real toe-off (FSR lift)
+   session 1: IMU 'left' at RIGHT lift    -72 | IMU 'right' at LEFT lift    -41 | IMU 'left' at LEFT lift     -3 | IMU 'right' at RIGHT lift     -3
+   session 2: IMU 'left' at RIGHT lift    -79 | IMU 'right' at LEFT lift     -1 | IMU 'left' at LEFT lift     -4 | IMU 'right' at RIGHT lift    -12
+   session 3: IMU 'left' at RIGHT lift    -68 | IMU 'right' at LEFT lift    -45 | IMU 'left' at LEFT lift     -4 | IMU 'right' at RIGHT lift     -0
+   session 4: IMU 'left' at RIGHT lift     -8 | IMU 'right' at LEFT lift    -49 | IMU 'left' at LEFT lift     -7 | IMU 'right' at RIGHT lift     -6
+   session 5: IMU 'left' at RIGHT lift     -8 | IMU 'right' at LEFT lift      9 | IMU 'left' at LEFT lift     -2 | IMU 'right' at RIGHT lift     14
+
+4b. Largest rotation speed in the middle of each real swing (median °/s, % of swings above +150)
+   session 1: IMU 'left' in RIGHT swings    28 (  0% > 150, n=160) | IMU 'right' in LEFT swings    15 (  2% > 150, n=159)
+   session 2: IMU 'left' in RIGHT swings    38 (  0% > 150, n=115) | IMU 'right' in LEFT swings    41 (  0% > 150, n=115)
+   session 3: IMU 'left' in RIGHT swings    38 (  0% > 150, n=120) | IMU 'right' in LEFT swings    59 (  0% > 150, n=120)
+   session 4: IMU 'left' in RIGHT swings    50 (  0% > 150, n=71) | IMU 'right' in LEFT swings    49 ( 11% > 150, n=71)
+   session 5: IMU 'left' in RIGHT swings    34 (  1% > 150, n=171) | IMU 'right' in LEFT swings    54 (  0% > 150, n=170)
+
+5. Real right-foot toe-offs on the IMU labelled 'left' (dip below -60 °/s after a right FSR lift)
+   session 1: {'lifts': 160, 'dips': 144, 'detected': 59, 'missed_in_window': 83, 'missed_other': 2}
+   session 2: {'lifts': 115, 'dips': 111, 'detected': 95, 'missed_in_window': 7, 'missed_other': 9}
+   session 3: {'lifts': 121, 'dips': 108, 'detected': 93, 'missed_in_window': 3, 'missed_other': 12}
+   session 4: {'lifts': 71, 'dips': 0, 'detected': 0, 'missed_in_window': 0, 'missed_other': 0}
+   session 5: {'lifts': 171, 'dips': 1, 'detected': 1, 'missed_in_window': 0, 'missed_other': 0}
+
+6. Gyro signal above 15 Hz around each detection (median, °/s)
+class
+at a heel strike    15.2
+correct foot         7.7
+no gait event       12.5
+other foot           4.6
+
+Example used in the document: session 1, IMU 'left', TO at 14.75 s, -66.4 °/s
+
+Graphs and detections.csv written to analysis_baseline/decision_analysis

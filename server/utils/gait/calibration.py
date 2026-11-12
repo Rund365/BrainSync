@@ -1,73 +1,75 @@
 """
-Per-foot IMU calibration, learned while walking (Integration Plan §7.3, §15.1).
+Per-foot IMU calibration, following Sabatini et al. 2005:
+  A. M. Sabatini, C. Martelloni, S. Scapellato, F. Cavallo, "Assessment of Walking Features From
+  Foot Inertial Sensing", IEEE Trans. Biomed. Eng. 52(3):486-494, 2005, DOI 10.1109/TBME.2004.840727
 
-- Gyro bias and gravity: averaged over moments the foot is still (flat on the ground).
-- Pitch axis: the main rotation axis during swings (largest principal component of the
-  gyro), so a crooked or mirrored sensor still gives the foot's pitch rate.
-- Sign: chosen so the mid-swing peak is positive. Before each FSR strike, the largest
-  rotation of the last half second is the mid-swing peak; its sign votes.
+- Axis and sign come from how the IMU is mounted (§II-A): the gyro axis we use is the one
+  perpendicular to the sagittal plane (mediolateral), so it reads the foot's pitch rate directly.
+  Set per foot in MOUNTING. Positive = the swing direction (their Fig. 2: the swing is a broad
+  positive pulse, toe-off and heel strike are negative peaks).
+- Gyro bias ("nulling", §II-C.2): mean of the gyro over the first 0.5 s, while the user stands
+  still before walking (Sabatini: N = 100 samples at 200 Hz). The session must start standing still.
+  The spread of those samples is logged (bias_std_dps) so it can be checked offline that the
+  user really stood still.
+
+The mounting itself is checked offline after each session with gaitmap's automatic sensor
+alignment (Kuderle et al., "Gaitmap - An Open Ecosystem for IMU-Based Human Gait Analysis and
+Algorithm Benchmarking", IEEE Open J. Eng. Med. Biol., 2024). See
+Documentation/IMU_sources_what_we_use.md.
 """
 import numpy as np
 
 G = 9.81
-STILL_GYRO_DPS = 20.0  # raw rotation below this (bias is only a few dps) ...
-STILL_ACC_TOL = 0.6  # ... and |acceleration| within this of gravity = foot still
-SWING_GYRO_DPS = 120.0  # rotation above this = foot swinging
-SIGN_VOTES_NEEDED = 3
+AXES = {"x": 0, "y": 1, "z": 2}
+
+# Foot id (1 = right, 2 = left) -> (board axis across the foot, as printed on the BNO055 board,
+# sign that makes the swing positive). Mounted the same way on both shoes, the left IMU is turned
+# 180 degrees relative to the right one, so its sign is the opposite.
+# These defaults match the simulator (utils/simulation/legs.py: pitch rate is sensor y, left
+# sensor mirrored). TODO: set to the real mounting on the shoes.
+MOUNTING = {1: ("y", +1), 2: ("y", -1)}
+
+SAMPLE_RATE_HZ = 100
+BIAS_S = 0.5  # Sabatini §II-C.2: N = 100 samples at 200 Hz
+BIAS_SAMPLES = round(BIAS_S * SAMPLE_RATE_HZ)
 
 
 class FootCalibration:
-    def __init__(self):
+    def __init__(self, axis="y", sign: int = +1):
+        # axis: a board axis name ("x", "y", "z") or a unit vector in the sensor frame
+        self.axis = np.eye(3)[AXES[axis]] if isinstance(axis, str) else np.asarray(axis, float)
+        self.sign = int(sign)
         self.gyro_bias = np.zeros(3)
-        self.gravity = np.array([0.0, 0.0, G])
-        self.still_samples = 0
-        self._cov = np.zeros((3, 3))
-        self.swing_samples = 0
-        self.axis = None  # unit vector in the sensor frame
-        self._votes = 0
-        self.sign = 0  # +1 / -1 once decided
+        self.still_samples = 0  # samples averaged into the bias
+        self.swing_samples = 0  # samples after the bias is known (name kept for phase_controller)
+        self._sum = np.zeros(3)
+        self._sum_sq = np.zeros(3)
 
     @property
     def ready(self) -> bool:
-        return self.axis is not None and self.sign != 0
+        return self.still_samples >= BIAS_SAMPLES
 
     def add(self, acc: np.ndarray, gyr: np.ndarray):
-        if np.linalg.norm(gyr) < STILL_GYRO_DPS and abs(np.linalg.norm(acc) - G) < STILL_ACC_TOL:
-            w = 1.0 / min(self.still_samples + 1, 500)
-            self.gyro_bias += w * (gyr - self.gyro_bias)
-            self.gravity += w * (acc - self.gravity)
-            self.still_samples += 1
-            return
-        g = gyr - self.gyro_bias
-        if np.linalg.norm(g) > SWING_GYRO_DPS:
-            self._cov += np.outer(g, g)
+        if self.ready:
             self.swing_samples += 1
-            if self.swing_samples % 25 == 0:
-                self._update_axis()
-
-    def _update_axis(self):
-        axis = np.linalg.eigh(self._cov)[1][:, -1]
-        if self.axis is not None and axis @ self.axis < 0:
-            axis = -axis  # keep the same orientation, so earlier sign votes stay valid
-        self.axis = axis
-
-    def raw_pitch_rate(self, gyr: np.ndarray) -> float:
-        """Pitch rate along the axis, before the sign is known."""
-        return float((gyr - self.gyro_bias) @ self.axis)
-
-    def vote_sign(self, raw_pitch_before_strike: list):
-        if self.sign or not raw_pitch_before_strike:
             return
-        peak = max(raw_pitch_before_strike, key=abs)
-        self._votes += 1 if peak > 0 else -1
-        if abs(self._votes) >= SIGN_VOTES_NEEDED:
-            self.sign = 1 if self._votes > 0 else -1
+        self._sum += gyr
+        self._sum_sq += gyr * gyr
+        self.still_samples += 1
+        if self.ready:
+            self.gyro_bias = self._sum / self.still_samples
+
+    def pitch_rate(self, gyr: np.ndarray) -> float:
+        """Foot pitch rate in dps, positive = swing direction."""
+        return self.sign * float((gyr - self.gyro_bias) @ self.axis)
 
     def state(self) -> dict:
+        n = max(self.still_samples, 1)
+        std = np.sqrt(np.maximum(self._sum_sq / n - (self._sum / n) ** 2, 0.0))
         return {
             "gyro_bias_dps": self.gyro_bias.round(3).tolist(),
-            "gravity_ms2": self.gravity.round(3).tolist(),
-            "pitch_axis": None if self.axis is None else (self.axis * (self.sign or 1)).round(4).tolist(),
+            "bias_std_dps": std.round(3).tolist(),
+            "pitch_axis": (self.axis * self.sign).round(4).tolist(),
             "still_samples": self.still_samples,
             "swing_samples": self.swing_samples,
         }

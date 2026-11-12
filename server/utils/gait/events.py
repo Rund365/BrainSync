@@ -1,13 +1,19 @@
 """
-Online gait event detection for one foot (Integration Plan §15.2, §15.4).
+Online gait event detection for one foot.
 
-Works on the calibrated pitch rate (positive = mid-swing direction), lightly filtered:
-  STANCE   --(push-off dip, then rising again)-->  toe-off (TO) at the bottom of the dip
-  SWING    --(big peak, then falling again)----->  mid-swing (MS) at the top of the peak
-  TERMINAL --(FSR strike of this foot)---------->  STANCE
+Gait phase segmentation from the foot's sagittal angular velocity, following
+  A. M. Sabatini, C. Martelloni, S. Scapellato, F. Cavallo, "Assessment of Walking Features From
+  Foot Inertial Sensing", IEEE Trans. Biomed. Eng. 52(3):486-494, 2005, §II-C.1, Eq. 2-3, Fig. 2.
+Positive = swing direction (calibration.py):
+  STANCE   --|w| >= 30 dps (Eq. 2, heel-off)----------------->  PUSH_OFF
+  PUSH_OFF --largest negative peak, ends when w turns positive->  toe-off (TO)
+  SWING    --largest positive peak, ends when w turns negative->  mid-swing (MS)
+  LANDING  --largest negative peak, ends when |w| < 30 dps (Eq. 3, foot-flat)
+                                                       -->  heel strike (HS), back to STANCE
+The sign checks on each peak (a TO must be negative, an MS positive, an HS negative) are ours:
+the paper describes clean cycles only.
 Events are timestamped with the sender time of the extreme, not the time they were
-noticed, so detection delay does not shift them. Timeouts return to STANCE if a strike
-never comes (stopping, shuffling).
+noticed, so detection delay does not shift them. A timeout returns to STANCE (stopping).
 
 Also measures how late the FSR fires after the real contact: the heel-strike impact is
 the first sample whose |acceleration| leaves gravity sharply just before the FSR strike.
@@ -18,12 +24,11 @@ from statistics import median
 
 import numpy as np
 
-from .calibration import FootCalibration, G
+from .calibration import FootCalibration, G, MOUNTING
 
 FILTER_ALPHA = 0.5  # one-pole low-pass on the pitch rate (~11 Hz at 100 Hz)
-TO_DPS = 60.0  # push-off dip must go below -TO_DPS
-MS_DPS = 150.0  # mid-swing peak must go above MS_DPS
-SLAP_GUARD_S = 0.15  # ignore the foot slapping flat right after a strike
+HO_DPS = 30.0  # heel-off when |pitch rate| >= 30 dps (Sabatini 2005, Eq. 2, TH_HO)
+FF_DPS = 30.0  # foot-flat when |pitch rate| < 30 dps (Sabatini 2005, Eq. 3, TH_FF)
 SWING_TIMEOUT_S = 1.0
 IMPACT_MS2 = 4.0  # |acceleration| this far from gravity = impact
 # ... and this much away from the sample before: an impact is a jump, while the braking just
@@ -31,27 +36,29 @@ IMPACT_MS2 = 4.0  # |acceleration| this far from gravity = impact
 IMPACT_JUMP_MS2 = 8.0
 IMPACT_SAMPLE_LAG_S = 0.005  # first sample after contact is on average half a sample late
 
-STANCE, SWING, TERMINAL = "stance", "swing", "terminal"
+STANCE, PUSH_OFF, SWING, LANDING = "stance", "push_off", "swing", "landing"
 
 
 @dataclass
 class GaitEvent:
     foot: int
-    kind: str  # "TO" or "MS"
+    kind: str  # "TO", "MS" or "HS"
     sender_s: float
     value_dps: float
 
 
 class FootTracker:
-    def __init__(self, foot: int):
+    def __init__(self, foot: int, axis=None, sign: int | None = None):
+        """axis / sign override MOUNTING[foot] (used to replay recordings with a known axis)."""
         self.foot = foot
-        self.calib = FootCalibration()
+        mount_axis, mount_sign = MOUNTING[foot]
+        self.calib = FootCalibration(mount_axis if axis is None else axis,
+                                     mount_sign if sign is None else sign)
         self.state = STANCE
         self._state_since = 0.0
         self._filtered = None
-        self._extreme = None  # (value, time) of the dip / peak being tracked
+        self._extreme = None  # (value, time) of the peak being tracked
         self._last_strike = None
-        self._raw_pitch = deque(maxlen=80)  # (t, raw pitch rate), for the sign votes
         self._acc_dev = deque(maxlen=150)  # (t, |a| - g), for the impact search
         self._pending_strikes = []
         self._fsr_delays = deque(maxlen=20)
@@ -68,23 +75,16 @@ class FootTracker:
         self._check_impacts(t)
 
         self.calib.add(acc, gyr)
-        if self.calib.axis is None:
+        if not self.calib.ready:
             return []
-        raw = self.calib.raw_pitch_rate(gyr)
-        self._raw_pitch.append((t, raw))
-        if not self.calib.sign:
-            return []
-
-        w = raw * self.calib.sign
+        w = self.calib.pitch_rate(gyr)
         self._filtered = w if self._filtered is None else self._filtered + FILTER_ALPHA * (w - self._filtered)
         return self._detect(t, self._filtered)
 
     def on_strike(self, t: float):
-        """FSR strike of this foot (sender time)."""
-        self.calib.vote_sign([v for (ts, v) in self._raw_pitch if t - 0.45 <= ts <= t])
+        """FSR strike of this foot (sender time). The IMU finds its own heel strike."""
         self._pending_strikes.append(t)
         self._last_strike = t
-        self._enter(STANCE, t)
 
     def _enter(self, state: str, t: float):
         self.state = state
@@ -95,26 +95,36 @@ class FootTracker:
         if self.state != STANCE and t - self._state_since > SWING_TIMEOUT_S:
             self._enter(STANCE, t)
 
-        if self.state == STANCE:
-            if self._last_strike is not None and t - self._last_strike < SLAP_GUARD_S:
-                return []
-            if w < -TO_DPS:
-                if self._extreme is None or w < self._extreme[0]:
-                    self._extreme = (w, t)
-            elif self._extreme is not None and w > 0.5 * self._extreme[0]:
+        if self.state == STANCE:  # foot flat
+            if abs(w) >= HO_DPS:  # Eq. 2: heel-off
+                self._enter(PUSH_OFF, t)
+
+        if self.state == PUSH_OFF:  # toe-off = largest clockwise (negative) peak
+            if self._extreme is None or w < self._extreme[0]:
+                self._extreme = (w, t)
+            elif w > 0:  # the swing pulse has started
                 value, t_to = self._extreme
                 self._enter(SWING, t_to)
-                return [GaitEvent(self.foot, "TO", t_to, value)]
-            elif w > MS_DPS:  # missed the push-off; the swing is already on
-                self._enter(SWING, t)
+                if value < 0:  # no negative peak = the push-off was missed: no TO
+                    return [GaitEvent(self.foot, "TO", t_to, value)]
 
-        if self.state == SWING:
-            if w > MS_DPS and (self._extreme is None or w > self._extreme[0]):
+        elif self.state == SWING:  # mid-swing = top of the positive pulse
+            if self._extreme is None or w > self._extreme[0]:
                 self._extreme = (w, t)
-            elif self._extreme is not None and w < 0.8 * self._extreme[0]:
+            elif w < 0:  # the pulse is over
                 value, t_ms = self._extreme
-                self._enter(TERMINAL, t_ms)
-                return [GaitEvent(self.foot, "MS", t_ms, value)]
+                self._enter(LANDING, t_ms)
+                if value > 0:
+                    return [GaitEvent(self.foot, "MS", t_ms, value)]
+
+        elif self.state == LANDING:  # heel strike = second clockwise peak of the cycle
+            if self._extreme is None or w < self._extreme[0]:
+                self._extreme = (w, t)
+            elif abs(w) < FF_DPS:  # Eq. 3: foot-flat
+                value, t_hs = self._extreme
+                self._enter(STANCE, t)
+                if value < 0:
+                    return [GaitEvent(self.foot, "HS", t_hs, value)]
         return []
 
     def _check_impacts(self, t: float):

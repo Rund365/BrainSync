@@ -1,0 +1,35 @@
+
+== session_2026-11-01_20-16-12  swings used: right 160, left 159  (dropped >1.0s: right 0, left 0)
+  imu swings_of   n  peak_total_dps  peak_pitch_dps  pitch/total  axis_angle_deg
+ left     right 160          225.50          218.81         0.99            7.30
+ left      left 159           22.43           19.49         0.87           29.12
+right     right 160          101.76           18.50         0.19           87.50
+right      left 159          146.42          126.26         0.92           19.71
+
+== session_2026-11-01_20-20-09  swings used: right 115, left 115  (dropped >1.0s: right 0, left 1)
+  imu swings_of   n  peak_total_dps  peak_pitch_dps  pitch/total  axis_angle_deg
+ left     right 115          235.42          234.25         0.99            8.20
+ left      left 115           21.60           17.98         0.85           29.31
+right     right 115          104.94           97.26         0.95            9.29
+right      left 115          137.64           85.19         0.66           87.53
+
+== session_2026-11-01_20-23-15  swings used: right 120, left 120  (dropped >1.0s: right 1, left 0)
+  imu swings_of   n  peak_total_dps  peak_pitch_dps  pitch/total  axis_angle_deg
+ left     right 120          253.11          249.32         0.99            9.88
+ left      left 120           25.65           19.57         0.80           36.50
+right     right 120           69.73           35.85         0.52           64.19
+right      left 120          116.44          112.92         0.97           11.37
+
+== session_2026-11-01_20-27-10  swings used: right 71, left 71  (dropped >1.0s: right 0, left 0)
+  imu swings_of  n  peak_total_dps  peak_pitch_dps  pitch/total  axis_angle_deg
+ left     right 71          290.87          271.91         0.96            5.23
+ left      left 71           20.49           18.99         0.94           18.35
+right     right 71           67.19           13.96         0.21           86.03
+right      left 71          147.67          124.44         0.90           11.85
+
+== session_2026-11-01_20-29-33  swings used: right 171, left 170  (dropped >1.0s: right 0, left 0)
+  imu swings_of   n  peak_total_dps  peak_pitch_dps  pitch/total  axis_angle_deg
+ left     right 171          236.50          224.35         0.96            8.25
+ left      left 170           33.80           30.47         0.89           25.47
+right     right 171          124.33          120.74         0.99           11.60
+right      left 170          134.31           98.69         0.78           28.23
