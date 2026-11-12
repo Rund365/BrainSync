@@ -95,6 +95,9 @@ class SubprocessManager:
         # Launch Process
         try:
             env = os.environ.copy()
+            # Engine output can hold non-ASCII text (emoji, check marks). On Windows the pipe
+            # defaults to the old 'charmap' code page, which cannot encode them and crashed the engine.
+            env["PYTHONIOENCODING"] = "utf-8"
             # We use bufsize=1 for line buffering
             self.process = subprocess.Popen(
                 cmd,
@@ -102,6 +105,8 @@ class SubprocessManager:
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE, # Capture separately
                 text=True,
+                encoding="utf-8",
+                errors="replace",
                 bufsize=1,
                 cwd=os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), # Execute INSIDE server/ folder (3 levels up from engine/)
                 env=env,

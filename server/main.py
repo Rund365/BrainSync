@@ -730,5 +730,14 @@ def main(args, status_callback=print, stop_event=None, session_dir_callback=None
     print("EXIT_CLEAN")
     return player, logger, bpm_estimation
 
+def _safe_console():
+    """Never crash on a character the console cannot show (e.g. emoji on a Windows code page):
+    print it as '?' instead."""
+    for stream in (sys.stdout, sys.stderr):
+        if hasattr(stream, "reconfigure"):
+            stream.reconfigure(errors="replace")
+
+
 if __name__ == "__main__":
-    main(parse_args())
+    _safe_console()
+    main(parse_args())
