@@ -605,6 +605,10 @@ class GuiApp:
                                          style="Success.TButton")
         self.btn_calibrate.pack(fill="x", pady=(0, 12))
 
+        self.btn_calibrate_imu = ttk.Button(sidebar, text="🧭  CALIBRATE IMUs", command=self.start_imu_calibration,
+                                             style="Success.TButton")
+        self.btn_calibrate_imu.pack(fill="x", pady=(0, 12))
+
         self.btn_quit = ttk.Button(sidebar, text="❌  QUIT APPLICATION", command=self.quit_app, 
                                     style="Secondary.TButton")
         self.btn_quit.pack(fill="x")
@@ -1460,6 +1464,7 @@ class GuiApp:
             phase_align=PHASE_ALIGN_CHOICES.get(self.phase_align_var.get(), "auto"),
             latency_ms=self._get_latency_ms(),
             start_steps=self._get_start_steps(),
+            calibration_walk=getattr(self, "_calibration_walk", False),
         )
         
         # Update UI state
@@ -1672,6 +1677,52 @@ class GuiApp:
 
 
 
+    def start_imu_calibration(self):
+        """Action for the 'CALIBRATE IMUs' button: records a calibration walk as a session. When it is
+        stopped, utils/analysis/calibrate_imus.py measures each IMU's axes from it."""
+        if self.is_running or self.is_training:
+            return
+        self._calibration_walk = True
+        self.start_session()
+        if not self.is_running:  # the session did not start (no serial port, no MIDI file)
+            self._calibration_walk = False
+            return
+        self.log("Calibration walk: stand still 5 s, walk straight ahead about 20 steps, stand still 5 s, "
+                 "then press STOP SESSION.")
+
+    def _run_imu_calibration(self, session_dir):
+        """Runs the IMU calibration on a recorded calibration walk, in the background."""
+        python_exe = get_python_executable()
+        script = Path(__file__).resolve().parent / "utils" / "analysis" / "calibrate_imus.py"
+        if not session_dir or not python_exe or not script.exists():
+            self.log("IMU calibration could not be started.")
+            return
+        self.log("Calibrating the IMUs from this walk (can take a minute the first time)...")
+
+        def _worker():
+            try:
+                proc = subprocess.run([python_exe, str(script), str(session_dir)], cwd=str(script.parents[2]),
+                                      capture_output=True, text=True, timeout=600)
+                lines = [line for line in proc.stdout.strip().splitlines() if line.strip()]
+                if proc.returncode != 0:
+                    err = " ".join(proc.stderr.strip().splitlines()[-2:]) or "unknown error"
+
+                    def _failed():
+                        self.log(f"IMU calibration failed: {err}")
+                        self.show_notification("⚠️ IMU calibration failed, see the log", duration=8000)
+                    self.root.after(0, _failed)
+                    return
+
+                def _done():
+                    for line in lines:
+                        self.log(line)
+                    self.show_notification("✅ IMU calibration saved", duration=8000)
+                self.root.after(0, _done)
+            except Exception as e:
+                self.root.after(0, lambda e=e: self.log(f"IMU calibration failed: {e}"))
+
+        threading.Thread(target=_worker, daemon=True).start()
+
     def stop_session(self):
         """Action for the 'STOP SESSION' button."""
         if self.session_thread: self.session_thread.stop()
@@ -1706,6 +1757,9 @@ class GuiApp:
             except Exception as e:
                 self.log(f"Plot failed: {e}")
             self._start_session_report(self.current_session_dir)
+            if getattr(self, "_calibration_walk", False):
+                self._run_imu_calibration(self.current_session_dir)
+        self._calibration_walk = False
 
         # Reset live buffers and plot for next session
         # self.live_data_buffer = [] # Retain buffer so user can see last session
