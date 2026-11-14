@@ -15,6 +15,8 @@ A neuro-adaptive music controller that synchronizes music tempo to walking caden
 
 **Goal:** the music's beat should sound at the moment the heel touches the ground. The FSR in each heel is the ground truth; the FSRs plus a BNO055 IMU on each shoe sole are used to predict the next heel strike.
 
+How it works, section by section, with the source of every method: [`Documentation/HOW_IT_WORKS.md`](Documentation/HOW_IT_WORKS.md). How to use it: [`Documentation/MANUAL.md`](Documentation/MANUAL.md).
+
 ### Where each part of the algorithm lives
 
 | Stage | What it does | Code |
@@ -22,8 +24,8 @@ A neuro-adaptive music controller that synchronizes music tempo to walking caden
 | Firmware, shoes | FSR step/lift detection (threshold + hysteresis), IMU sampling at 100 Hz, ESP-NOW | [`ESP32/step_detection_sketch`](ESP32/step_detection_sketch/step_detection_sketch.ino) |
 | Firmware, receiver | Relays everything to the PC over serial (921600 baud) | [`ESP32/step_receiver_sketch`](ESP32/step_receiver_sketch/step_receiver_sketch.ino) |
 | Clock sync, parsing | Shoe clock → PC clock, raw → physical units | [`server/utils/hardware/sensor_stream.py`](server/utils/hardware/sensor_stream.py) |
-| IMU calibration | Gyro bias and gravity while standing, foot rotation axis by PCA, rotation direction | [`server/utils/gait/calibration.py`](server/utils/gait/calibration.py) |
-| Gait events | Toe-off (rotation speed < −60 °/s) and mid-swing (> +150 °/s) | [`server/utils/gait/events.py`](server/utils/gait/events.py) |
+| IMU calibration | Axis of each IMU measured from a calibration walk (gaitmap); gyro zero point from standing still at every session start | [`server/utils/gait/calibration.py`](server/utils/gait/calibration.py), [`server/utils/analysis/calibrate_imus.py`](server/utils/analysis/calibrate_imus.py) |
+| Gait events | Heel-off, toe-off, mid-swing and heel strike from the foot's rotation speed (Sabatini et al. 2005, 30 °/s thresholds) | [`server/utils/gait/events.py`](server/utils/gait/events.py) |
 | Strike prediction | Next heel strike from the step rhythm, toe-off and mid-swing, weighted by accuracy | [`server/utils/prediction_model/strike_predictor.py`](server/utils/prediction_model/strike_predictor.py) |
 | Tempo and phase alignment | Base tempo from the last 8 steps, PI controller that moves the beat onto the predicted strike | [`server/utils/engine/phase_controller.py`](server/utils/engine/phase_controller.py) |
 | Glue | Runs a session, logs everything | [`server/main.py`](server/main.py), [`server/utils/engine/strike_tracking.py`](server/utils/engine/strike_tracking.py) |
@@ -31,7 +33,7 @@ A neuro-adaptive music controller that synchronizes music tempo to walking caden
 ### Running a session
 
 1. `setup/Windows/dev/setup_env.bat` once (Linux/Mac: `setup/Linux_Mac/dev/setup_env.sh`), then `start_app.bat`.
-2. In the GUI: choose the serial port, press **CALIBRATE WEIGHT** while standing, then **Start**.
+2. In the GUI: choose the serial port and press **CALIBRATE WEIGHT** while standing. Once per mounting press **CALIBRATE IMUs** and do the calibration walk. Then **Start**; every session begins with 5 s of standing still.
 3. Every session is saved in `server/logs/<name>/session_<date>_<time>/`.
 
 **Prediction-only test (music does not follow the walker):**
@@ -59,6 +61,9 @@ The strike predictor runs and logs in every mode, so its accuracy can be measure
 
 - `server/utils/analysis/session_report.py` – full report of a session
 - `server/utils/analysis/alignment_plot.py` – beat vs. heel strike, one graph per session
+- `server/utils/analysis/replay_events.py` – runs a recorded session through the detection code again and compares with the FSR
+- `server/utils/analysis/prediction_comparison.py` – prediction of the next landing: ours next to Zank et al. 2013
+- `server/utils/analysis/calibrate_imus.py` – IMU calibration from a calibration walk; `--check` tells whether an IMU has moved
 - `server/tests/` – unit tests (`python -m pytest server/tests`)
 
 ### Known issues (Nov 2026)
