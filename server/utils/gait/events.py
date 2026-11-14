@@ -5,7 +5,7 @@ Gait phase segmentation from the foot's sagittal angular velocity, following
   A. M. Sabatini, C. Martelloni, S. Scapellato, F. Cavallo, "Assessment of Walking Features From
   Foot Inertial Sensing", IEEE Trans. Biomed. Eng. 52(3):486-494, 2005, §II-C.1, Eq. 2-3, Fig. 2.
 Positive = swing direction (calibration.py):
-  STANCE   --|w| >= 30 dps (Eq. 2, heel-off)----------------->  PUSH_OFF
+  STANCE   --|w| >= 30 dps (Eq. 2)--------------------------->  heel-off (HO), PUSH_OFF
   PUSH_OFF --largest negative peak, ends when w turns positive->  toe-off (TO)
   SWING    --largest positive peak, ends when w turns negative->  mid-swing (MS)
   LANDING  --largest negative peak, ends when |w| < 30 dps (Eq. 3, foot-flat)
@@ -42,7 +42,7 @@ STANCE, PUSH_OFF, SWING, LANDING = "stance", "push_off", "swing", "landing"
 @dataclass
 class GaitEvent:
     foot: int
-    kind: str  # "TO", "MS" or "HS"
+    kind: str  # "HO", "TO", "MS" or "HS"
     sender_s: float
     value_dps: float
 
@@ -95,9 +95,11 @@ class FootTracker:
         if self.state != STANCE and t - self._state_since > SWING_TIMEOUT_S:
             self._enter(STANCE, t)
 
+        events = []
         if self.state == STANCE:  # foot flat
             if abs(w) >= HO_DPS:  # Eq. 2: heel-off
                 self._enter(PUSH_OFF, t)
+                events.append(GaitEvent(self.foot, "HO", t, w))
 
         if self.state == PUSH_OFF:  # toe-off = largest clockwise (negative) peak
             if self._extreme is None or w < self._extreme[0]:
@@ -106,7 +108,7 @@ class FootTracker:
                 value, t_to = self._extreme
                 self._enter(SWING, t_to)
                 if value < 0:  # no negative peak = the push-off was missed: no TO
-                    return [GaitEvent(self.foot, "TO", t_to, value)]
+                    return events + [GaitEvent(self.foot, "TO", t_to, value)]
 
         elif self.state == SWING:  # mid-swing = top of the positive pulse
             if self._extreme is None or w > self._extreme[0]:
@@ -125,7 +127,7 @@ class FootTracker:
                 self._enter(STANCE, t)
                 if value < 0:
                     return [GaitEvent(self.foot, "HS", t_hs, value)]
-        return []
+        return events
 
     def _check_impacts(self, t: float):
         # The IMU data of a strike arrives a little after the FSR message; wait for it

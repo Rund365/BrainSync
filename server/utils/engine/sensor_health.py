@@ -13,7 +13,6 @@ from ..prediction_model.strike_predictor import RIGHT, LEFT
 FOOT_NAMES = {RIGHT: "right", LEFT: "left"}
 IMU_SILENT_S = 1.0  # walking without IMU samples from a foot for this long = problem
 WALKING_S = 3.0  # a step within this = walking
-CALIBRATION_STEPS = 20  # a foot should be calibrated after this many steps
 LOSS_WINDOW_S = 10.0
 LOSS_WARN = 0.02  # more than 2 % of the messages lost in a window
 BUS_ERROR_WINDOW_S = 10.0
@@ -84,10 +83,10 @@ class SensorHealth:
             calib = self.tracker.feet[foot].calib
             if calib.ready and not self._calibrated[foot]:
                 self._calibrated[foot] = True
-                self._note(now, f"The {name} IMU is calibrated (after {self._steps} steps)")
-            self._set(now, f"calib_{foot}", self._steps >= CALIBRATION_STEPS and not calib.ready,
-                      f"The {name} IMU is not calibrated after {CALIBRATION_STEPS} steps: "
-                      "check that it is fixed firmly to the foot")
+                self._note(now, f"The {name} IMU is calibrated")
+            self._set(now, f"calib_{foot}", not calib.ready and calib.rejected_windows >= 2,
+                      f"The {name} IMU cannot measure its gyro bias: stand still for a second",
+                      f"The {name} IMU measured its gyro bias")
         self._check_loss(now)
 
     def _check_loss(self, now: float):

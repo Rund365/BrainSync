@@ -6,15 +6,15 @@ they arrived on the PC, the same way StrikeTracker does live, and collects the e
 
 --check   compares them with the session's own gait_events.csv (only meaningful with the code
           the session was recorded with; it matched 100% before the Sabatini change).
---vs-fsr  compares the IMU events with the FSR: heel strike (HS) vs. FSR strike, toe-off (TO)
-          vs. FSR lift, and relative stance. Reference values, Sabatini et al. 2005 (IEEE TBME
+--vs-fsr  compares the IMU events with the FSR: heel strike (HS) vs. FSR strike, heel-off (HO)
+          vs. FSR lift (the FSR is under the heel only), and relative stance. Reference values, Sabatini et al. 2005 (IEEE TBME
           52(3)), §III-IV: HS -2 ms (95% CI -16..+12 ms) vs. footswitches, TO about 35 ms early,
           relative stance 54-60 %.
 --swap    feeds the IMU labelled 'left' to the right foot's tracker and vice versa (the mapping
           the FSR swing windows show in imu_noise_analysis.py), without changing the engine.
 --mount   which gyro axis and sign each tracker uses:
             fixed: calibration.MOUNTING (new recordings, IMUs mounted in a known orientation)
-            meta:  recordings made before that. Axis = the one the old calibration found
+            meta:  recordings made before that. Axis and gyro bias = the ones the old calibration found
                    (meta.json), sign = the one that makes the foot rotate forward during its FSR
                    swings: the foot pitch rises from about -70 deg at toe-off to about +20 deg at
                    heel strike (Sabatini 2005, Fig. 4b), so the integral of the pitch rate over a
@@ -66,7 +66,7 @@ def meta_mount(folder: Path, foot: int, prefix: str, t: np.ndarray, gyr: np.ndar
     rate = (gyr - np.array(c["gyro_bias_dps"])) @ axis
     integrals = [rate[(t >= a) & (t <= b)].sum() * 0.01 for a, b in fsr_swings(folder, foot)]
     sign = 1 if np.median(integrals) > 0 else -1
-    return axis, sign, float(np.median(integrals)) * sign
+    return axis, sign, float(np.median(integrals)) * sign, np.array(c["gyro_bias_dps"], float)
 
 
 def replay(folder: Path, swap: bool = False, mount: str = "fixed"):
@@ -81,8 +81,11 @@ def replay(folder: Path, swap: bool = False, mount: str = "fixed"):
         data[foot] = (imu[f"valid_{p}"].to_numpy() == 1,
                       imu[[f"{p}_ax", f"{p}_ay", f"{p}_az"]].to_numpy(float) / ACC_LSB_PER_MS2, gyr)
         if mount == "meta":
-            axis, sign, swing_deg = meta_mount(folder, foot, p, t, gyr)
+            axis, sign, swing_deg, bias = meta_mount(folder, foot, p, t, gyr)
             feet[foot] = FootTracker(foot, axis=axis, sign=sign)
+            # These recordings never stood still for 0.5 s (no window passes STILL_STD_DPS), so
+            # use the bias the old calibration measured, marked as accepted.
+            feet[foot].calib.gyro_bias, feet[foot].calib._bias_ok = bias, True
             mounts[foot] = (IMU_LABEL[p], sign, swing_deg)
         else:
             feet[foot] = FootTracker(foot)
@@ -158,15 +161,16 @@ def vs_fsr(folder: Path, events: pd.DataFrame) -> pd.DataFrame:
         ev = events[events["foot"] == foot]
         imu_hs = np.sort(ev.loc[ev["event"] == "HS", "sender_s"].to_numpy())
         imu_to = np.sort(ev.loc[ev["event"] == "TO", "sender_s"].to_numpy())
+        imu_ho = np.sort(ev.loc[ev["event"] == "HO", "sender_s"].to_numpy())
         hs = _offsets_ms(imu_hs, fsr_hs)
-        to = _offsets_ms(imu_to, fsr_lift)
+        ho = _offsets_ms(imu_ho, fsr_lift)  # FSR under the heel only: its lift is a heel-off
         rs = _relative_stance(imu_hs, imu_to)
         pct = lambda a, q: round(float(np.percentile(a, q)), 1) if len(a) else None
         rows.append({
             "foot": FOOT_NAME[foot], "FSR strikes": len(fsr_hs),
             "IMU HS": len(imu_hs), "HS paired": len(hs),
             "HS-FSR median ms": pct(hs, 50), "HS 2.5%": pct(hs, 2.5), "HS 97.5%": pct(hs, 97.5),
-            "IMU TO": len(imu_to), "TO paired": len(to), "TO-lift median ms": pct(to, 50),
+            "IMU HO": len(imu_ho), "HO paired": len(ho), "HO-lift median ms": pct(ho, 50),
             "rel. stance %": pct(np.array(rs), 50),
         })
     return pd.DataFrame(rows)
@@ -192,7 +196,7 @@ def main():
             extra = f", median swing rotation {swing_deg:+.0f} deg" if swing_deg is not None else ""
             bias_std = feet[foot].calib.state()["bias_std_dps"]
             print(f"   {FOOT_NAME[foot]} foot <- IMU '{label}', sign {sign:+d}{extra}, "
-                  f"bias std over first 0.5 s {bias_std} dps")
+                  f"bias {feet[foot].calib.gyro_bias.round(2).tolist()} dps, spread {bias_std} dps")
         if args.check:
             print(check(folder, events).to_string(index=False))
         if args.vs_fsr:
