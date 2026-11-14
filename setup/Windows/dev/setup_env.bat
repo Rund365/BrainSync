@@ -2,8 +2,9 @@
 :: ======================================================================================
 :: BRAIN MUSIC INTERFACE - SETUP WIZARD
 :: ======================================================================================
-:: Finds (or installs) a suitable Python, creates the virtual environment (.venv), installs
-:: all dependencies and checks that everything the app needs is there.
+:: Finds (or installs) a suitable Python, deletes the virtual environment of an earlier setup,
+:: creates it again (.venv), installs all dependencies (the app's, and gaitmap for the IMU
+:: calibration) and checks that everything the app needs is there.
 ::
 :: Why the Python version matters: the MIDI library (python-rtmidi) has ready-made packages
 :: only for Python 3.10, 3.11 and 3.12. On newer versions pip would have to build it from
@@ -20,7 +21,8 @@ echo ==================================================
 echo.
 echo This script will:
 echo   1. Find Python 3.10-3.12 (and offer to install 3.12 if there is none)
-echo   2. Create a Python Virtual Environment (.venv) and upgrade pip
+echo   2. Delete the virtual environment of an earlier setup (.venv), create it again
+echo      and upgrade pip
 echo   3. Install all dependencies
 echo   4. Check the environment (libraries, MIDI, serial ports, model)
 echo.
@@ -63,21 +65,23 @@ if not defined GOOD_PYTHON (
 echo.
 echo [2/4] Creating the virtual environment...
 
-:: An existing .venv made with an unsuitable Python cannot install the MIDI library
-if defined GOOD_PYTHON if exist .venv\Scripts\python.exe (
-    .venv\Scripts\python.exe -c "import sys; sys.exit(0 if (3, 10) <= sys.version_info[:2] <= (3, 12) else 1)"
-    if errorlevel 1 call :rebuild_venv
+:: A clean start: the environment of an earlier setup is deleted and made again, so no
+:: library from an older install is left behind
+if exist .venv (
+    echo Deleting .venv ...
+    rmdir /s /q .venv
+)
+if exist .venv (
+    echo Could not delete .venv. Close the app and every terminal that uses it, then run this again.
+    pause
+    exit /b 1
 )
 
-if not exist .venv\Scripts\activate.bat (
-    %PYTHON_CMD% -m venv .venv
-    if errorlevel 1 (
-        echo Error creating venv!
-        pause
-        exit /b 1
-    )
-) else (
-    echo Virtual environment already exists, skipping creation.
+%PYTHON_CMD% -m venv .venv
+if errorlevel 1 (
+    echo Error creating venv!
+    pause
+    exit /b 1
 )
 
 call .venv\Scripts\activate.bat
@@ -93,8 +97,8 @@ python -m pip install -r requirements.txt
 if errorlevel 1 (
     echo.
     echo Error installing dependencies!
-    echo If python-rtmidi failed to build, delete the .venv folder and run this setup again:
-    echo it will offer to install Python 3.12.
+    echo If python-rtmidi failed to build, this Python has no ready-made package for it:
+    echo install Python 3.12 and run this setup again.
     pause
     exit /b 1
 )
@@ -165,13 +169,4 @@ if not defined PYTHON_CMD (
     echo Python 3.12 was installed but cannot be found yet.
     echo Close this window and run setup_env.bat again.
 )
-exit /b 0
-
-:: Deletes a .venv made with an unsuitable Python, so it is made again with the right one
-:rebuild_venv
-echo.
-echo The existing .venv uses a Python version the MIDI library has no package for.
-choice /c YN /m "Delete .venv and make it again with the right Python"
-if errorlevel 2 exit /b 0
-rmdir /s /q .venv
 exit /b 0

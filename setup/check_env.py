@@ -40,6 +40,8 @@ LIBRARIES = [
     ("optuna", "optuna", False),            # only model training
     ("plotly", "plotly", False),
     ("PIL", "Pillow", False),
+    ("gaitmap", "gaitmap", False),          # only the IMU calibration
+    ("gaitmap_mad", "gaitmap_mad", False),
 ]
 
 

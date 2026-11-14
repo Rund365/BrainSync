@@ -1,7 +1,9 @@
-pandas
+# numpy and pandas are capped because gaitmap 2.6.0 (IMU calibration) needs numpy < 2.1 and
+# pandas < 2.4. gaitmap and gaitmap_mad must be the same version, so both are pinned.
+pandas<2.4
 matplotlib
 pyserial
-numpy
+numpy<2.1
 mido
 python-rtmidi
 sounddevice
@@ -12,3 +14,5 @@ plotly
 kaleido
 joblib
 Pillow
+gaitmap==2.6.0
+gaitmap_mad==2.6.0  # ForwardDirectionSignAlignment lives here (AGPL-3.0)

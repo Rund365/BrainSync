@@ -18,7 +18,8 @@ echo "=================================================="
 echo
 echo "This script will:"
 echo "  1. Find Python 3.10-3.12 (and offer to install 3.12 if there is none)"
-echo "     and create a Python Virtual Environment (.venv)"
+echo "     delete the virtual environment of an earlier setup (.venv)"
+echo "     and create it again"
 echo "  2. Upgrade pip"
 echo "  3. Install all dependencies"
 echo "  4. Check the environment (libraries, MIDI, serial ports, model)"
@@ -89,25 +90,17 @@ if ! $PYTHON_CMD -c "import venv, ensurepip" 2> /dev/null; then
     exit 1
 fi
 
-# An existing .venv made with an unsuitable Python cannot install the MIDI library
-if [ -n "$GOOD_PYTHON" ] && [ -x ".venv/bin/python" ]; then
-    if ! .venv/bin/python -c "import sys; sys.exit(0 if (3, 10) <= sys.version_info[:2] <= (3, 12) else 1)"; then
-        echo "The existing .venv uses a Python version the MIDI library has no package for."
-        read -p "Delete .venv and make it again with $PYTHON_CMD? [y/N]: " REPLY
-        if [[ "$REPLY" =~ ^[Yy]$ ]]; then
-            rm -rf .venv
-        fi
-    fi
+# A clean start: the environment of an earlier setup is deleted and made again, so no
+# library from an older install is left behind
+if [ -d ".venv" ]; then
+    echo "Deleting .venv ..."
+    rm -rf .venv
 fi
 
-if [ ! -d ".venv" ]; then
-    $PYTHON_CMD -m venv .venv
-    if [ $? -ne 0 ]; then
-        echo "Error creating venv!"
-        exit 1
-    fi
-else
-    echo "Virtual environment already exists, skipping creation."
+$PYTHON_CMD -m venv .venv
+if [ $? -ne 0 ]; then
+    echo "Error creating venv!"
+    exit 1
 fi
 
 if [ ! -f ".venv/bin/activate" ]; then
@@ -160,7 +153,8 @@ echo "[3/4] Installing dependencies..."
 python -m pip install -r requirements.txt
 if [ $? -ne 0 ]; then
     echo "Error installing dependencies!"
-    echo "If python-rtmidi failed to build, remove .venv and rerun: it offers to install Python 3.12."
+    echo "If python-rtmidi failed to build, this Python has no ready-made package for it:"
+    echo "install Python 3.12 and rerun this setup."
     exit 1
 fi
 python setup/check_env.py --mark
