@@ -18,6 +18,7 @@ from pathlib import Path
 from utils.hardware.midi_player import MidiBeatSync, NullOutput
 from utils.hardware.sensor_stream import SensorStream, SerialReader, ImuMsg, StepMsg, LiftMsg, StatusMsg, OtherMsg
 from utils.engine.strike_tracking import StrikeTracker
+from utils.gait.calibration import CALIBRATION_FILE, load_calibration, mounting_from, up_from
 from utils.engine.phase_controller import PhaseAligner, PhaseSettings
 from utils.engine.sensor_health import SensorHealth
 from utils.session.logger import Logger
@@ -39,7 +40,8 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "midi_path",
         nargs="?",
-        default=r"midi_files\Technion_March1.mid",
+        # next to server/, whatever folder the command is run from
+        default=str(Path(__file__).resolve().parent.parent / "midi_files" / "Technion_March1.mid"),
         help="Path to the MIDI file to play",
     )
     parser.add_argument(
@@ -281,6 +283,12 @@ def parse_args() -> argparse.Namespace:
         help="Serial baud rate (default: found automatically, 921600 for the IMU firmware, 115200 before it)",
     )
     parser.add_argument(
+        "--calibration-walk",
+        action="store_true",
+        help="Record an IMU calibration walk (stand still 5 s, walk straight ahead about 20 steps, stand "
+             "still 5 s): fixed tempo, no beat alignment. Then run utils/analysis/calibrate_imus.py on the session",
+    )
+    parser.add_argument(
         "--no-audio",
         action="store_true",
         help="Do not open a MIDI port (silent run, e.g. for simulations)",
@@ -473,6 +481,10 @@ def handle_startup_mode(args, ser, player, logger, bpm_estimation, status_callba
 
 def main(args, status_callback=print, stop_event=None, session_dir_callback=None, command_queue=None):
     midi_path = args.midi_path
+    calibration_walk = getattr(args, "calibration_walk", False)
+    if calibration_walk:  # the walk only has to be recorded: fixed tempo, no beat alignment
+        args.manual, args.hybrid, args.random, args.phase_align = True, False, False, "off"
+        args.walk_first = False  # walk-first waits for steps before recording; the standing start must be recorded
     smoothing_window = getattr(args, 'smoothing', 3)
     stride = getattr(args, 'stride', 1)
     
@@ -647,7 +659,22 @@ def main(args, status_callback=print, stop_event=None, session_dir_callback=None
     # ------------------------------------------------------------------
     stream = SensorStream()
     sensor_logger = SensorLogger(logger.path)
-    tracker = StrikeTracker(stream, sensor_logger)
+    # IMU axes: measured once per mounting by a calibration walk (utils/analysis/calibrate_imus.py).
+    # The simulator has its own fixed axes and does not use the file.
+    imu_calibration = None if getattr(args, "simulate", None) else load_calibration()
+    if imu_calibration:
+        logger.log(f"IMU calibration: {CALIBRATION_FILE.name}, from session {imu_calibration.get('session')}, "
+                   f"made {imu_calibration.get('created')}")
+    elif not getattr(args, "simulate", None) and protocol >= 2 and not calibration_walk:
+        _notify(status_callback, f"WARNING: no IMU calibration ({CALIBRATION_FILE.name} is missing). The IMU axes "
+                                 "are placeholders, so the IMU events of this session are not valid. Record a "
+                                 "calibration walk and run utils/analysis/calibrate_imus.py on it.")
+        logger.log("No IMU calibration file: IMU axes are placeholders (simulator values)")
+    if calibration_walk:
+        _notify(status_callback, "Calibration walk: stand still 5 s, walk straight ahead about 20 steps, "
+                                 "stand still 5 s, then stop the session")
+    tracker = StrikeTracker(stream, sensor_logger, mounting_from(imu_calibration) if imu_calibration else None,
+                            up_from(imu_calibration))
     aligner = PhaseAligner(player, tracker, settings, enabled=phase_align == "on", sensor_logger=sensor_logger,
                            notify=lambda message: _notify(status_callback, message))
     if getattr(args, "walk_first", False):
@@ -708,6 +735,9 @@ def main(args, status_callback=print, stop_event=None, session_dir_callback=None
         time.sleep(0.001)
         
     logger.log("Session ended")
+    if calibration_walk:
+        logger.log(f"Calibration walk recorded. The GUI calibrates from it now; from the command line run: "
+                   f"python utils/analysis/calibrate_imus.py \"{logger.path}\"")
     reader.stop()
     player.stop()
     player.close()
@@ -720,6 +750,8 @@ def main(args, status_callback=print, stop_event=None, session_dir_callback=None
         "sensor_health": health.state(),
         "run_type": run_type,
         "simulated": bool(getattr(args, "simulate", None)),
+        "imu_calibration": imu_calibration,
+        "calibration_walk": calibration_walk,
     })
     if hasattr(ser, "write_truth"):
         ser.write_truth(logger.path)

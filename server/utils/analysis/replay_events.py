@@ -13,7 +13,8 @@ they arrived on the PC, the same way StrikeTracker does live, and collects the e
 --swap    feeds the IMU labelled 'left' to the right foot's tracker and vice versa (the mapping
           the FSR swing windows show in imu_noise_analysis.py), without changing the engine.
 --mount   which gyro axis and sign each tracker uses:
-            fixed: calibration.MOUNTING (new recordings, IMUs mounted in a known orientation)
+            fixed: the IMU calibration the session ran with (meta.json), else the current
+                   imu_calibration.json, else calibration.MOUNTING (the simulator's values)
             meta:  recordings made before that. Axis and gyro bias = the ones the old calibration found
                    (meta.json), sign = the one that makes the foot rotate forward during its FSR
                    swings: the foot pitch rises from about -70 deg at toe-off to about +20 deg at
@@ -33,6 +34,7 @@ import numpy as np
 import pandas as pd
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))  # server/
+from utils.gait.calibration import load_calibration
 from utils.gait.events import FootTracker
 from utils.hardware.sensor_stream import ACC_LSB_PER_MS2, GYR_LSB_PER_DPS
 
@@ -76,6 +78,9 @@ def replay(folder: Path, swap: bool = False, mount: str = "fixed"):
     # live (strike_tracking.py): columns l_* -> LEFT tracker, r_* -> RIGHT tracker
     source = {RIGHT: "l", LEFT: "r"} if swap else {RIGHT: "r", LEFT: "l"}
     data, feet, mounts = {}, {}, {}
+    meta_file = folder / "meta.json"
+    calibration = (json.loads(meta_file.read_text(encoding="utf-8")).get("imu_calibration")
+                   if meta_file.exists() else None) or load_calibration() or {}
     for foot, p in source.items():
         gyr = imu[[f"{p}_gx", f"{p}_gy", f"{p}_gz"]].to_numpy(float) / GYR_LSB_PER_DPS
         data[foot] = (imu[f"valid_{p}"].to_numpy() == 1,
@@ -88,7 +93,8 @@ def replay(folder: Path, swap: bool = False, mount: str = "fixed"):
             feet[foot].calib.gyro_bias, feet[foot].calib._bias_ok = bias, True
             mounts[foot] = (IMU_LABEL[p], sign, swing_deg)
         else:
-            feet[foot] = FootTracker(foot)
+            measured = calibration.get("imus", {}).get(IMU_LABEL[p])  # by IMU, so --swap keeps each IMU's axis
+            feet[foot] = FootTracker(foot, axis=measured["pitch_axis"], sign=+1) if measured else FootTracker(foot)
             mounts[foot] = (IMU_LABEL[p], feet[foot].calib.sign, None)
     # Live, a strike reaches the tracker when its message arrives on the PC, usually before the IMU
     # batch holding the last few samples before it (median 3 samples). Use the PC arrival times

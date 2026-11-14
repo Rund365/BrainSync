@@ -8,6 +8,7 @@ measured from the IMU impact and subtracted, so the target is the real contact.
 """
 from dataclasses import dataclass
 
+from ..gait.calibration import MOUNTING
 from ..gait.events import FootTracker
 from ..hardware.sensor_stream import SensorStream, ImuMsg, StepMsg, imu_to_units
 from ..prediction_model.strike_predictor import StrikePredictor, RIGHT, LEFT
@@ -23,9 +24,15 @@ class NextStrike:
 
 
 class StrikeTracker:
-    def __init__(self, stream: SensorStream, sensor_logger=None):
+    def __init__(self, stream: SensorStream, sensor_logger=None, mounting: dict | None = None,
+                 up: dict | None = None):
+        """mounting: foot -> (axis, sign), from the IMU calibration (gait.calibration.mounting_from).
+        None = MOUNTING, the simulator's values.
+        up: foot -> the calibration's 'up' (gait.calibration.up_from), for the "IMU moved" check."""
+        self.up = up or {}
         self.stream = stream
-        self.feet = {RIGHT: FootTracker(RIGHT), LEFT: FootTracker(LEFT)}
+        mounting = mounting or MOUNTING
+        self.feet = {foot: FootTracker(foot, *mounting[foot]) for foot in (RIGHT, LEFT)}
         self.predictor = StrikePredictor()
         self.log = sensor_logger
         self._last_logged = None

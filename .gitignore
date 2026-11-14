@@ -19,3 +19,5 @@ venv311/
 # Simulated sessions (server/main.py --simulate)
 server/sim_logs/
 server/user_settings.json
+# IMU calibration of the current mounting (utils/analysis/calibrate_imus.py)
+server/imu_calibration.json

@@ -7,6 +7,7 @@ Each problem is logged once when it starts and once when it is gone.
 """
 from collections import deque
 
+from ..gait.calibration import MOVED_DEG, tilt_deg
 from ..hardware.sensor_stream import ImuMsg, StatusMsg, OtherMsg
 from ..prediction_model.strike_predictor import RIGHT, LEFT
 
@@ -31,6 +32,7 @@ class SensorHealth:
         self._last_step = None
         self._steps = 0
         self._calibrated = {RIGHT: False, LEFT: False}
+        self.mount_tilt_deg = {}  # foot name -> degrees between gravity while standing and the calibration's up
         self._bus_errors = None
         self._bus_error_times = {RIGHT: deque(), LEFT: deque()}
         self._errors_seen = set()
@@ -84,10 +86,27 @@ class SensorHealth:
             if calib.ready and not self._calibrated[foot]:
                 self._calibrated[foot] = True
                 self._note(now, f"The {name} IMU is calibrated")
+                self._check_mounting(now, foot, name, calib)
             self._set(now, f"calib_{foot}", not calib.ready and calib.rejected_windows >= 2,
                       f"The {name} IMU cannot measure its gyro bias: stand still for a second",
                       f"The {name} IMU measured its gyro bias")
         self._check_loss(now)
+
+    def _check_mounting(self, now, foot, name, calib):
+        """Has the IMU moved on the shoe since its calibration walk? Gravity while standing still at
+        the session start, against the 'up' the calibration stored (the check Sabatini 2005 §II-D
+        makes before each trial)."""
+        up = getattr(self.tracker, "up", {}).get(foot)
+        standing_acc = getattr(calib, "standing_acc", None)
+        if up is None or standing_acc is None:
+            return
+        tilt = tilt_deg(standing_acc, up)
+        self.mount_tilt_deg[name] = round(tilt, 1)
+        if tilt > MOVED_DEG:
+            self._note(now, f"WARNING: the {name} IMU sits {tilt:.0f} degrees off its calibration: it has moved "
+                            "on the shoe (or the foot was not flat on the ground). Record a new calibration walk")
+        else:
+            self._note(now, f"The {name} IMU sits as in its calibration ({tilt:.1f} degrees off)")
 
     def _check_loss(self, now: float):
         stats = self.stream.stats
@@ -120,4 +139,4 @@ class SensorHealth:
         self.logger.log(f"SENSORS: {message}")
 
     def state(self) -> dict:
-        return {"open_problems": sorted(self.problems), "log": self.history}
+        return {"open_problems": sorted(self.problems), "mount_tilt_deg": self.mount_tilt_deg, "log": self.history}
