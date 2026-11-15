@@ -36,6 +36,8 @@ result against the pressure pad.
 
 **Where we stand (November 2026)**
 
+TODO: remember to update when we do test it
+
 | Part | State |
 |---|---|
 | Sensors, radio, logging | work; no step lost in 1275 recorded steps |
@@ -50,7 +52,7 @@ result against the pressure pad.
 |---|---|
 | Gait event rules, gyro zero point | Sabatini et al. 2005 |
 | Sensor axes from a walk | gaitmap (Kuderle et al. 2024), Mihy et al. 2022 |
-| Prediction from swing events | ours; to be compared with Zank et al. 2013 |
+| Prediction from swing and lift events | ours; to be compared with Zank et al. 2013 |
 | Tempo from steps | ours; D-Jogger (Moens et al. 2014) as the published baseline |
 
 Everything that is our own choice is marked OURS in the constants tables. Full references are at
@@ -91,12 +93,14 @@ logic here except the FSR threshold.
 **Why these two signals**
 - **Gyroscope** (rotation speed, °/s): the foot rotates in a repeating pattern every step.
   Heel-off, toe-off, mid-swing and heel strike are found as thresholds and peaks of the rotation
-  speed around the axis across the foot. This is the only signal the event detector uses
-  (section 5).
-- **Accelerometer** (m/s²): used for one thing, the impact spike at landing. It measures how late
-  the FSR fires after the real contact (section 5).
-- **No angles.** An angle needs integrating the gyro, and the integral drifts. The event rules work
-  on rotation speed directly.
+  speed around the axis across the foot (section 5.4).
+- **Accelerometer** (m/s²): the impact spike marks the landing, and the acceleration along "up"
+  shows the foot rising and falling (sections 5.8, 5.8b). The landing also tells how late the FSR
+  fires after the real contact.
+- **One angle only: which way is up.** An angle needs integrating the gyro, and the integral
+  drifts. So "up" is carried through the foot's rotation by the gyro and reset to gravity every
+  time the foot is flat after a landing; it cannot drift for longer than one step. The event rules
+  work on rotation speed directly.
 - **Fusion off.** Raw mode lets us choose the ranges ourselves.
 
 ### 1.3 Timestamps
@@ -340,6 +344,8 @@ day to day, like a kitchen scale that shows 3 g with nothing on it.
   then on.
 - The system checks that the foot was really still in that half second (spread under 2 °/s on
   every axis). If not, it waits for the next quiet half second.
+- The same half second gives gravity as this sensor feels it: its size (the recorded IMUs read
+  about 10.4 m/s², not 9.81) and, if the calibration file has none, which way is up.
 - No events are detected until a zero point is accepted. So every session must start standing
   still.
 
@@ -358,7 +364,8 @@ works on this number.
 - A copy stays in the calibration session's folder.
 - Every later session stores the calibration it ran with in its `meta.json`, and replay uses
   that one.
-- No file: the app warns that the session's IMU events are not valid.
+- No file: the app warns that the session's IMU events are not valid. Nothing is guessed in its
+  place: without the axis, the rotation events (section 5.4) are off.
 
 ### 4.7b Has the sensor moved since?
 Two checks, both against the calibration:
@@ -392,10 +399,13 @@ Two checks, both against the calibration:
 | 2 °/s | "standing still" limit for the bias | OURS, placeholder until the table recording |
 | 0.1 s, 15 °/s | "standing" for the gravity step | gaitmap example |
 | 10° | "the sensor has moved" warning | OURS, placeholder |
+| 0.2-0.3 s after a landing, 20 % per sample | "up" pulled back to gravity while the foot is flat | OURS |
 
 ### 4.11 Known limits
 - Needs real forward walking. Walking in place gives no forward direction.
-- "left" / "right" are IMU labels (I2C address). Which foot each is on is not checked here.
+- "left" / "right" are IMU labels (I2C address). Which foot each is on is set once, in
+  `calibration.py` (`IMU_OF_FOOT`): crossed, as the shoes are wired (section 1.2). Rewiring the
+  shoes means changing that line.
 - The axis is fixed for the session. A shift of the sensor is checked at the session start only
   (section 4.7b), not during the walk. A turn of the sensor around the vertical is not seen by
   that check; the `--check` run sees it.
@@ -460,15 +470,16 @@ Then back to stance.
 ### 5.5 Where exactly a decision is made
 - **Only two thresholds exist**, both 30 °/s: one starts a step (heel-off), one ends it (foot
   flat).
-- **The unit is degrees per second**, a rotation *speed*. No angle in degrees is computed anywhere.
+- **The unit is degrees per second**, a rotation *speed*. These rules use no angle in degrees.
 - Everything between the two thresholds is decided by shape, not by a number: the lowest point of
   a dip, the highest point of a bump, and the moment the signal changes sign.
 - **An event is noticed later than it happened.** A peak is only known to be the peak once the
   signal has turned back. The event keeps the time of the peak itself, so this delay does not shift
   its timestamp.
-- **Consequence for mid-swing.** The top of the swing bump is only known when the bump is over,
-  and the bump ends just before the landing. So mid-swing is reported very late (section 6.2).
-  The swing bump is also flat on top, so noise decides where exactly "the top" is.
+- **Mid-swing is reported early.** The top of the swing bump is only certain when the bump is over,
+  just before the landing: too late to use (section 6.2). So mid-swing is reported as soon as the
+  rotation has fallen to 80 % of its highest value, still timed at the top. The swing bump is flat
+  on top, so noise decides where exactly "the top" is.
 
 ### 5.6 How a wrong decision happens
 | Cause | Effect |
@@ -485,14 +496,40 @@ The pitch rate is lightly smoothed before the rules run: `new = old + 0.5 × (ra
 removes fast jitter above roughly 11 Hz. Sabatini used a 15 Hz filter that needs the whole
 recording; ours works live.
 
-### 5.8 Extra: how late is the pressure pad?
-The pad needs some pressure before it fires, so it reports the landing slightly late. The landing
-itself shows as a sharp jolt in the accelerometer. For every pad strike the detector looks for
-that jolt just before it and measures the gap. The median of the last 20 is used to aim the beat
-at the real contact, not at the pad. This measurement is our own, with no published source.
+### 5.8 The landing, and how late the pressure pad is
+The landing shows as a sharp jolt in the accelerometer: from one sample to the next, its reading
+jumps by more than 9 m/s². A jolt counts as a **landing (LAND)** in one of two ways:
+- the foot has lifted since its last landing (section 5.8b) and is nearly flat at the jolt (tilted
+  less than 40°): reported 30 ms later;
+- otherwise, once the foot settles: its rotation stays under 150 °/s from 0.1 to 0.2 s after the
+  jolt. Reported 0.2 s later.
+
+A toe-off can jolt as hard when walking, but the foot is steep then and swings on afterwards, so it
+is not taken for a landing. A jolt twice as big within 30 ms replaces the first one (that was a
+knock just before the contact). The landing keeps the time of the jolt.
+
+The pad needs some pressure before it fires, so it reports the landing slightly late: 20-40 ms in
+the 1 Nov recordings, where the toes land first and the heel after. For every pad strike the gap to
+the landing before it is measured; the median of the last 20 is the pad's lateness. This
+measurement is our own, with no published source.
+
+### 5.8b The lift: rise, fall and top
+The accelerometer feels gravity plus the foot's own acceleration. With "up" known (section 1.2),
+the part along "up" minus gravity is the foot's vertical acceleration. Added up from a moment the
+foot is flat (0.3 s after a landing, speed 0), it gives the foot's vertical speed:
+
+| Event | When |
+|---|---|
+| **Rise (RISE)** | the upward speed passes 0.05 m/s: the foot leaves the ground |
+| **Fall (FALL)** | the upward speed is back to half its peak: the rise is ending |
+| **Top (TOP)** | the speed reaches 0: the foot's highest point |
+
+These need no forward swing, so they also work when stepping in place, where the rotation events
+of section 5.4 have little to go on. No top within 1 s means the foot did not step.
 
 ### 5.9 Who uses the events
-- **TO and MS** feed the strike prediction (section 6).
+- **LAND** teaches the strike prediction (section 6.3) and gives the pad's lateness (section 5.8).
+- **TO, MS, rise, fall and top** feed the strike prediction (section 6).
 - **HO and HS** are logged, to compare with the pressure pad (pad lift ↔ HO, pad strike ↔ HS).
 
 ### 5.10 Validation so far
@@ -511,7 +548,15 @@ at the real contact, not at the pad. This measurement is our own, with no publis
 | 0.5 | smoothing factor | OURS |
 | 1.0 s | a step that takes longer is dropped (walker stopped) | OURS |
 | each peak must have the right sign | reject malformed steps | OURS (the paper shows clean steps only) |
-| 4 and 8 m/s², 80 ms window, 5 ms | landing jolt in the accelerometer | OURS |
+| 80 % | mid-swing is reported once the bump falls to this share of its top | OURS |
+| 9 m/s² | landing: jump of the acceleration from one sample to the next | OURS |
+| 30 ms, twice as big | a later jolt that replaces the first | OURS |
+| 40°, 30 ms | nearly flat after a lift: a landing, reported this soon | OURS |
+| 150 °/s over 0.1-0.2 s | otherwise: the foot settles after a landing | OURS |
+| 0.4 s | one landing per foot within this | OURS |
+| 0.3 s | after a landing the foot is flat: the lift is followed from here | OURS |
+| 0.05 m/s, 50 % | rise, fall | OURS |
+| 1.0 s | no top this long after the flat moment: no step | OURS |
 
 ### 5.12 Known limits
 - Sabatini's thresholds were tuned at 200 Hz, on a treadmill, with their filter. We run at 100 Hz,
@@ -519,6 +564,8 @@ at the real contact, not at the pad. This measurement is our own, with no publis
 - The paper detects events after the walk. We do it live, so each event is known only a moment
   after it happened.
 - The pressure pad is under the heel only, so toe-off has no direct ground truth.
+- The landing and lift rules are ours. They are not yet checked on recordings made after a
+  calibration walk.
 
 ### 5.13 Methods and logic
 | Method | Problem it solves | Cost |
@@ -528,37 +575,48 @@ at the real contact, not at the pad. This measurement is our own, with no publis
 | Fixed order of phases | A dip in the swing cannot be mistaken for toe-off | One missed event can cost the whole step |
 | Event timed at the peak | Detection delay does not shift the timestamp | none |
 | Light live smoothing | Jitter would create false sign changes | Small delay; differs from the paper's filter |
+| Mid-swing reported at 80 % of its top | Known early enough to be used (section 6.2) | Reported a moment after the top |
+| Landing from the accelerometer jolt | The real contact, known 30 ms later, before the pad fires | A hard toe-off jolts too: needs the tilt or settle check |
+| Lift from the vertical speed | Works with or without a forward swing | Needs "up", the zero point and a flat moment |
 
 ## 6. Strike prediction: knowing the landing before it happens
 
 **Files:** `server/utils/prediction_model/strike_predictor.py`, `server/utils/engine/strike_tracking.py`
 
-**Status: built, not evaluated.** It depends on correct toe-off and mid-swing events (section 5),
-and those are not validated yet. Detection is checked first.
+**Status: built, not evaluated.** It depends on the events of section 5, and those are not
+validated on our data yet. Detection is checked first.
 
 ### 6.1 The problem
 A beat that should sound when the heel lands must be sent before the heel lands. So the PC needs
 the landing time in advance.
 
-### 6.2 The idea: three clues
+### 6.2 The idea: six clues
 Like waiting for a train:
 
 | Clue | Train | Foot | Known ahead |
 |---|---|---|---|
 | Rhythm | the timetable | last landing + this person's usual step time | a whole step |
 | Toe-off | "it left the previous station" | the foot left the ground; the landing follows after a nearly fixed time | roughly 300-450 ms |
-| Mid-swing | "you can see it coming" | the foot is halfway through the air | meant: 200 ms. Real: see below |
+| Mid-swing | "you can see it coming" | the foot is halfway through the air | about 200 ms, minus the wait to 80 % (section 5.5) |
+| Rise | "it left the previous station" | the foot left the ground (section 5.8b) | roughly 250-350 ms |
+| Fall | "it is braking" | the foot's rise is ending | roughly 150-250 ms |
+| Top | "it is at the platform signal" | the foot's highest point | roughly 100-200 ms |
 
-**The mid-swing clue arrives too late.** The code only knows "that was mid-swing" when the swing
-is over (section 5.5). In the published measurements of Zank et al. that moment is 24 ms before
-the landing on average. A beat has to be sent about 30 ms early, so this clue cannot help. In
-practice the prediction rests on rhythm and toe-off.
+Each clue's guess is its event's time plus this person's usual delay from that event to the
+landing. Toe-off and mid-swing need the foot to swing forward. Rise, fall and top only need it to
+go up and down, so they also work when stepping in place.
+
+In the published measurements of Zank et al. the end of the swing is 24 ms before the landing on
+average. A beat has to be sent about 30 ms early, so mid-swing is reported before the swing ends
+(section 5.5).
 
 ### 6.3 Learning from every real landing
-- Each time the pressure pad fires, the real delays are measured: toe-off to landing, mid-swing to
-  landing, and the step time.
+- Each time a landing is detected (section 5.8), the real delays are measured: from each clue's
+  event to the landing, and the step time.
 - The last 8 are kept per foot, and their median is "this person's usual".
-- Each clue is also scored: how far off was it this time.
+- Each clue is also scored: how far off its last guess before the landing was.
+- The pressure pad is not used to learn. It stays the referee: each pad strike is paired with its
+  landing, and the gap gives the pad's lateness (section 5.8).
 
 So the system adapts to the person. Nothing is preset per user.
 
@@ -568,8 +626,8 @@ So the system adapts to the person. Nothing is preset per user.
 - A guess that disagrees strongly with the best one is left out (pace change).
 - A guess more than 1 s overdue is dropped: the person stopped.
 
-### 6.5 Two corrections before use
-- The pressure pad's own lateness is subtracted (section 5.8), so the target is the real contact.
+### 6.5 Before use
+- The target is the landing itself, the real contact, not the pad (section 5.8).
 - The time is converted from the sender's clock to the PC's (section 3.4).
 
 ### 6.6 Where the idea comes from, and the published work closest to it
@@ -595,10 +653,18 @@ Their results, 10 people, 154 steps, tested on people the predictor had not seen
 | start and end of swing | gyro only | 24 ms | 18 ms |
 
 Two of their four events already exist in our detector: the start of the swing is the moment we
-report toe-off, the end of the swing is the moment we report mid-swing.
+report toe-off, the end of the swing is the moment the swing bump ends. Their upward acceleration
+is close to our lift events (section 5.8b).
 
 ### 6.7 How it is evaluated
-`server/utils/analysis/prediction_comparison.py` replays a recorded session and, for every landing,
+`server/utils/analysis/score_predictions.py` replays a recorded session through the detector and
+the prediction, as the app runs them. For every pad strike it takes the guess that was current
+80-300 ms before it, counted from when the IMU data reached the PC (the radio delay included), and
+compares it with the strike. It uses the calibration saved with the session, or one given with
+`--calibration`.
+
+`server/utils/analysis/prediction_comparison.py` compares our clues with Zank et al. It replays a
+recorded session and, for every landing,
 measures for our clues and for the four predictors of Zank et al.:
 - **lead time:** how long before the landing the prediction was available;
 - **error:** predicted landing minus real landing.
@@ -626,6 +692,8 @@ need our own recordings, made after a calibration walk.
 |---|---|
 | 8, minimum 3 | landings kept per foot; needed before a clue is used |
 | 40 / 25 / 12 ms | assumed error of rhythm / toe-off / mid-swing before any score exists |
+| 30 / 25 / 25 ms | the same for rise / fall / top |
+| 0.1-0.8 s, 0.02-0.5 s | plausible delay from rise, and from fall or top, to the landing |
 | 0.25-1.5 s | step times outside this are not walking |
 | 0.7-1.3, power 0.75 | limits and strength of the swing-speed correction |
 | 3 | a clue more than 3 of its own errors from the best one is left out |
@@ -635,9 +703,10 @@ The assumed errors (12 and 25 ms) are more optimistic than the published 17-34 m
 
 ### 6.9 Known limits
 - No part is validated on our data.
-- The mid-swing clue arrives too late to be used.
 - Wrong events give confidently wrong predictions; nothing here can detect that.
-- It learns only from the pressure pad, so a pad error is learned too.
+- It learns from the IMU landing, so a missed or false landing is learned too.
+- `prediction_comparison.py` still learns from the pad (the earlier design), so its numbers are
+  for that design.
 
 ### 6.10 Methods and logic
 | Method | Problem it solves | Cost |
@@ -645,7 +714,9 @@ The assumed errors (12 and 25 ms) are more optimistic than the published 17-34 m
 | Several clues, not one | Early clues give time, late clues give precision | More to validate |
 | Learn delays per person and per foot | People and legs differ | Needs a few steps before it works |
 | Median of the last 8 | One odd step should not move the estimate | Slow to follow a real change |
-| Weight by recent error | The system finds out by itself which clue to trust | Needs the pressure pad as referee |
+| Weight by recent error | The system finds out by itself which clue to trust | Needs a landing as referee |
+| Learn from the IMU landing, not the pad | The landing is the real contact; the pad fires 20-40 ms after it, by a varying gap | A missed landing is a step without learning |
+| Lift clues next to swing clues | The prediction works whether the person walks or steps in place | Three more clues to validate |
 | Drop overdue guesses | A weight shift while standing looks like a toe-off | none |
 
 ## 7. Tempo and music
