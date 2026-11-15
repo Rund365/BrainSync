@@ -7,7 +7,7 @@ Each problem is logged once when it starts and once when it is gone.
 """
 from collections import deque
 
-from ..gait.calibration import MOVED_DEG, tilt_deg
+from ..gait.calibration import IMU_OF_FOOT, MOVED_DEG, imu_of_foot, tilt_deg
 from ..hardware.sensor_stream import ImuMsg, StatusMsg, OtherMsg
 from ..prediction_model.strike_predictor import RIGHT, LEFT
 
@@ -42,10 +42,9 @@ class SensorHealth:
     # ----------- Inputs -----------
     def on_message(self, msg, arrival: float):
         if isinstance(msg, ImuMsg):
-            if msg.valid_right:
-                self._last_imu[RIGHT] = arrival
-            if msg.valid_left:
-                self._last_imu[LEFT] = arrival
+            for foot in (RIGHT, LEFT):
+                if imu_of_foot(msg, foot)[0]:
+                    self._last_imu[foot] = arrival
         elif isinstance(msg, StatusMsg):
             self._on_status(msg, arrival)
         elif isinstance(msg, OtherMsg) and msg.kind == "ERR":
@@ -59,7 +58,7 @@ class SensorHealth:
         self._last_step = arrival
 
     def _on_status(self, msg: StatusMsg, now: float):
-        errors = {RIGHT: msg.i2c_err_right, LEFT: msg.i2c_err_left}
+        errors = {foot: msg.i2c_err_left if IMU_OF_FOOT[foot] == "left" else msg.i2c_err_right for foot in (RIGHT, LEFT)}
         if self._bus_errors is not None:
             for foot, name in FOOT_NAMES.items():
                 recent = self._bus_error_times[foot]

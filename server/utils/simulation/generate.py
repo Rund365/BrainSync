@@ -6,11 +6,24 @@ Writes to server/sim_logs/generated/<time>_<scenario>/:
   sim_imu_data.csv     IMU samples (planned imu_data.csv format, raw LSB, sensor frame)
   sim_steps.csv        true events of every step (heel strike, FSR, toe-off, mid-swing, lift)
   sim_meta.json        the simulated person, sensors and link
+  imu_data.csv, strikes.csv, gait_events.csv
+                       the same files a real session writes, so the analysis scripts
+                       (score_predictions.py, replay_events.py, ...) run on it unchanged
   stride_overlay.png   strides of each foot overlaid, aligned on the true heel strike
 
 Usage (from the repo root):
   .venv\\Scripts\\python.exe server\\utils\\simulation\\generate.py mixed --seed 1
+  .venv\\Scripts\\python.exe server\\utils\\simulation\\generate.py in_place --seed 1
+
+The same seed gives the same person and the same IMU mounting, so a calibration walk can be
+simulated for the sessions of that seed (as on the real shoes, once per mounting):
+  generate.py calibration --seed 1 --out <cal>
+  python server\\utils\\analysis\\calibrate_imus.py <cal> --out <cal>\\imu_calibration.json
+  generate.py 0:3,110:60 --seed 1 --out <session>
+  python server\\utils\\analysis\\score_predictions.py <session> --calibration <cal>\\imu_calibration.json
 """
+import csv
+import shutil
 import argparse
 import sys
 from datetime import datetime
@@ -50,7 +63,28 @@ def generate(scenario: str, seed: int | None, out_dir: Path, realistic: bool = T
             while line := receiver.readline():
                 capture.write(f"{clock.t:.4f} {line.decode().strip()}\n")
     receiver.write_truth(out_dir)
+    write_session_files(receiver, out_dir)
     return receiver
+
+
+def write_session_files(receiver: SimulatedReceiver, out_dir: Path):
+    """imu_data.csv, strikes.csv and gait_events.csv (FSR lifts) as the engine writes them for a real
+    session. The simulated IMUs are wired like the real ones (gait.calibration.IMU_OF_FOOT)."""
+    shutil.copyfile(out_dir / "sim_imu_data.csv", out_dir / "imu_data.csv")
+    start = receiver._walk_start or 0.0
+    with open(out_dir / "strikes.csv", "w", newline="", encoding="utf-8") as f:
+        writer = csv.writer(f)
+        writer.writerow(["sender_t_us", "pc_t", "seq", "foot", "interval_ms", "fsr_value"])
+        previous = None
+        for seq, (s, at) in enumerate(receiver.emitted_steps):
+            interval = 0 if previous is None else round((s.fsr - previous) * 1000)
+            previous = s.fsr
+            writer.writerow([receiver._clock.t_us(start + s.fsr), f"{at:.6f}", seq, s.foot, interval, s.fsr_value])
+    with open(out_dir / "gait_events.csv", "w", newline="", encoding="utf-8") as f:
+        writer = csv.writer(f)
+        writer.writerow(["sender_s", "pc_t", "foot", "event", "value_dps"])
+        for s in sorted(receiver.legs.strikes, key=lambda s: s.lift):
+            writer.writerow([f"{receiver._clock.t_us(start + s.lift) / 1e6:.4f}", "", s.foot, "LIFT", ""])
 
 
 def plot_stride_overlay(receiver: SimulatedReceiver, path: Path):
@@ -102,7 +136,8 @@ def summary(receiver: SimulatedReceiver) -> str:
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument("scenario", help="Preset (steady, speedup, stop_start, mixed) or 'cadence:seconds,...'")
+    parser.add_argument("scenario", help="Preset (steady, speedup, stop_start, mixed, in_place, around, calibration) "
+                                         "or 'cadence:seconds[:walk|place|turn],...'")
     parser.add_argument("--seed", type=int, default=None, help="Same seed = same person, sensors and walk")
     parser.add_argument("--out", type=Path, default=None, help="Output folder")
     parser.add_argument("--sharp", action="store_true", help="Stress-test walker: instant stops and starts, no drift")

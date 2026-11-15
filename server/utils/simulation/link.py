@@ -16,6 +16,7 @@ from dataclasses import dataclass, asdict
 
 import numpy as np
 
+from ..gait.calibration import IMU_OF_FOOT
 from .legs import LegRecording
 from .walker import RIGHT, LEFT
 
@@ -33,6 +34,8 @@ class LinkProfile:
     hiccup_s: float = 0.03
     packet_loss: float = 0.003
     batch_n: int = 5
+    imu_extra_s: float = 0.017  # IMU batches leave this much later than a STEP would (recordings
+                                # session_2026-11-01: IMU samples reach the PC 22-59 ms late, median 41)
 
     @classmethod
     def random(cls, rng: np.random.Generator) -> "LinkProfile":
@@ -66,17 +69,19 @@ def build_messages(rec: LegRecording, link: LinkProfile, walk_start_s: float,
     clock = SenderClock(link)
     sent = []  # (send_s, Message)
 
-    # IMU batches
+    # IMU batches, each IMU in the slot it is wired to, as on the real shoes
+    on = {label: foot for foot, label in IMU_OF_FOOT.items()}  # IMU slot -> foot it sits on
     n = link.batch_n
     jitter_s = rng.normal(0, 30e-6, len(rec.t))
     for seq, k in enumerate(range(0, len(rec.t) - n + 1, n)):
         lines = []
         for i in range(k, k + n):
             t_us = clock.t_us(walk_start_s + rec.t[i] + jitter_s[i])
-            valid = int(rec.valid[LEFT][i]) | (int(rec.valid[RIGHT][i]) << 1)
-            values = [*rec.acc_raw[LEFT][i], *rec.gyr_raw[LEFT][i], *rec.acc_raw[RIGHT][i], *rec.gyr_raw[RIGHT][i]]
+            valid = int(rec.valid[on["left"]][i]) | (int(rec.valid[on["right"]][i]) << 1)
+            values = [*rec.acc_raw[on["left"]][i], *rec.gyr_raw[on["left"]][i],
+                      *rec.acc_raw[on["right"]][i], *rec.gyr_raw[on["right"]][i]]
             lines.append(f"IMU,{seq},{t_us},{valid}," + ",".join(str(v) for v in values))
-        sent.append((walk_start_s + rec.t[k + n - 1], Message(0.0, "IMU", seq, lines=lines)))
+        sent.append((walk_start_s + rec.t[k + n - 1] + link.imu_extra_s, Message(0.0, "IMU", seq, lines=lines)))
 
     # FSR strikes and releases
     previous_fsr = None

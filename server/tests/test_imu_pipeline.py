@@ -367,24 +367,70 @@ class HardwareReadinessTests(unittest.TestCase):
         rx.timeout = 0.05
         return rx
 
-    def test_fsr_delay_is_measured_from_the_impact_not_the_braking(self):
-        from dataclasses import replace
+    def test_fsr_delay_is_measured_from_the_impact(self):
+        from statistics import median
         from utils.gait.events import FootTracker
-        from utils.simulation.legs import Person, simulate_legs, ACC_LSB_PER_MS2, GYR_LSB_PER_DPS
+        from utils.simulation.legs import simulate_legs, ACC_LSB_PER_MS2, GYR_LSB_PER_DPS
         from utils.simulation.walker import Walker, parse_scenario
-        person = Person.random(np.random.default_rng(3))
-        # Real feet brake up to ~3 g just before landing, more than the simulator's default
-        person = Person(right=replace(person.right, brake_ms2=30.0), left=replace(person.left, brake_ms2=30.0))
-        rec = simulate_legs(Walker(parse_scenario("110:20"), seed=3), seed=3, person=person)
+        # Stepping in place lands toes first: the heel FSR fires 20-40 ms after the impact
+        for scenario in ("110:20", "110:20:place"):
+            rec = simulate_legs(Walker(parse_scenario(scenario), seed=3), seed=3)
+            for foot in (RIGHT, LEFT):
+                tracker = FootTracker(foot)
+                mine = [s for s in rec.strikes if s.foot == foot]
+                strikes = sorted(s.fsr for s in mine)
+                for i, t in enumerate(rec.t):
+                    while strikes and strikes[0] <= t:
+                        tracker.on_strike(strikes.pop(0))
+                    if rec.valid[foot][i]:
+                        tracker.add_sample(t, rec.acc_raw[foot][i] / ACC_LSB_PER_MS2,
+                                           rec.gyr_raw[foot][i] / GYR_LSB_PER_DPS)
+                self.assertAlmostEqual(tracker.fsr_delay_s, median(s.fsr - s.hs for s in mine), delta=0.008)
+
+    def test_each_foot_gets_its_own_imu_through_the_crossed_wiring(self):
+        from utils.engine.strike_tracking import StrikeTracker
+        from utils.hardware.sensor_stream import SensorStream, ImuMsg
+        from utils.simulation.generate import ManualClock
+        from utils.simulation.simulated_receiver import SimulatedReceiver
+        from utils.simulation.walker import Walker, parse_scenario
+        clock = ManualClock()
+        rx = SimulatedReceiver(Walker(parse_scenario("110:15"), seed=2), seed=2, time_source=clock)
+        rx.timeout = 0
+        rx.write(b"RESET\nSTART\n")
+        stream = SensorStream()
+        tracker = StrikeTracker(stream)
+        lands = {RIGHT: [], LEFT: []}
+        original = tracker.predictor.on_strike
+        tracker.predictor.on_strike = lambda foot, t: (lands[foot].append(t), original(foot, t))[1]
+        while not rx.finished:
+            clock.t += 0.001
+            while line := rx.readline():
+                msg = stream.feed(line.decode().strip(), clock.t)
+                if isinstance(msg, ImuMsg):
+                    tracker.on_imu(msg)
         for foot in (RIGHT, LEFT):
-            tracker = FootTracker(foot)
-            strikes = sorted(s.fsr for s in rec.strikes if s.foot == foot)
+            truth = np.array([rx._clock.t_us(rx._walk_start + s.hs) / 1e6 for s in rx.legs.strikes if s.foot == foot])
+            self.assertGreaterEqual(len(lands[foot]), len(truth) - 2)
+            self.assertLess(max(np.min(np.abs(truth - t)) for t in lands[foot]), 0.02)
+
+    def test_one_landing_per_stride_when_walking_and_in_place(self):
+        from utils.gait.events import FootTracker
+        from utils.simulation.legs import simulate_legs, ACC_LSB_PER_MS2, GYR_LSB_PER_DPS
+        from utils.simulation.walker import Walker, parse_scenario
+        # Walking: the toe-off push jumps like an impact but the foot swings after it, so it is no landing
+        for scenario in ("125:30", "110:30:place", "110:30:turn"):
+            rec = simulate_legs(Walker(parse_scenario(scenario), seed=4), seed=4)
+            tracker = FootTracker(RIGHT)
+            lands = []
             for i, t in enumerate(rec.t):
-                while strikes and strikes[0] <= t:
-                    tracker.on_strike(strikes.pop(0))
-                if rec.valid[foot][i]:
-                    tracker.add_sample(t, rec.acc_raw[foot][i] / ACC_LSB_PER_MS2, rec.gyr_raw[foot][i] / GYR_LSB_PER_DPS)
-            self.assertAlmostEqual(tracker.fsr_delay_s, person.foot(foot).fsr_delay_s, delta=0.008)
+                if rec.valid[RIGHT][i]:
+                    lands += [e.sender_s for e in tracker.add_sample(t, rec.acc_raw[RIGHT][i] / ACC_LSB_PER_MS2,
+                                                                     rec.gyr_raw[RIGHT][i] / GYR_LSB_PER_DPS)
+                              if e.kind == "LAND"]
+            truth = np.array([s.hs for s in rec.strikes if s.foot == RIGHT])
+            near = [np.min(np.abs(truth - t)) for t in lands]
+            self.assertGreaterEqual(len(lands), len(truth) - 2, scenario)
+            self.assertLess(max(near), 0.02, scenario)
 
     def test_player_starts_on_time_pauses_silently_and_resumes_on_time(self):
         import tempfile
@@ -505,7 +551,10 @@ class HardwareReadinessTests(unittest.TestCase):
         feet = {f: SimpleNamespace(calib=SimpleNamespace(ready=True)) for f in (RIGHT, LEFT)}
         stream = SimpleNamespace(stats=SimpleNamespace(received={}, lost={}))
         health = SensorHealth(SimpleNamespace(log=messages.append), SimpleNamespace(feet=feet), stream, protocol=2)
-        imu = lambda left: ImuMsg(0, 0, left, True, np.zeros(6), np.zeros(6))
+        from utils.gait.calibration import IMU_OF_FOOT
+        # the left foot's IMU goes silent, in whichever slot it is wired to
+        imu = lambda left: ImuMsg(0, 0, left or IMU_OF_FOOT[LEFT] != "left", left or IMU_OF_FOOT[LEFT] != "right",
+                                  np.zeros(6), np.zeros(6))
         for t in np.arange(0, 6, 0.5):
             health.on_step(t)
             health.on_message(imu(left=t < 2 or t >= 4.5), t)

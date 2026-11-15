@@ -1,17 +1,21 @@
 """
-Predicts when the next foot strike will happen (Integration Plan §16).
+Predicts when the next foot strike (landing) will happen (Integration Plan §16).
 
-Three estimates for the next strike, all in sender time:
-  B0 rhythm     last strike + usual step time onto this foot      (no IMU, ~1 step ahead)
-  B1 toe-off    toe-off of the swinging foot + its usual TO->strike delay   (~400 ms ahead)
-  B2 mid-swing  mid-swing of the swinging foot + its usual MS->strike delay (~200 ms ahead),
+Estimates for the next landing, all in sender time:
+  B0 rhythm     last landing + usual step time onto this foot   (~1 step ahead)
+  B1 toe-off    toe-off of the swinging foot + its usual TO->landing delay
+  B2 mid-swing  mid-swing of the swinging foot + its usual MS->landing delay,
                 scaled by how fast this swing is (TO -> MS against the foot's usual)
+  B3 rise       the swinging foot leaves the ground (events.py RISE) + its usual RISE->landing delay
+  B5 fall       its rise is ending (events.py FALL) + its usual FALL->landing delay
+  B4 top        its highest point (events.py TOP) + its usual TOP->landing delay
+B1 / B2 need a forward swing; B3 / B4 / B5 also work without one (e.g. stepping in place).
 Fused by inverse variance: each estimate weighs 1 / (its recent error)², so the newest,
-most precise one dominates as the strike approaches. Estimates far from the most precise
+most precise one dominates as the landing approaches. Estimates far from the most precise
 one are left out.
 
-Everything is learned per person and per foot from the FSR strikes: on each strike the
-delays (strike - TO, strike - MS) and the step time are added to rolling medians, and
+Everything is learned per person and per foot from the IMU landings (events.py LAND, fed to
+on_strike): on each landing the delays and the step time are added to rolling medians, and
 each method's error is recorded to update its weight.
 """
 from collections import deque
@@ -21,7 +25,10 @@ from statistics import median
 RIGHT, LEFT = 1, 2
 HISTORY = 8  # strides kept for the rolling medians
 MIN_HISTORY = 3
-PRIOR_SIGMA_S = {"B0": 0.040, "B1": 0.025, "B2": 0.012}
+PRIOR_SIGMA_S = {"B0": 0.040, "B1": 0.025, "B2": 0.012,
+                 "B3": 0.030, "B4": 0.025, "B5": 0.025}  # B3 / B4 / B5: spread measured on the recordings
+RISE_DELAY_S = (0.1, 0.8)  # rise -> landing, plausible range
+TOP_DELAY_S = (0.02, 0.5)  # top of the lift -> strike, plausible range (also for FALL)
 MIN_SIGMA_S = 0.004
 STEP_RANGE_S = (0.25, 1.5)  # step times outside this are not walking (stopped, started)
 # Swing speed: a faster swing (shorter TO -> MS than this foot's usual) also ends sooner, so
@@ -41,7 +48,7 @@ STALE_S = 1.0
 @dataclass
 class StrikePrediction:
     foot: int
-    sender_s: float  # predicted FSR strike time
+    sender_s: float  # predicted landing (IMU impact) time
     sigma_s: float
     method: str  # which estimate weighs most
     estimates: dict = field(default_factory=dict)  # method -> (sender_s, sigma_s)
@@ -58,12 +65,16 @@ class StrikePredictor:
         self.to_delay = {f: deque(maxlen=HISTORY) for f in (RIGHT, LEFT)}
         self.ms_delay = {f: deque(maxlen=HISTORY) for f in (RIGHT, LEFT)}
         self.to_ms = {f: deque(maxlen=HISTORY) for f in (RIGHT, LEFT)}  # TO -> MS of each swing
+        self.rise_delay = {f: deque(maxlen=HISTORY) for f in (RIGHT, LEFT)}
+        self.top_delay = {f: deque(maxlen=HISTORY) for f in (RIGHT, LEFT)}
+        self.fall_delay = {f: deque(maxlen=HISTORY) for f in (RIGHT, LEFT)}
+        self._air = {f: {} for f in (RIGHT, LEFT)}  # foot -> {"RISE": t, "FALL": t, "TOP": t} since its last landing
         self.errors = {m: deque(maxlen=HISTORY) for m in PRIOR_SIGMA_S}
         self.last_strike = None  # (foot, sender_s)
         self.strike_count = 0
         self.recent_steps = deque(maxlen=4 * HISTORY)  # step times of both feet, in order
         self._swing = {f: {} for f in (RIGHT, LEFT)}  # foot -> {"TO": t, "MS": t} of its current swing
-        self._made = {}  # method -> latest estimate for the coming strike, for scoring
+        self._made = deque(maxlen=256)  # (now, foot, {method: estimate}) for the coming strike, for scoring
 
     # ----------- Inputs -----------
     def on_event(self, foot: int, kind: str, sender_s: float):
@@ -71,14 +82,20 @@ class StrikePredictor:
             self._swing[foot] = {"TO": sender_s}
         elif kind == "MS":
             self._swing[foot]["MS"] = sender_s
+        elif kind in ("RISE", "FALL", "TOP"):
+            self._air[foot][kind] = sender_s
 
     def on_strike(self, foot: int, sender_s: float) -> dict:
         """Learn from a real strike. Returns each method's error (actual - predicted) for it."""
         errors = {}
-        if self.last_strike and self._made.get("foot") == foot:
+        # Each method is judged on its latest estimate made before the landing (the landing is
+        # reported a little after it happened: events.py LAND)
+        made = next(((f, est) for now, f, est in reversed(self._made) if now <= sender_s), None)
+        if self.last_strike and made is not None and made[0] == foot:
+            made = made[1]
             for method in PRIOR_SIGMA_S:
-                if method in self._made:
-                    err = sender_s - self._made[method]
+                if method in made:
+                    err = sender_s - made[method]
                     if abs(err) < 0.3:  # a wild miss is a stop/start, not the method's precision
                         self.errors[method].append(err)
                     errors[method] = err
@@ -90,6 +107,14 @@ class StrikePredictor:
             self.ms_delay[foot].append(sender_s - swing["MS"])
             if "TO" in swing and 0.03 < swing["MS"] - swing["TO"] < 0.5:
                 self.to_ms[foot].append(swing["MS"] - swing["TO"])
+        air = self._air[foot]
+        if "RISE" in air and RISE_DELAY_S[0] < sender_s - air["RISE"] < RISE_DELAY_S[1]:
+            self.rise_delay[foot].append(sender_s - air["RISE"])
+        if "TOP" in air and TOP_DELAY_S[0] < sender_s - air["TOP"] < TOP_DELAY_S[1]:
+            self.top_delay[foot].append(sender_s - air["TOP"])
+        if "FALL" in air and TOP_DELAY_S[0] < sender_s - air["FALL"] < TOP_DELAY_S[1]:
+            self.fall_delay[foot].append(sender_s - air["FALL"])
+        self._air[foot] = {}
         if self.last_strike and self.last_strike[0] != foot:
             step = sender_s - self.last_strike[1]
             if STEP_RANGE_S[0] < step < STEP_RANGE_S[1]:
@@ -101,7 +126,7 @@ class StrikePredictor:
         self.last_strike = (foot, sender_s)
         self.strike_count += 1
         self._swing[foot] = {}
-        self._made = {}
+        self._made.clear()
         return errors
 
     # ----------- Output -----------
@@ -165,16 +190,24 @@ class StrikePredictor:
             if SCALE_B2 and "TO" in swing:
                 scale = self._scale(swing["MS"] - swing["TO"], self.to_ms[foot])
             estimates["B2"] = swing["MS"] + median(self.ms_delay[foot]) * scale
+        air = self._air[foot]
+        if "RISE" in air and len(self.rise_delay[foot]) >= MIN_HISTORY:
+            estimates["B3"] = air["RISE"] + median(self.rise_delay[foot])
+        if "TOP" in air and len(self.top_delay[foot]) >= MIN_HISTORY:
+            estimates["B4"] = air["TOP"] + median(self.top_delay[foot])
+        if "FALL" in air and len(self.fall_delay[foot]) >= MIN_HISTORY:
+            estimates["B5"] = air["FALL"] + median(self.fall_delay[foot])
 
         # A rhythm guess that is long past (no swing seen) means the person stopped
-        if "B0" in estimates and not swing and now_sender_s > estimates["B0"] + 0.15:
+        if "B0" in estimates and not swing and not air and now_sender_s > estimates["B0"] + 0.15:
             del estimates["B0"]
         estimates = {m: t for m, t in estimates.items() if now_sender_s <= t + STALE_S}
         if not estimates:
             return None
 
-        self._made.update(estimates)
-        self._made["foot"] = foot
+        made = {**(self._made[-1][2] if self._made else {}), **estimates}  # each method's latest
+        if not self._made or self._made[-1][2] != made:
+            self._made.append((now_sender_s, foot, made))
         weights = {m: 1.0 / self.sigma(m) ** 2 for m in estimates}
         if FUSE_GATE:
             best = max(weights, key=lambda m: (weights[m], m))  # a tie goes to the later event
@@ -196,5 +229,8 @@ class StrikePredictor:
             "step_ms": {"right": med(self.step_times[RIGHT]), "left": med(self.step_times[LEFT])},
             "to_delay_ms": {"right": med(self.to_delay[RIGHT]), "left": med(self.to_delay[LEFT])},
             "ms_delay_ms": {"right": med(self.ms_delay[RIGHT]), "left": med(self.ms_delay[LEFT])},
+            "rise_delay_ms": {"right": med(self.rise_delay[RIGHT]), "left": med(self.rise_delay[LEFT])},
+            "top_delay_ms": {"right": med(self.top_delay[RIGHT]), "left": med(self.top_delay[LEFT])},
+            "fall_delay_ms": {"right": med(self.fall_delay[RIGHT]), "left": med(self.fall_delay[LEFT])},
             "sigma_ms": {m: round(self.sigma(m) * 1000, 1) for m in PRIOR_SIGMA_S},
         }

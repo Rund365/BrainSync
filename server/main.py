@@ -666,10 +666,10 @@ def main(args, status_callback=print, stop_event=None, session_dir_callback=None
         logger.log(f"IMU calibration: {CALIBRATION_FILE.name}, from session {imu_calibration.get('session')}, "
                    f"made {imu_calibration.get('created')}")
     elif not getattr(args, "simulate", None) and protocol >= 2 and not calibration_walk:
-        _notify(status_callback, f"WARNING: no IMU calibration ({CALIBRATION_FILE.name} is missing). The IMU axes "
-                                 "are placeholders, so the IMU events of this session are not valid. Record a "
-                                 "calibration walk and run utils/analysis/calibrate_imus.py on it.")
-        logger.log("No IMU calibration file: IMU axes are placeholders (simulator values)")
+        _notify(status_callback, f"WARNING: no IMU calibration ({CALIBRATION_FILE.name} is missing), so the "
+                                 "IMU events of this session are not valid. Record a calibration walk "
+                                 "(CALIBRATE IMUs) first.")
+        logger.log("No IMU calibration file: no IMU gait events this session")
     if calibration_walk:
         _notify(status_callback, "Calibration walk: stand still 5 s, walk straight ahead about 20 steps, "
                                  "stand still 5 s, then stop the session")

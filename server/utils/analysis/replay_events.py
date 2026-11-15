@@ -14,7 +14,7 @@ they arrived on the PC, the same way StrikeTracker does live, and collects the e
           the FSR swing windows show in imu_noise_analysis.py), without changing the engine.
 --mount   which gyro axis and sign each tracker uses:
             fixed: the IMU calibration the session ran with (meta.json), else the current
-                   imu_calibration.json, else calibration.MOUNTING (the simulator's values)
+                   imu_calibration.json; an IMU that is not there gets no pitch axis (no IMU events)
             meta:  recordings made before that. Axis and gyro bias = the ones the old calibration found
                    (meta.json), sign = the one that makes the foot rotate forward during its FSR
                    swings: the foot pitch rises from about -70 deg at toe-off to about +20 deg at
@@ -43,7 +43,7 @@ FOOT_NAME = {RIGHT: "right", LEFT: "left"}
 IMU_LABEL = {"r": "right", "l": "left"}  # imu_data.csv column prefix -> IMU label in meta.json
 MATCH_S = 0.015  # --check: a replayed event within 1.5 samples of a logged one is the same event
 NEAREST_S = 0.15  # --vs-fsr: an IMU event is paired with an FSR event of the same foot within this
-                  # (ours: well under the ~0.5 s between the two feet's events)
+                  # (well under the ~0.5 s between the two feet's events)
 MAX_SWING_S = 1.0  # lift -> next strike longer than this is a stop, not a swing
 
 
@@ -94,7 +94,8 @@ def replay(folder: Path, swap: bool = False, mount: str = "fixed"):
             mounts[foot] = (IMU_LABEL[p], sign, swing_deg)
         else:
             measured = calibration.get("imus", {}).get(IMU_LABEL[p])  # by IMU, so --swap keeps each IMU's axis
-            feet[foot] = FootTracker(foot, axis=measured["pitch_axis"], sign=+1) if measured else FootTracker(foot)
+            feet[foot] = (FootTracker(foot, axis=measured["pitch_axis"], sign=+1, up=measured.get("up"))
+                          if measured else FootTracker(foot))
             mounts[foot] = (IMU_LABEL[p], feet[foot].calib.sign, None)
     # Live, a strike reaches the tracker when its message arrives on the PC, usually before the IMU
     # batch holding the last few samples before it (median 3 samples). Use the PC arrival times

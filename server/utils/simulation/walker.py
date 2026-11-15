@@ -1,9 +1,10 @@
 """
 Simulated walker: turns a walking scenario into a list of foot strikes.
 
-A scenario is a list of segments "cadence:seconds", e.g. "110:20,130:15,0:5,110:20":
-walk at 110 steps/min for 20 s, then 130 for 15 s, stand still for 5 s, then 110 for 20 s.
-Cadence 0 means standing still.
+A scenario is a list of segments "cadence:seconds[:motion]", e.g. "110:20,130:15,0:5,110:20:place":
+walk at 110 steps/min for 20 s, then 130 for 15 s, stand still for 5 s, then step in place at 110
+for 20 s. Cadence 0 means standing still. Motion (legs.py): walk (forward, the default), place
+(stepping in place, as in the recordings) or turn (walking in a circle).
 
 Realistic walking (default):
   - pace changes are gradual, an S-curve over `ramp_s` seconds
@@ -25,13 +26,18 @@ PRESETS = {
     "speedup": "100:20,130:30,100:20",
     "stop_start": "110:20,0:5,110:20,0:5,110:20",
     "mixed": "105:20,125:20,0:4,110:20,95:20",
+    "in_place": "115:60:place",  # like the recordings (session_2026-11-01)
+    "around": "110:20,110:20:turn,0:4,115:20:place,110:20",
+    "calibration": "0:5,100:12,0:5",  # the IMU calibration walk (utils/analysis/calibrate_imus.py)
 }
+MOTIONS = ("walk", "place", "turn")
 
 
 @dataclass
 class Segment:
     cadence: float  # steps per minute, 0 = standing still
     duration: float  # seconds
+    motion: str = "walk"
 
 
 @dataclass
@@ -39,20 +45,25 @@ class Step:
     time: float  # seconds since the walk started
     foot: int  # RIGHT or LEFT
     interval: float  # seconds since the previous step (of either foot); 0 for the first step
+    motion: str = "walk"
 
 
 def parse_scenario(text: str) -> list[Segment]:
-    """Parse a preset name or a "cadence:seconds,..." string."""
+    """Parse a preset name or a "cadence:seconds[:motion],..." string."""
     text = PRESETS.get(text.strip(), text.strip())
     segments = []
     for part in text.split(","):
-        cadence, _, duration = part.partition(":")
+        cadence, _, rest = part.partition(":")
+        duration, _, motion = rest.partition(":")
         try:
-            segment = Segment(float(cadence), float(duration))
+            segment = Segment(float(cadence), float(duration), motion.strip() or "walk")
         except ValueError:
-            raise ValueError(f"Bad scenario segment {part!r}; expected 'cadence:seconds' or one of {list(PRESETS)}")
+            raise ValueError(f"Bad scenario segment {part!r}; expected 'cadence:seconds[:motion]' "
+                             f"or one of {list(PRESETS)}")
         if segment.cadence < 0 or segment.duration <= 0:
             raise ValueError(f"Bad scenario segment {part!r}; cadence must be >= 0 and seconds > 0")
+        if segment.motion not in MOTIONS:
+            raise ValueError(f"Bad scenario segment {part!r}; motion must be one of {MOTIONS}")
         segments.append(segment)
     return segments
 
@@ -64,7 +75,7 @@ def _smoothstep(x: float) -> float:
 
 class Walker:
     def __init__(self, segments: list[Segment], realistic: bool = True, ramp_s: float | None = None,
-                 start_s: float = 3.0, stop_s: float = 2.0, drift: float = 0.015, step_cv: float = 0.02,
+                 start_s: float = 3.0, stop_s: float = 2.0, drift: float = 0.015, step_cv: float = 0.035,
                  asymmetry: float = 0.02, first_step_s: float = 0.5, seed: int | None = None):
         """
         Args:
@@ -74,7 +85,8 @@ class Walker:
             start_s: seconds to reach full pace after standing (realistic only).
             stop_s: seconds of slowing down before standing (realistic only).
             drift: size of the slow pace drift, as a fraction of the cadence (realistic only).
-            step_cv: random step-to-step variation, as a fraction of the step time (2% ≈ healthy gait).
+            step_cv: random step-to-step variation, as a fraction of the step time (the recordings:
+                     stride-to-stride differences of 40-80 ms, about 3.5% per step).
             asymmetry: left steps this fraction longer, right steps this fraction shorter.
             first_step_s: time of the first step after the walk starts.
             seed: random seed, for repeatable walks.
@@ -122,6 +134,14 @@ class Walker:
             c *= 1 - 0.25 * _smoothstep((t - (end - self.stop_s)) / self.stop_s)
         return c * (1 + sum(a * math.sin(2 * math.pi * t / period + phase) for a, period, phase in self._drift))
 
+    def motion_at(self, t: float) -> str:
+        end = 0.0
+        for segment in self.segments:
+            end += segment.duration
+            if t < end:
+                return segment.motion
+        return self.segments[-1].motion
+
     def _segment_end(self, t: float) -> float:
         end = 0.0
         for segment in self.segments:
@@ -141,7 +161,7 @@ class Walker:
                 t = self._segment_end(t) + (0.4 if self.realistic else 0.0)
                 continue
             interval = t - steps[-1].time if steps else 0.0
-            steps.append(Step(time=t, foot=foot, interval=interval))
+            steps.append(Step(time=t, foot=foot, interval=interval, motion=self.motion_at(t)))
             foot = LEFT if foot == RIGHT else RIGHT
 
             side = 1 + self.asymmetry if foot == LEFT else 1 - self.asymmetry
