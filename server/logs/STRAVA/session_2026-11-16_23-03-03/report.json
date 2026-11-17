@@ -1,0 +1,178 @@
+{
+  "session": "C:\\Users\\Rund\\Desktop\\computer science\\BrainSync Project\\BrainSync\\server\\logs\\STRAVA\\session_2026-11-16_23-03-03",
+  "latency_ms": 30.0,
+  "alignment_enabled": false,
+  "receiver_protocol": 2,
+  "steps": 54,
+  "beats": 122,
+  "duration_s": 60.5,
+  "link": "IMU: 1209 received, 11 lost; LIFT: 54 received, 0 lost; STEP: 54 received, 0 lost; parse errors 0, unknown lines 0",
+  "sensor_health": {
+    "open_problems": [
+      "bus_1",
+      "bus_2"
+    ],
+    "mount_tilt_deg": {},
+    "log": [
+      [
+        415780.647,
+        "WARNING: Frequent IMU bus errors on the right foot (19300 so far): check its wiring"
+      ],
+      [
+        415780.647,
+        "WARNING: Frequent IMU bus errors on the left foot (19300 so far): check its wiring"
+      ],
+      [
+        415787.263,
+        "WARNING: No data from the right IMU: check its wiring and power"
+      ],
+      [
+        415787.263,
+        "WARNING: No data from the left IMU: check its wiring and power"
+      ],
+      [
+        415809.281,
+        "WARNING: 3% of the sensor messages lost in the last 10 s: move the receiver closer or check for interference"
+      ],
+      [
+        415819.289,
+        "Message loss is back to normal"
+      ],
+      [
+        415833.3,
+        "The right IMU sends data again"
+      ],
+      [
+        415833.3,
+        "The left IMU sends data again"
+      ]
+    ]
+  },
+  "tracking": {
+    "calibration": {
+      "right": {
+        "gyro_bias_dps": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "bias_std_dps": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "up": [
+          -0.3539,
+          -0.7937,
+          0.4947
+        ],
+        "up_source": "given",
+        "standing_acc_ms2": null,
+        "g_level_ms2": 9.81,
+        "rejected_windows": 0,
+        "pitch_axis": [
+          -0.9339,
+          0.3283,
+          -0.1414
+        ],
+        "still_samples": 0,
+        "swing_samples": 0
+      },
+      "left": {
+        "gyro_bias_dps": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "bias_std_dps": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "up": [
+          0.1721,
+          0.9313,
+          0.3211
+        ],
+        "up_source": "given",
+        "standing_acc_ms2": null,
+        "g_level_ms2": 9.81,
+        "rejected_windows": 0,
+        "pitch_axis": [
+          0.9826,
+          -0.1391,
+          -0.1229
+        ],
+        "still_samples": 0,
+        "swing_samples": 0
+      }
+    },
+    "fsr_delay_ms": {
+      "right": 0.0,
+      "left": 0.0
+    },
+    "predictor": {
+      "step_ms": {
+        "right": null,
+        "left": null
+      },
+      "to_delay_ms": {
+        "right": null,
+        "left": null
+      },
+      "ms_delay_ms": {
+        "right": null,
+        "left": null
+      },
+      "rise_delay_ms": {
+        "right": null,
+        "left": null
+      },
+      "top_delay_ms": {
+        "right": null,
+        "left": null
+      },
+      "fall_delay_ms": {
+        "right": null,
+        "left": null
+      },
+      "sigma_ms": {
+        "B0": 40.0,
+        "B1": 25.0,
+        "B2": 12.0,
+        "B3": 30.0,
+        "B4": 25.0,
+        "B5": 25.0
+      }
+    },
+    "clock": {
+      "offset_s": 415586.8247222355,
+      "drift_ppm": -14.019059727123691,
+      "ref_sender_s": 252.016
+    }
+  },
+  "beat_vs_estimated_contact_ms": {
+    "n": 54,
+    "median_abs": 123.09599999571219,
+    "mean": 23.365370402138474,
+    "sd": 149.85602670090037,
+    "within30": 11.11111111111111,
+    "within50": 18.51851851851852
+  },
+  "imu": {
+    "lines": 6045,
+    "rate_hz": 99.36590253378614,
+    "valid_right_pct": 0.0,
+    "valid_left_pct": 0.0
+  },
+  "event_lead_s": {
+    "right_TO": null,
+    "right_MS": null,
+    "left_TO": null,
+    "left_MS": null
+  },
+  "calibrated": {
+    "right": false,
+    "left": false
+  }
+}

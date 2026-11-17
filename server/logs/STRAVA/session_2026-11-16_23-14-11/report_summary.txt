@@ -1,0 +1,48 @@
+Session C:\Users\Rund\Desktop\computer science\BrainSync Project\BrainSync\server\logs\STRAVA\session_2026-11-16_23-14-11
+  201 steps, 204 beats, 102 s, alignment off, receiver protocol 2
+  Link: IMU: 961 received, 2 lost; LIFT: 297 received, 4 lost; STEP: 201 received, 1 lost; parse errors 0, unknown lines 0
+  IMU: 47 lines/s, valid right 22%, left 80%, calibrated {'right': False, 'left': False}
+  Beat vs estimated contact: median 118 ms, 10% within ±30 ms, 20% within ±50 ms, mean -25 ms
+  Prediction 400ms_ahead: median error (ms) ; missed 2
+  Prediction 200ms_ahead: median error (ms) fused 54, B0 42; missed 0
+  Prediction 100ms_ahead: median error (ms) fused 71, B0 47; missed 0
+  Sensors: WARNING: No data from the right IMU: check its wiring and power
+  Sensors: WARNING: No data from the left IMU: check its wiring and power
+  Sensors: WARNING: Frequent IMU bus errors on the right foot (1171 so far): check its wiring
+  Sensors: WARNING: Frequent IMU bus errors on the left foot (2428 so far): check its wiring
+  Sensors: The right IMU sends data again
+  Sensors: WARNING: No data from the right IMU: check its wiring and power
+  Sensors: The right IMU sends data again
+  Sensors: WARNING: The right IMU cannot measure its gyro bias: stand still for a second
+  Sensors: The left IMU sends data again
+  Sensors: WARNING: No data from the left IMU: check its wiring and power
+  Sensors: The left IMU sends data again
+  Sensors: WARNING: No data from the left IMU: check its wiring and power
+  Sensors: WARNING: No data from the right IMU: check its wiring and power
+  Sensors: The right IMU sends data again
+  Sensors: WARNING: No data from the right IMU: check its wiring and power
+  Sensors: The right IMU sends data again
+  Sensors: WARNING: No data from the right IMU: check its wiring and power
+  Sensors: The right IMU sends data again
+  Sensors: WARNING: No data from the right IMU: check its wiring and power
+  Sensors: The right IMU sends data again
+  Sensors: WARNING: 3% of the sensor messages lost in the last 10 s: move the receiver closer or check for interference
+  Sensors: WARNING: No data from the right IMU: check its wiring and power
+  Sensors: The right IMU sends data again
+  Sensors: Message loss is back to normal
+  Sensors: WARNING: No data from the right IMU: check its wiring and power
+  Sensors: The right IMU sends data again
+  Sensors: WARNING: No data from the right IMU: check its wiring and power
+  Sensors: The right IMU sends data again
+  Sensors: IMU bus errors on the right foot have stopped
+  Sensors: The left IMU sends data again
+  Sensors: WARNING: No data from the left IMU: check its wiring and power
+  Sensors: The left IMU sends data again
+  Sensors: WARNING: No data from the left IMU: check its wiring and power
+  Sensors: The left IMU sends data again
+  Sensors: WARNING: No data from the left IMU: check its wiring and power
+  Sensors: The left IMU sends data again
+  Sensors: WARNING: No data from the left IMU: check its wiring and power
+  Sensors: The left IMU sends data again
+  Sensors: WARNING: The left IMU cannot measure its gyro bias: stand still for a second
+Report: C:\Users\Rund\Desktop\computer science\BrainSync Project\BrainSync\server\logs\STRAVA\session_2026-11-16_23-14-11\report.png

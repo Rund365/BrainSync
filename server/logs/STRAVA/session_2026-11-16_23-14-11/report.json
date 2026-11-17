@@ -1,0 +1,370 @@
+{
+  "session": "C:\\Users\\Rund\\Desktop\\computer science\\BrainSync Project\\BrainSync\\server\\logs\\STRAVA\\session_2026-11-16_23-14-11",
+  "latency_ms": 30.0,
+  "alignment_enabled": false,
+  "receiver_protocol": 2,
+  "steps": 201,
+  "beats": 204,
+  "duration_s": 101.79142999998294,
+  "link": "IMU: 961 received, 2 lost; LIFT: 297 received, 4 lost; STEP: 201 received, 1 lost; parse errors 0, unknown lines 0",
+  "sensor_health": {
+    "open_problems": [
+      "bus_2",
+      "calib_1",
+      "calib_2"
+    ],
+    "mount_tilt_deg": {},
+    "log": [
+      [
+        416448.373,
+        "WARNING: No data from the right IMU: check its wiring and power"
+      ],
+      [
+        416448.373,
+        "WARNING: No data from the left IMU: check its wiring and power"
+      ],
+      [
+        416448.921,
+        "WARNING: Frequent IMU bus errors on the right foot (1171 so far): check its wiring"
+      ],
+      [
+        416448.921,
+        "WARNING: Frequent IMU bus errors on the left foot (2428 so far): check its wiring"
+      ],
+      [
+        416450.374,
+        "The right IMU sends data again"
+      ],
+      [
+        416451.376,
+        "WARNING: No data from the right IMU: check its wiring and power"
+      ],
+      [
+        416452.377,
+        "The right IMU sends data again"
+      ],
+      [
+        416453.378,
+        "WARNING: The right IMU cannot measure its gyro bias: stand still for a second"
+      ],
+      [
+        416454.378,
+        "The left IMU sends data again"
+      ],
+      [
+        416457.38,
+        "WARNING: No data from the left IMU: check its wiring and power"
+      ],
+      [
+        416458.381,
+        "The left IMU sends data again"
+      ],
+      [
+        416459.382,
+        "WARNING: No data from the left IMU: check its wiring and power"
+      ],
+      [
+        416462.384,
+        "WARNING: No data from the right IMU: check its wiring and power"
+      ],
+      [
+        416465.385,
+        "The right IMU sends data again"
+      ],
+      [
+        416467.386,
+        "WARNING: No data from the right IMU: check its wiring and power"
+      ],
+      [
+        416469.388,
+        "The right IMU sends data again"
+      ],
+      [
+        416470.389,
+        "WARNING: No data from the right IMU: check its wiring and power"
+      ],
+      [
+        416472.39,
+        "The right IMU sends data again"
+      ],
+      [
+        416483.4,
+        "WARNING: No data from the right IMU: check its wiring and power"
+      ],
+      [
+        416485.402,
+        "The right IMU sends data again"
+      ],
+      [
+        416487.405,
+        "WARNING: 3% of the sensor messages lost in the last 10 s: move the receiver closer or check for interference"
+      ],
+      [
+        416494.411,
+        "WARNING: No data from the right IMU: check its wiring and power"
+      ],
+      [
+        416495.412,
+        "The right IMU sends data again"
+      ],
+      [
+        416497.414,
+        "Message loss is back to normal"
+      ],
+      [
+        416503.426,
+        "WARNING: No data from the right IMU: check its wiring and power"
+      ],
+      [
+        416504.428,
+        "The right IMU sends data again"
+      ],
+      [
+        416507.43,
+        "WARNING: No data from the right IMU: check its wiring and power"
+      ],
+      [
+        416508.431,
+        "The right IMU sends data again"
+      ],
+      [
+        416529.84,
+        "IMU bus errors on the right foot have stopped"
+      ],
+      [
+        416530.447,
+        "The left IMU sends data again"
+      ],
+      [
+        416531.447,
+        "WARNING: No data from the left IMU: check its wiring and power"
+      ],
+      [
+        416532.448,
+        "The left IMU sends data again"
+      ],
+      [
+        416534.449,
+        "WARNING: No data from the left IMU: check its wiring and power"
+      ],
+      [
+        416535.449,
+        "The left IMU sends data again"
+      ],
+      [
+        416536.45,
+        "WARNING: No data from the left IMU: check its wiring and power"
+      ],
+      [
+        416537.451,
+        "The left IMU sends data again"
+      ],
+      [
+        416539.452,
+        "WARNING: No data from the left IMU: check its wiring and power"
+      ],
+      [
+        416540.452,
+        "The left IMU sends data again"
+      ],
+      [
+        416540.452,
+        "WARNING: The left IMU cannot measure its gyro bias: stand still for a second"
+      ]
+    ]
+  },
+  "tracking": {
+    "calibration": {
+      "right": {
+        "gyro_bias_dps": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "bias_std_dps": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "up": [
+          -0.1278,
+          -0.7339,
+          0.6671
+        ],
+        "up_source": "given",
+        "standing_acc_ms2": null,
+        "g_level_ms2": 9.81,
+        "rejected_windows": 77,
+        "pitch_axis": [
+          -0.961,
+          0.258,
+          0.0997
+        ],
+        "still_samples": 3857,
+        "swing_samples": 0
+      },
+      "left": {
+        "gyro_bias_dps": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "bias_std_dps": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "up": [
+          0.1842,
+          0.902,
+          0.3906
+        ],
+        "up_source": "given",
+        "standing_acc_ms2": null,
+        "g_level_ms2": 9.81,
+        "rejected_windows": 21,
+        "pitch_axis": [
+          0.9728,
+          -0.1106,
+          -0.2035
+        ],
+        "still_samples": 1057,
+        "swing_samples": 0
+      }
+    },
+    "fsr_delay_ms": {
+      "right": 10.0,
+      "left": 0.0
+    },
+    "predictor": {
+      "step_ms": {
+        "right": 565.0,
+        "left": 550.0
+      },
+      "to_delay_ms": {
+        "right": null,
+        "left": null
+      },
+      "ms_delay_ms": {
+        "right": null,
+        "left": null
+      },
+      "rise_delay_ms": {
+        "right": 190.0,
+        "left": 490.0
+      },
+      "top_delay_ms": {
+        "right": 60.0,
+        "left": 50.0
+      },
+      "fall_delay_ms": {
+        "right": 160.0,
+        "left": 275.0
+      },
+      "sigma_ms": {
+        "B0": 66.3,
+        "B1": 25.0,
+        "B2": 12.0,
+        "B3": 188.3,
+        "B4": 133.7,
+        "B5": 98.6
+      }
+    },
+    "clock": {
+      "offset_s": 415978.63697131735,
+      "drift_ppm": -27.715978024514836,
+      "ref_sender_s": 569.213982
+    }
+  },
+  "beat_vs_estimated_contact_ms": {
+    "n": 201,
+    "median_abs": 117.75999999372289,
+    "mean": -24.914885543006477,
+    "sd": 143.90078977321312,
+    "within30": 10.44776119402985,
+    "within50": 19.900497512437813
+  },
+  "prediction": {
+    "400ms_ahead": {
+      "fused": {
+        "n": 0
+      },
+      "B0": {
+        "n": 0
+      },
+      "B1": {
+        "n": 0
+      },
+      "B2": {
+        "n": 0
+      },
+      "missed": 2
+    },
+    "200ms_ahead": {
+      "fused": {
+        "n": 13,
+        "median_abs": 53.61900000002606,
+        "mean": -37.46615384614835,
+        "sd": 96.3565463696672,
+        "within30": 7.6923076923076925,
+        "within50": 30.76923076923077
+      },
+      "B0": {
+        "n": 9,
+        "median_abs": 42.42499999998017,
+        "mean": 23.952888888895057,
+        "sd": 46.615920817433754,
+        "within30": 11.11111111111111,
+        "within50": 55.55555555555556
+      },
+      "B1": {
+        "n": 0
+      },
+      "B2": {
+        "n": 0
+      },
+      "missed": 0
+    },
+    "100ms_ahead": {
+      "fused": {
+        "n": 14,
+        "median_abs": 71.28199999999651,
+        "mean": -22.855071428563992,
+        "sd": 107.158569126387,
+        "within30": 7.142857142857142,
+        "within50": 28.57142857142857
+      },
+      "B0": {
+        "n": 10,
+        "median_abs": 47.16400000000931,
+        "mean": 38.68650000000571,
+        "sd": 62.52562141756383,
+        "within30": 10.0,
+        "within50": 50.0
+      },
+      "B1": {
+        "n": 0
+      },
+      "B2": {
+        "n": 0
+      },
+      "missed": 0
+    }
+  },
+  "imu": {
+    "lines": 4805,
+    "rate_hz": 47.00584690126255,
+    "valid_right_pct": 21.99791883454735,
+    "valid_left_pct": 80.27055150884496
+  },
+  "event_lead_s": {
+    "right_TO": null,
+    "right_MS": null,
+    "left_TO": null,
+    "left_MS": null
+  },
+  "calibrated": {
+    "right": false,
+    "left": false
+  }
+}

@@ -34,17 +34,18 @@ result against the pressure pad.
 6. **Prediction:** estimates when the heel will land. Section 6.
 7. **Tempo and music:** chooses the tempo and plays. Section 7.
 
-**Where we stand (November 2026)**
-
-TODO: remember to update when we do test it
+**Where we stand (17 November 2026, after the 16.11 recordings)**
 
 | Part | State |
 |---|---|
-| Sensors, radio, logging | work; no step lost in 1275 recorded steps |
-| Calibration | new, tested on a public example walk, not yet on our sensors |
-| Gait events | rules from a published study; not yet validated on our data |
-| Prediction | built; not evaluated; one of its three clues arrives too late |
+| Sensors, radio, logging | work; no step lost in 1275 steps (1.11). On 16.11 two sessions lost IMU data (I2C bus errors) and are left out |
+| Calibration | done on our sensors (16.11 calibration walk); between calibration and sessions the IMUs moved 12-16° on the shoes |
+| Gait events | the landing is found for 95-100 % of the pad's strikes, 5-15 ms spread (16.11); Sabatini's events are not validated yet |
+| Prediction | evaluated on 16.11: 45-61 % of steps within ±30 ms, 80 ms ahead; a rhythm-only guess from the pad reaches 58-73 % |
 | Beat on the step | switched off until the parts above are validated |
+
+We suspect the sensor mounting is the main source of error: the IMUs are taped on and the cables
+are pulled at every step (details: `For Tom/5 - 16.11 recordings and prediction errors`).
 
 **Where the methods come from**
 
@@ -390,7 +391,13 @@ Two checks, both against the calibration:
 - Axis found within 1-3° of the main rotation axis every time, sign correct every time.
 - On that data the hand-set axis of its authors captures 70 % of the rotation, the measured axis
   83-87 %.
-- Not yet run on our own sensors.
+- **On our sensors (16.11):** two calibration walks.
+  - First walk (22-52-24): pitch share 0.70 and 0.83, largest gap 0.06 s. Its axes and signs were
+    checked against the pad: each IMU rotates forward in its own foot's swings.
+  - Second walk (23-06-37), after the "has moved" check found one IMU 15° off: pitch share 0.75
+    and 0.76, the sensors sit 13-16° off their board axes. 5 % of the IMU packets were lost
+    (largest gap 0.31 s), the walk was slow (0.9 s per step) and ended without standing still.
+  - In the sessions after it, the start check found an IMU 12-14° off in 2 of 4 sessions.
 
 ### 4.10 Constants
 | Value | Meaning | Source |
@@ -409,7 +416,10 @@ Two checks, both against the calibration:
 - The axis is fixed for the session. A shift of the sensor is checked at the session start only
   (section 4.7b), not during the walk. A turn of the sensor around the vertical is not seen by
   that check; the `--check` run sees it.
-- None of the 1 Nov recordings contains 0.5 s quiet enough for the bias.
+- None of the 1 Nov recordings contains 0.5 s quiet enough for the bias. On 16.11, in 3 of 4
+  sessions at least one IMU never had one (quietest half second 2.1-2.7 °/s, the limit is 2), so
+  that foot ran without the rotation events for the whole session. The calibration walk, standing
+  still, reached 0.2-0.3 °/s.
 
 ### 4.12 Methods and logic
 | Method | Problem it solves | Cost |
@@ -538,7 +548,17 @@ of section 5.4 have little to go on. No top within 1 s means the foot did not st
 - Against the pressure pad, on the 1 Nov recordings: heel strike 34 to 102 ms late (median per
   session). **Not a valid test:** those recordings had no zero point, an unknown axis and a
   guessed sign.
-- The real test needs recordings made after a calibration walk.
+- **16.11, after a calibration walk (4 sessions, 1081 steps):**
+  - The landing (LAND) is found for 95-100 % of the pad's strikes, with a spread of 5-15 ms per
+    foot. It comes 11-24 ms before the pad on the right foot and 19-26 ms after it on the left.
+  - The IMU also reports landings that did not happen: 18-125 per session. The raw data shows
+    them when the foot leaves the ground. In two sessions most of them are on one foot, with the
+    same code on both feet, which points at that foot's mounting.
+  - Sabatini's events ran only where a zero point was accepted (section 4.11); they are not
+    validated yet.
+- How to repeat it: `server/utils/analysis/prediction_errors.py` (section 6.7);
+  `server/utils/analysis/decision_plot.py` draws one step with each threshold and the event it
+  triggers.
 
 ### 5.11 Constants
 | Value | Meaning | Source |
@@ -564,8 +584,8 @@ of section 5.4 have little to go on. No top within 1 s means the foot did not st
 - The paper detects events after the walk. We do it live, so each event is known only a moment
   after it happened.
 - The pressure pad is under the heel only, so toe-off has no direct ground truth.
-- The landing and lift rules are ours. They are not yet checked on recordings made after a
-  calibration walk.
+- The landing and lift rules are ours. The landing is checked on the 16.11 recordings
+  (section 5.10); it still reports false landings when the foot leaves the ground.
 
 ### 5.13 Methods and logic
 | Method | Problem it solves | Cost |
@@ -583,8 +603,8 @@ of section 5.4 have little to go on. No top within 1 s means the foot did not st
 
 **Files:** `server/utils/prediction_model/strike_predictor.py`, `server/utils/engine/strike_tracking.py`
 
-**Status: built, not evaluated.** It depends on the events of section 5, and those are not
-validated on our data yet. Detection is checked first.
+**Status: built, first evaluation on the 16.11 recordings (section 6.7).** It depends on the
+events of section 5, and those are not fully validated on our data yet.
 
 ### 6.1 The problem
 A beat that should sound when the heel lands must be sent before the heel lands. So the PC needs
@@ -684,8 +704,26 @@ our data, because their target was the step sound and ours is the pressure pad.
 
 These numbers are **not a result**: that walk has no pressure pad. Its "landings" were computed
 from the same motion sensor, so the errors are too optimistic. The upward-acceleration event did
-not appear before the landing in that data; whether it does on our shoes is open. Valid numbers
-need our own recordings, made after a calibration walk.
+not appear before the landing in that data; whether it does on our shoes is open.
+
+**On our recordings (16.11, 4 sessions with tempo changes, 1081 steps):**
+`server/utils/analysis/prediction_errors.py` replays them and takes, for every pad strike, the
+prediction 80 ms before it (the last moment the beat can still move). The pad's steady lateness
+per foot is removed.
+
+| Session | Within ±30 ms | Off by more than 100 ms, or none | Rhythm from the pad alone: within ±30 ms |
+|---|---|---|---|
+| 23-18-57 | 53 % | 16 % | 71 % |
+| 23-23-19 | 47 % | 18 % | 70 % |
+| 23-25-14 | 61 % | 9 % | 73 % |
+| 23-30-51 | 45 % | 13 % | 58 % |
+
+- The prediction is still below a guess from the pad's own rhythm (no IMU, perfect steps).
+- Large errors follow a missed or late landing, a change of pace, lost data and false landings.
+- In 65 % of the steps none of those is present, and 56 % of them are within ±30 ms. Part of the
+  rest is the walker's own step-to-step variation; part, we suspect, is the sensor moving on the
+  shoe.
+- Not covered: fixed-tempo recordings (none valid yet).
 
 ### 6.8 Constants (all OURS)
 | Value | Meaning |
@@ -702,7 +740,8 @@ need our own recordings, made after a calibration walk.
 The assumed errors (12 and 25 ms) are more optimistic than the published 17-34 ms.
 
 ### 6.9 Known limits
-- No part is validated on our data.
+- Evaluated on four sessions of one walker (16.11), with the sensors taped on; not yet on a
+  stable mounting.
 - Wrong events give confidently wrong predictions; nothing here can detect that.
 - It learns from the IMU landing, so a missed or false landing is learned too.
 - `prediction_comparison.py` still learns from the pad (the earlier design), so its numbers are

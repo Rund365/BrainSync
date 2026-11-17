@@ -1,0 +1,75 @@
+Session log started at 2026-11-16_23-06-37 (t=0.000)
+[00:00:00.000] DEBUG: Attempting to initialize MidiBeatSync...
+[00:00:00.000] DEBUG: MidiBeatSync initialized successfully.
+[00:00:00.000] Starting in MANUAL MODE.
+[00:00:00.000] Using default song BPM: 120.0
+[00:00:00.000] Run type: manual
+[00:00:00.000] Prediction model enabled: lgbm_model.joblib
+[00:00:00.000] Mode Activated: ManualMode
+[00:00:00.000] Session started
+[00:00:00.000] DEBUG: Attempting to open serial port COM5...
+[00:00:00.000] Receiver on COM5 at 921600 baud
+[00:00:00.000] Receiver firmware: protocol 2 (IMU)
+[00:00:00.000] Setting smoothing window to 3
+[00:00:00.000] Smoothing window set response: ACK,WINDOW,3
+[00:00:00.000] Setting update stride to 1
+[00:00:00.000] Update stride set response: ACK,STRIDE,1
+[00:00:00.000] ACK,RESET received
+[00:00:00.000] ACK,START received
+[00:00:00.000] Session handshake completed
+[00:00:00.000] Running main loop...
+[00:00:00.000] Session timer started - music is now playing
+[00:00:00.011] IMU calibration: imu_calibration.json, from session session_2026-11-16_22-52-24, made 2026-11-16T22:53:38
+[00:00:00.011] Phase alignment off (output latency 30 ms, kp 1.0, dead-band 0 ms, max nudge 15%, phase reset 100 ms, start: on the step after 10 steps, standing: pause, max tempo change 5% per beat)
+[00:00:01.013] SENSORS: The right IMU is calibrated
+[00:00:01.013] SENSORS: WARNING: the right IMU sits 15 degrees off its calibration: it has moved on the shoe (or the foot was not flat on the ground). Record a new calibration walk
+[00:00:01.013] SENSORS: The left IMU is calibrated
+[00:00:01.015] SENSORS: The left IMU sits as in its calibration (5.0 degrees off)
+[00:00:07.702] Processed: BPM=120.00
+[00:00:08.913] Processed: BPM=49.79
+[00:00:09.767] Processed: BPM=58.14
+[00:00:10.820] Processed: BPM=57.82
+[00:00:11.662] Processed: BPM=65.38
+[00:00:12.680] Processed: BPM=61.81
+[00:00:13.528] Processed: BPM=66.37
+[00:00:14.528] Processed: BPM=62.81
+[00:00:16.393] Processed: BPM=63.14
+[00:00:17.172] Processed: BPM=64.66
+[00:00:18.192] Processed: BPM=64.10
+[00:00:19.040] Processed: BPM=67.90
+[00:00:20.032] SENSORS: WARNING: 5% of the sensor messages lost in the last 10 s: move the receiver closer or check for interference
+[00:00:20.094] Processed: BPM=61.54
+[00:00:20.864] Processed: BPM=67.34
+[00:00:21.920] Processed: BPM=62.46
+[00:00:22.699] Processed: BPM=69.10
+[00:00:23.793] Processed: BPM=61.52
+[00:00:24.565] Processed: BPM=68.08
+[00:00:25.647] Processed: BPM=61.06
+[00:00:26.438] Processed: BPM=68.16
+[00:00:27.419] Processed: BPM=63.07
+[00:00:29.172] Processed: BPM=64.94
+[00:00:30.043] Processed: BPM=62.96
+[00:00:31.090] Processed: BPM=61.66
+[00:00:31.897] Processed: BPM=66.06
+[00:00:32.812] Processed: BPM=65.03
+[00:00:34.619] Processed: BPM=65.53
+[00:00:35.440] Processed: BPM=65.31
+[00:00:36.314] Processed: BPM=66.06
+[00:00:37.140] Processed: BPM=71.40
+[00:00:38.100] Processed: BPM=67.39
+[00:00:38.975] Processed: BPM=67.67
+[00:00:39.898] Processed: BPM=65.12
+[00:00:40.740] Processed: BPM=68.42
+[00:00:41.659] Processed: BPM=67.04
+[00:00:42.440] Processed: BPM=70.95
+[00:00:43.360] Processed: BPM=68.47
+[00:00:44.130] Processed: BPM=73.02
+[00:00:45.009] Processed: BPM=69.98
+[00:00:45.852] Processed: BPM=72.23
+[00:00:46.968] Processed: BPM=63.29
+[00:00:47.748] Processed: BPM=65.67
+[00:00:56.463] Processed: BPM=16.96
+[00:00:57.171] Session stopped by user.
+[00:00:57.171] Session ended
+[00:00:57.171] Calibration walk recorded. The GUI calibrates from it now; from the command line run: python utils/analysis/calibrate_imus.py "C:\Users\Rund\Desktop\computer science\BrainSync Project\BrainSync\server\logs\STRAVA\session_2026-11-16_23-06-37"
+[00:00:57.296] Link: IMU: 1089 received, 56 lost; LIFT: 45 received, 1 lost; STEP: 43 received, 3 lost; parse errors 0, unknown lines 0

@@ -1,0 +1,358 @@
+{
+  "strike_tracking": {
+    "calibration": {
+      "right": {
+        "gyro_bias_dps": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "bias_std_dps": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "up": [
+          -0.1278,
+          -0.7339,
+          0.6671
+        ],
+        "up_source": "given",
+        "standing_acc_ms2": null,
+        "g_level_ms2": 9.81,
+        "rejected_windows": 77,
+        "pitch_axis": [
+          -0.961,
+          0.258,
+          0.0997
+        ],
+        "still_samples": 3857,
+        "swing_samples": 0
+      },
+      "left": {
+        "gyro_bias_dps": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "bias_std_dps": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "up": [
+          0.1842,
+          0.902,
+          0.3906
+        ],
+        "up_source": "given",
+        "standing_acc_ms2": null,
+        "g_level_ms2": 9.81,
+        "rejected_windows": 21,
+        "pitch_axis": [
+          0.9728,
+          -0.1106,
+          -0.2035
+        ],
+        "still_samples": 1057,
+        "swing_samples": 0
+      }
+    },
+    "fsr_delay_ms": {
+      "right": 10.0,
+      "left": 0.0
+    },
+    "predictor": {
+      "step_ms": {
+        "right": 565.0,
+        "left": 550.0
+      },
+      "to_delay_ms": {
+        "right": null,
+        "left": null
+      },
+      "ms_delay_ms": {
+        "right": null,
+        "left": null
+      },
+      "rise_delay_ms": {
+        "right": 190.0,
+        "left": 490.0
+      },
+      "top_delay_ms": {
+        "right": 60.0,
+        "left": 50.0
+      },
+      "fall_delay_ms": {
+        "right": 160.0,
+        "left": 275.0
+      },
+      "sigma_ms": {
+        "B0": 66.3,
+        "B1": 25.0,
+        "B2": 12.0,
+        "B3": 188.3,
+        "B4": 133.7,
+        "B5": 98.6
+      }
+    },
+    "clock": {
+      "offset_s": 415978.63697131735,
+      "drift_ppm": -27.715978024514836,
+      "ref_sender_s": 569.213982
+    }
+  },
+  "phase_alignment": {
+    "enabled": false,
+    "settings": {
+      "latency_s": 0.03,
+      "kp": 1.0,
+      "ki": 0.1,
+      "delta_max": 0.15,
+      "delta_rate_per_s": 2.0,
+      "deadband_s": 0.0,
+      "catchup_s": 0.03,
+      "reset_s": 0.1,
+      "reset_delta_max": 0.5,
+      "t_min_s": 0.05,
+      "bias_max_s": 0.05,
+      "bias_window_s": 0.06,
+      "max_sigma_s": 0.08,
+      "beats_per_step": 1,
+      "base_from_strikes": true,
+      "base_steps": 8,
+      "base_ahead": 0.0,
+      "base_min_steps": 1,
+      "base_uses_model": false,
+      "decay_grace": 1.5,
+      "hold_when_standing": true,
+      "start_on_step": true,
+      "start_steps": 10,
+      "start_needs_calibration": true,
+      "start_fallback_steps": 20,
+      "restart_steps": 5,
+      "start_ahead": 0.0,
+      "pause_when_standing": true,
+      "pause_after_periods": 1.75,
+      "max_change_per_beat": 0.05,
+      "max_change_far": null,
+      "far_error_s": 0.08,
+      "near_error_s": 0.03
+    },
+    "bias_ms": 0.0
+  },
+  "link": "IMU: 961 received, 2 lost; LIFT: 297 received, 4 lost; STEP: 201 received, 1 lost; parse errors 0, unknown lines 0",
+  "receiver_protocol": 2,
+  "sensor_health": {
+    "open_problems": [
+      "bus_2",
+      "calib_1",
+      "calib_2"
+    ],
+    "mount_tilt_deg": {},
+    "log": [
+      [
+        416448.373,
+        "WARNING: No data from the right IMU: check its wiring and power"
+      ],
+      [
+        416448.373,
+        "WARNING: No data from the left IMU: check its wiring and power"
+      ],
+      [
+        416448.921,
+        "WARNING: Frequent IMU bus errors on the right foot (1171 so far): check its wiring"
+      ],
+      [
+        416448.921,
+        "WARNING: Frequent IMU bus errors on the left foot (2428 so far): check its wiring"
+      ],
+      [
+        416450.374,
+        "The right IMU sends data again"
+      ],
+      [
+        416451.376,
+        "WARNING: No data from the right IMU: check its wiring and power"
+      ],
+      [
+        416452.377,
+        "The right IMU sends data again"
+      ],
+      [
+        416453.378,
+        "WARNING: The right IMU cannot measure its gyro bias: stand still for a second"
+      ],
+      [
+        416454.378,
+        "The left IMU sends data again"
+      ],
+      [
+        416457.38,
+        "WARNING: No data from the left IMU: check its wiring and power"
+      ],
+      [
+        416458.381,
+        "The left IMU sends data again"
+      ],
+      [
+        416459.382,
+        "WARNING: No data from the left IMU: check its wiring and power"
+      ],
+      [
+        416462.384,
+        "WARNING: No data from the right IMU: check its wiring and power"
+      ],
+      [
+        416465.385,
+        "The right IMU sends data again"
+      ],
+      [
+        416467.386,
+        "WARNING: No data from the right IMU: check its wiring and power"
+      ],
+      [
+        416469.388,
+        "The right IMU sends data again"
+      ],
+      [
+        416470.389,
+        "WARNING: No data from the right IMU: check its wiring and power"
+      ],
+      [
+        416472.39,
+        "The right IMU sends data again"
+      ],
+      [
+        416483.4,
+        "WARNING: No data from the right IMU: check its wiring and power"
+      ],
+      [
+        416485.402,
+        "The right IMU sends data again"
+      ],
+      [
+        416487.405,
+        "WARNING: 3% of the sensor messages lost in the last 10 s: move the receiver closer or check for interference"
+      ],
+      [
+        416494.411,
+        "WARNING: No data from the right IMU: check its wiring and power"
+      ],
+      [
+        416495.412,
+        "The right IMU sends data again"
+      ],
+      [
+        416497.414,
+        "Message loss is back to normal"
+      ],
+      [
+        416503.426,
+        "WARNING: No data from the right IMU: check its wiring and power"
+      ],
+      [
+        416504.428,
+        "The right IMU sends data again"
+      ],
+      [
+        416507.43,
+        "WARNING: No data from the right IMU: check its wiring and power"
+      ],
+      [
+        416508.431,
+        "The right IMU sends data again"
+      ],
+      [
+        416529.84,
+        "IMU bus errors on the right foot have stopped"
+      ],
+      [
+        416530.447,
+        "The left IMU sends data again"
+      ],
+      [
+        416531.447,
+        "WARNING: No data from the left IMU: check its wiring and power"
+      ],
+      [
+        416532.448,
+        "The left IMU sends data again"
+      ],
+      [
+        416534.449,
+        "WARNING: No data from the left IMU: check its wiring and power"
+      ],
+      [
+        416535.449,
+        "The left IMU sends data again"
+      ],
+      [
+        416536.45,
+        "WARNING: No data from the left IMU: check its wiring and power"
+      ],
+      [
+        416537.451,
+        "The left IMU sends data again"
+      ],
+      [
+        416539.452,
+        "WARNING: No data from the left IMU: check its wiring and power"
+      ],
+      [
+        416540.452,
+        "The left IMU sends data again"
+      ],
+      [
+        416540.452,
+        "WARNING: The left IMU cannot measure its gyro bias: stand still for a second"
+      ]
+    ]
+  },
+  "run_type": "random",
+  "simulated": false,
+  "imu_calibration": {
+    "created": "2026-11-16T23:07:42",
+    "session": "session_2026-11-16_23-06-37",
+    "method": "gaitmap 2.6.0: gravity, PCA, forward direction sign",
+    "imus": {
+      "left": {
+        "pitch_axis": [
+          -0.961,
+          0.258,
+          0.0997
+        ],
+        "nearest_board_axis": "-x",
+        "angle_to_board_axis_deg": 16.1,
+        "pitch_share": 0.752,
+        "up": [
+          -0.1278,
+          -0.7339,
+          0.6671
+        ],
+        "rotation_fit_error_dps": 0.0,
+        "seconds_used": 57.2,
+        "largest_gap_s": 0.31
+      },
+      "right": {
+        "pitch_axis": [
+          0.9728,
+          -0.1106,
+          -0.2035
+        ],
+        "nearest_board_axis": "+x",
+        "angle_to_board_axis_deg": 13.4,
+        "pitch_share": 0.762,
+        "up": [
+          0.1842,
+          0.902,
+          0.3906
+        ],
+        "rotation_fit_error_dps": 0.0,
+        "seconds_used": 57.2,
+        "largest_gap_s": 0.31
+      }
+    }
+  },
+  "calibration_walk": false
+}

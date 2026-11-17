@@ -1,0 +1,299 @@
+Session log started at 2026-11-16_23-14-11 (t=0.000)
+[00:00:00.000] DEBUG: Attempting to initialize MidiBeatSync...
+[00:00:00.000] DEBUG: MidiBeatSync initialized successfully.
+[00:00:00.000] Starting in RANDOM DRIFT MODE.
+[00:00:00.000] Run type: random
+[00:00:00.000] Prediction model enabled: lgbm_model.joblib
+[00:00:00.000] GAME: Difficulty updated to ±20%
+[00:00:00.000] RANDOM: Mode switched to SIMPLE (Step-based)
+[00:00:00.000] RANDOM: Simple threshold set to 5.0 BPM
+[00:00:00.000] RANDOM: Simple steps set to 5
+[00:00:00.000] RANDOM: Simple timeout set to 15.0s
+[00:00:00.000] Mode Activated: RandomMode
+[00:00:00.000] Session started
+[00:00:00.000] DEBUG: Attempting to open serial port COM5...
+[00:00:00.000] Receiver on COM5 at 921600 baud
+[00:00:00.000] Receiver firmware: protocol 2 (IMU)
+[00:00:00.000] Setting smoothing window to 3
+[00:00:00.000] Smoothing window set response: ACK,WINDOW,3
+[00:00:00.000] Setting update stride to 1
+[00:00:00.000] Update stride set response: ACK,STRIDE,1
+[00:00:00.000] ACK,RESET received
+[00:00:00.000] ACK,START received
+[00:00:00.000] Session handshake completed
+[00:00:00.000] Running main loop...
+[00:00:00.000] Session timer started - music is now playing
+[00:00:00.011] IMU calibration: imu_calibration.json, from session session_2026-11-16_23-06-37, made 2026-11-16T23:07:42
+[00:00:00.013] Phase alignment off (output latency 30 ms, kp 1.0, dead-band 0 ms, max nudge 15%, phase reset 100 ms, start: on the step after 10 steps, standing: pause, max tempo change 5% per beat)
+[00:00:00.013] GAME: New Target 118.7 BPM! Match it!
+[00:00:00.941] Processed: BPM=118.68
+[00:00:01.016] SENSORS: WARNING: No data from the right IMU: check its wiring and power
+[00:00:01.016] SENSORS: WARNING: No data from the left IMU: check its wiring and power
+[00:00:01.150] SIMPLE: Lost match. Resetting counter.
+[00:00:01.150] Processed: BPM=284.36
+[00:00:01.429] Processed: BPM=245.40
+[00:00:01.565] SENSORS: WARNING: Frequent IMU bus errors on the right foot (1171 so far): check its wiring
+[00:00:01.565] SENSORS: WARNING: Frequent IMU bus errors on the left foot (2428 so far): check its wiring
+[00:00:01.634] Processed: BPM=260.87
+[00:00:02.637] Processed: BPM=121.21
+[00:00:03.017] SENSORS: The right IMU sends data again
+[00:00:03.151] Processed: BPM=104.59
+[00:00:04.019] SENSORS: WARNING: No data from the right IMU: check its wiring and power
+[00:00:04.035] Processed: BPM=74.91
+[00:00:04.302] Processed: BPM=108.37
+[00:00:04.500] SIMPLE: Lost match. Resetting counter.
+[00:00:04.501] Processed: BPM=133.43
+[00:00:05.020] SENSORS: The right IMU sends data again
+[00:00:05.062] Processed: BPM=175.27
+[00:00:05.189] Processed: BPM=202.70
+[00:00:05.787] Processed: BPM=139.86
+[00:00:06.021] SENSORS: WARNING: The right IMU cannot measure its gyro bias: stand still for a second
+[00:00:06.514] Processed: BPM=123.97
+[00:00:06.715] Processed: BPM=117.96
+[00:00:07.021] SENSORS: The left IMU sends data again
+[00:00:07.211] SIMPLE: Lost match. Resetting counter.
+[00:00:07.211] Processed: BPM=126.76
+[00:00:08.033] Processed: BPM=118.58
+[00:00:08.437] Processed: BPM=104.53
+[00:00:09.250] Processed: BPM=88.06
+[00:00:09.755] Processed: BPM=104.41
+[00:00:10.023] SENSORS: WARNING: No data from the left IMU: check its wiring and power
+[00:00:10.360] Processed: BPM=93.51
+[00:00:11.024] SENSORS: The left IMU sends data again
+[00:00:11.051] Processed: BPM=100.11
+[00:00:11.655] Processed: BPM=94.79
+[00:00:12.025] SENSORS: WARNING: No data from the left IMU: check its wiring and power
+[00:00:12.092] Processed: BPM=103.93
+[00:00:12.336] Processed: BPM=139.97
+[00:00:13.179] Processed: BPM=118.03
+[00:00:13.342] SIMPLE: Lost match. Resetting counter.
+[00:00:13.343] Processed: BPM=143.77
+[00:00:13.569] Processed: BPM=145.99
+[00:00:14.459] Processed: BPM=142.52
+[00:00:14.632] SIMPLE: Lost match. Resetting counter.
+[00:00:14.633] Processed: BPM=139.75
+[00:00:14.865] Processed: BPM=139.21
+[00:00:15.014] SIMPLE: Timeout (15.0s)! Next target.
+[00:00:15.014] GAME: New Target 137.3 BPM! Match it!
+[00:00:15.027] SENSORS: WARNING: No data from the right IMU: check its wiring and power
+[00:00:15.721] Processed: BPM=141.18
+[00:00:16.079] Processed: BPM=124.65
+[00:00:16.887] Processed: BPM=88.98
+[00:00:17.113] Processed: BPM=129.03
+[00:00:17.282] SIMPLE: Lost match. Resetting counter.
+[00:00:17.284] Processed: BPM=149.63
+[00:00:17.486] Processed: BPM=298.51
+[00:00:17.764] Processed: BPM=276.07
+[00:00:18.028] SENSORS: The right IMU sends data again
+[00:00:18.090] Processed: BPM=221.67
+[00:00:18.295] Processed: BPM=222.77
+[00:00:18.447] Processed: BPM=263.93
+[00:00:19.248] Processed: BPM=155.31
+[00:00:19.411] Processed: BPM=161.87
+[00:00:19.683] Processed: BPM=145.99
+[00:00:20.029] SENSORS: WARNING: No data from the right IMU: check its wiring and power
+[00:00:20.162] Processed: BPM=198.02
+[00:00:20.356] Processed: BPM=189.87
+[00:00:20.807] Processed: BPM=160.00
+[00:00:21.304] Processed: BPM=157.34
+[00:00:21.609] Processed: BPM=143.88
+[00:00:22.006] Processed: BPM=149.63
+[00:00:22.031] SENSORS: The right IMU sends data again
+[00:00:22.554] Processed: BPM=143.66
+[00:00:22.749] SIMPLE: Lost match. Resetting counter.
+[00:00:22.751] Processed: BPM=157.62
+[00:00:23.032] SENSORS: WARNING: No data from the right IMU: check its wiring and power
+[00:00:23.242] Processed: BPM=145.99
+[00:00:23.920] Processed: BPM=132.26
+[00:00:24.314] Processed: BPM=115.24
+[00:00:24.438] Processed: BPM=150.25
+[00:00:24.875] Processed: BPM=187.50
+[00:00:25.033] SENSORS: The right IMU sends data again
+[00:00:25.217] Processed: BPM=198.68
+[00:00:25.422] Processed: BPM=185.19
+[00:00:25.615] Processed: BPM=243.90
+[00:00:26.107] Processed: BPM=202.02
+[00:00:26.441] Processed: BPM=174.93
+[00:00:26.819] Processed: BPM=149.13
+[00:00:27.229] Processed: BPM=160.43
+[00:00:27.373] Processed: BPM=192.72
+[00:00:27.619] Processed: BPM=225.56
+[00:00:27.825] Processed: BPM=302.01
+[00:00:27.966] Processed: BPM=303.54
+[00:00:28.513] Processed: BPM=202.70
+[00:00:28.754] Processed: BPM=223.33
+[00:00:29.257] Processed: BPM=153.85
+[00:00:29.687] Processed: BPM=170.78
+[00:00:29.814] SIMPLE: Lost match. Resetting counter.
+[00:00:29.814] Processed: BPM=169.33
+[00:00:30.016] SIMPLE: Timeout (15.0s)! Next target.
+[00:00:30.016] GAME: New Target 98.8 BPM! Match it!
+[00:00:30.440] Processed: BPM=152.16
+[00:00:31.085] Processed: BPM=128.66
+[00:00:31.672] Processed: BPM=96.98
+[00:00:32.424] SIMPLE: Lost match. Resetting counter.
+[00:00:32.425] Processed: BPM=90.68
+[00:00:32.839] Processed: BPM=102.33
+[00:00:33.289] Processed: BPM=111.32
+[00:00:33.641] Processed: BPM=147.90
+[00:00:34.100] Processed: BPM=142.74
+[00:00:34.901] Processed: BPM=112.01
+[00:00:35.284] Processed: BPM=109.56
+[00:00:35.774] Processed: BPM=107.59
+[00:00:36.037] Processed: BPM=157.62
+[00:00:36.043] SENSORS: WARNING: No data from the right IMU: check its wiring and power
+[00:00:36.460] Processed: BPM=153.19
+[00:00:36.973] Processed: BPM=149.88
+[00:00:37.298] Processed: BPM=142.74
+[00:00:37.620] Processed: BPM=155.17
+[00:00:37.834] Processed: BPM=212.26
+[00:00:38.045] SENSORS: The right IMU sends data again
+[00:00:38.482] Processed: BPM=152.03
+[00:00:38.950] Processed: BPM=135.64
+[00:00:39.120] Processed: BPM=138.78
+[00:00:39.772] Processed: BPM=139.53
+[00:00:40.048] SENSORS: WARNING: 3% of the sensor messages lost in the last 10 s: move the receiver closer or check for interference
+[00:00:40.221] Processed: BPM=141.29
+[00:00:41.084] Processed: BPM=91.60
+[00:00:41.291] Processed: BPM=118.50
+[00:00:41.423] Processed: BPM=149.75
+[00:00:42.293] Processed: BPM=148.76
+[00:00:42.703] Processed: BPM=127.48
+[00:00:43.527] Processed: BPM=85.47
+[00:00:43.977] Processed: BPM=107.14
+[00:00:44.766] Processed: BPM=87.21
+[00:00:45.016] SIMPLE: Timeout (15.0s)! Next target.
+[00:00:45.016] GAME: New Target 124.9 BPM! Match it!
+[00:00:45.139] Processed: BPM=111.80
+[00:00:45.642] Processed: BPM=108.11
+[00:00:45.953] Processed: BPM=151.77
+[00:00:46.378] Processed: BPM=145.87
+[00:00:46.853] Processed: BPM=148.27
+[00:00:47.054] SENSORS: WARNING: No data from the right IMU: check its wiring and power
+[00:00:47.162] Processed: BPM=148.76
+[00:00:47.567] Processed: BPM=150.75
+[00:00:47.997] Processed: BPM=157.34
+[00:00:48.055] SENSORS: The right IMU sends data again
+[00:00:48.240] Processed: BPM=166.98
+[00:00:48.702] Processed: BPM=158.45
+[00:00:49.120] Processed: BPM=160.71
+[00:00:49.249] Processed: BPM=180.00
+[00:00:49.370] Processed: BPM=269.46
+[00:00:49.859] Processed: BPM=243.57
+[00:00:50.058] SENSORS: Message loss is back to normal
+[00:00:50.555] Processed: BPM=137.20
+[00:00:51.063] SIMPLE: Lost match. Resetting counter.
+[00:00:51.064] Processed: BPM=106.57
+[00:00:51.455] Processed: BPM=112.57
+[00:00:51.783] SIMPLE: Lost match. Resetting counter.
+[00:00:51.784] Processed: BPM=146.10
+[00:00:52.237] Processed: BPM=153.58
+[00:00:52.633] Processed: BPM=153.19
+[00:00:52.978] Processed: BPM=151.26
+[00:00:53.452] Processed: BPM=147.54
+[00:00:54.242] Processed: BPM=111.73
+[00:00:54.665] Processed: BPM=106.82
+[00:00:55.186] Processed: BPM=103.93
+[00:00:55.455] Processed: BPM=148.39
+[00:00:55.881] Processed: BPM=147.54
+[00:00:56.069] SENSORS: WARNING: No data from the right IMU: check its wiring and power
+[00:00:56.239] Processed: BPM=170.62
+[00:00:56.951] Processed: BPM=120.40
+[00:00:57.071] SENSORS: The right IMU sends data again
+[00:00:57.076] Processed: BPM=150.63
+[00:00:58.281] Processed: BPM=88.15
+[00:00:59.458] Processed: BPM=71.74
+[00:01:00.016] SIMPLE: Timeout (15.0s)! Next target.
+[00:01:00.016] GAME: New Target 96.2 BPM! Match it!
+[00:01:00.073] SENSORS: WARNING: No data from the right IMU: check its wiring and power
+[00:01:00.639] Processed: BPM=50.52
+[00:01:01.074] SENSORS: The right IMU sends data again
+[00:01:01.825] Processed: BPM=50.78
+[00:01:03.086] Processed: BPM=49.61
+[00:01:04.382] Processed: BPM=48.05
+[00:01:05.631] Processed: BPM=47.38
+[00:01:06.803] Processed: BPM=48.47
+[00:01:07.964] Processed: BPM=50.31
+[00:01:09.177] Processed: BPM=50.65
+[00:01:09.381] Processed: BPM=69.71
+[00:01:10.389] Processed: BPM=74.17
+[00:01:10.548] SIMPLE: Lost match. Resetting counter.
+[00:01:10.548] Processed: BPM=131.39
+[00:01:11.590] Processed: BPM=81.52
+[00:01:11.812] SIMPLE: Lost match. Resetting counter.
+[00:01:11.812] Processed: BPM=126.40
+[00:01:12.841] Processed: BPM=78.47
+[00:01:13.070] Processed: BPM=121.54
+[00:01:13.938] Processed: BPM=84.87
+[00:01:14.128] SIMPLE: Lost match. Resetting counter.
+[00:01:14.129] Processed: BPM=139.86
+[00:01:14.932] Processed: BPM=96.67
+[00:01:15.017] SIMPLE: Timeout (15.0s)! Next target.
+[00:01:15.018] GAME: New Target 142.3 BPM! Match it!
+[00:01:15.067] Processed: BPM=158.87
+[00:01:15.416] SIMPLE: Lost match. Resetting counter.
+[00:01:15.417] Processed: BPM=140.41
+[00:01:16.043] Processed: BPM=162.31
+[00:01:16.605] SIMPLE: Lost match. Resetting counter.
+[00:01:16.605] Processed: BPM=116.96
+[00:01:17.219] Processed: BPM=99.50
+[00:01:17.738] Processed: BPM=106.07
+[00:01:18.235] Processed: BPM=110.70
+[00:01:18.793] Processed: BPM=114.43
+[00:01:19.303] Processed: BPM=115.09
+[00:01:19.883] Processed: BPM=108.83
+[00:01:20.365] Processed: BPM=114.43
+[00:01:20.958] Processed: BPM=108.63
+[00:01:21.448] Processed: BPM=115.09
+[00:01:22.056] Processed: BPM=106.45
+[00:01:22.484] SENSORS: IMU bus errors on the right foot have stopped
+[00:01:22.562] Processed: BPM=112.36
+[00:01:23.090] SENSORS: The left IMU sends data again
+[00:01:23.173] Processed: BPM=104.29
+[00:01:23.660] Processed: BPM=112.22
+[00:01:24.090] SENSORS: WARNING: No data from the left IMU: check its wiring and power
+[00:01:24.287] Processed: BPM=104.35
+[00:01:24.789] Processed: BPM=111.39
+[00:01:25.091] SENSORS: The left IMU sends data again
+[00:01:25.393] Processed: BPM=103.93
+[00:01:25.883] Processed: BPM=112.71
+[00:01:26.505] Processed: BPM=105.14
+[00:01:27.042] Processed: BPM=109.09
+[00:01:27.092] SENSORS: WARNING: No data from the left IMU: check its wiring and power
+[00:01:27.630] Processed: BPM=103.03
+[00:01:28.092] SENSORS: The left IMU sends data again
+[00:01:28.146] Processed: BPM=110.02
+[00:01:28.747] Processed: BPM=106.07
+[00:01:29.093] SENSORS: WARNING: No data from the left IMU: check its wiring and power
+[00:01:29.255] Processed: BPM=110.91
+[00:01:29.872] Processed: BPM=103.87
+[00:01:30.018] SIMPLE: Timeout (15.0s)! Next target.
+[00:01:30.018] GAME: New Target 116.0 BPM! Match it!
+[00:01:30.094] SENSORS: The left IMU sends data again
+[00:01:30.378] Processed: BPM=109.96
+[00:01:30.964] Processed: BPM=105.20
+[00:01:31.470] Processed: BPM=112.57
+[00:01:32.095] SENSORS: WARNING: No data from the left IMU: check its wiring and power
+[00:01:32.119] Processed: BPM=103.33
+[00:01:32.652] Processed: BPM=106.57
+[00:01:33.095] SENSORS: The left IMU sends data again
+[00:01:33.095] SENSORS: WARNING: The left IMU cannot measure its gyro bias: stand still for a second
+[00:01:33.289] Processed: BPM=98.85
+[00:01:33.806] Processed: BPM=106.70
+[00:01:34.432] Processed: BPM=101.58
+[00:01:34.939] Processed: BPM=109.16
+[00:01:35.567] Processed: BPM=102.16
+[00:01:36.084] Processed: BPM=108.50
+[00:01:36.686] Processed: BPM=103.09
+[00:01:37.208] Processed: BPM=109.76
+[00:01:37.801] Processed: BPM=104.83
+[00:01:38.311] Processed: BPM=110.77
+[00:01:38.927] Processed: BPM=104.65
+[00:01:39.431] Processed: BPM=110.50
+[00:01:40.055] Processed: BPM=103.21
+[00:01:40.593] Processed: BPM=108.30
+[00:01:41.197] Processed: BPM=101.87
+[00:01:41.693] Processed: BPM=109.82
+[00:01:42.254] Session stopped by user.
+[00:01:42.254] Session ended
+[00:01:42.392] Link: IMU: 961 received, 2 lost; LIFT: 297 received, 4 lost; STEP: 201 received, 1 lost; parse errors 0, unknown lines 0

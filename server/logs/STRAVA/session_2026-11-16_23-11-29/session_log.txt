@@ -1,0 +1,256 @@
+Session log started at 2026-11-16_23-11-29 (t=0.000)
+[00:00:00.000] DEBUG: Attempting to initialize MidiBeatSync...
+[00:00:00.000] DEBUG: MidiBeatSync initialized successfully.
+[00:00:00.000] Starting in RANDOM DRIFT MODE.
+[00:00:00.000] Run type: random
+[00:00:00.000] Prediction model enabled: lgbm_model.joblib
+[00:00:00.000] GAME: Difficulty updated to ±20%
+[00:00:00.000] RANDOM: Mode switched to SIMPLE (Step-based)
+[00:00:00.000] RANDOM: Simple threshold set to 5.0 BPM
+[00:00:00.000] RANDOM: Simple steps set to 5
+[00:00:00.000] RANDOM: Simple timeout set to 15.0s
+[00:00:00.000] Mode Activated: RandomMode
+[00:00:00.000] Session started
+[00:00:00.000] DEBUG: Attempting to open serial port COM5...
+[00:00:00.000] Receiver on COM5 at 921600 baud
+[00:00:00.000] Receiver firmware: protocol 2 (IMU)
+[00:00:00.000] Setting smoothing window to 3
+[00:00:00.000] Smoothing window set response: ACK,WINDOW,3
+[00:00:00.000] Setting update stride to 1
+[00:00:00.000] Update stride set response: ACK,STRIDE,1
+[00:00:00.000] ACK,RESET received
+[00:00:00.000] ACK,START received
+[00:00:00.000] Session handshake completed
+[00:00:00.000] Running main loop...
+[00:00:00.000] Session timer started - music is now playing
+[00:00:00.010] IMU calibration: imu_calibration.json, from session session_2026-11-16_23-06-37, made 2026-11-16T23:07:42
+[00:00:00.011] Phase alignment off (output latency 30 ms, kp 1.0, dead-band 0 ms, max nudge 15%, phase reset 100 ms, start: on the step after 10 steps, standing: pause, max tempo change 5% per beat)
+[00:00:00.011] GAME: New Target 104.0 BPM! Match it!
+[00:00:01.013] SENSORS: WARNING: The right IMU cannot measure its gyro bias: stand still for a second
+[00:00:01.013] SENSORS: The left IMU is calibrated
+[00:00:01.013] SENSORS: The left IMU sits as in its calibration (2.5 degrees off)
+[00:00:03.016] SENSORS: The right IMU is calibrated
+[00:00:03.016] SENSORS: WARNING: the right IMU sits 16 degrees off its calibration: it has moved on the shoe (or the foot was not flat on the ground). Record a new calibration walk
+[00:00:03.016] SENSORS: The right IMU measured its gyro bias
+[00:00:03.574] Processed: BPM=104.04
+[00:00:04.372] SIMPLE: Lost match. Resetting counter.
+[00:00:04.372] Processed: BPM=75.28
+[00:00:04.956] Processed: BPM=86.83
+[00:00:05.656] Processed: BPM=86.66
+[00:00:06.195] Processed: BPM=99.06
+[00:00:06.871] Processed: BPM=94.09
+[00:00:07.415] Processed: BPM=102.16
+[00:00:08.067] Processed: BPM=95.90
+[00:00:08.618] Processed: BPM=103.15
+[00:00:09.277] SIMPLE: Matched 5/5 steps...
+[00:00:09.277] SIMPLE: Completed 5 steps! Next target.
+[00:00:09.277] GAME: New Target 127.1 BPM! Match it!
+[00:00:09.277] Processed: BPM=96.72
+[00:00:09.793] Processed: BPM=104.77
+[00:00:10.024] SENSORS: WARNING: 7% of the sensor messages lost in the last 10 s: move the receiver closer or check for interference
+[00:00:10.464] Processed: BPM=97.51
+[00:00:11.651] Processed: BPM=98.20
+[00:00:12.145] Processed: BPM=99.23
+[00:00:12.721] Processed: BPM=104.90
+[00:00:13.261] Processed: BPM=112.29
+[00:00:13.894] Processed: BPM=102.68
+[00:00:14.435] Processed: BPM=105.14
+[00:00:15.065] Processed: BPM=100.67
+[00:00:15.598] Processed: BPM=106.19
+[00:00:16.167] Processed: BPM=103.69
+[00:00:16.675] Processed: BPM=110.09
+[00:00:17.292] Processed: BPM=105.76
+[00:00:17.769] Processed: BPM=112.36
+[00:00:18.392] Processed: BPM=105.08
+[00:00:18.900] Processed: BPM=111.80
+[00:00:19.530] Processed: BPM=102.21
+[00:00:20.025] Processed: BPM=110.02
+[00:00:20.034] SENSORS: Message loss is back to normal
+[00:00:20.634] Processed: BPM=104.05
+[00:00:21.121] Processed: BPM=113.14
+[00:00:21.705] Processed: BPM=107.21
+[00:00:22.291] Processed: BPM=108.56
+[00:00:22.867] Processed: BPM=102.97
+[00:00:23.378] Processed: BPM=107.53
+[00:00:23.913] Processed: BPM=111.11
+[00:00:24.277] SIMPLE: Timeout (15.0s)! Next target.
+[00:00:24.278] GAME: New Target 110.8 BPM! Match it!
+[00:00:24.379] Processed: BPM=119.13
+[00:00:24.978] Processed: BPM=112.50
+[00:00:25.553] Processed: BPM=109.42
+[00:00:26.200] SIMPLE: Lost match. Resetting counter.
+[00:00:26.201] Processed: BPM=98.90
+[00:00:26.792] Processed: BPM=99.61
+[00:00:27.446] Processed: BPM=95.09
+[00:00:27.943] Processed: BPM=103.39
+[00:00:28.621] Processed: BPM=98.15
+[00:00:29.048] Processed: BPM=112.36
+[00:00:29.695] Processed: BPM=102.62
+[00:00:30.260] SIMPLE: Lost match. Resetting counter.
+[00:00:30.261] Processed: BPM=109.82
+[00:00:30.825] Processed: BPM=101.29
+[00:00:31.406] Processed: BPM=105.20
+[00:00:31.967] Processed: BPM=105.45
+[00:00:32.429] Processed: BPM=112.22
+[00:00:33.054] Processed: BPM=109.09
+[00:00:33.550] Processed: BPM=113.56
+[00:00:34.678] SIMPLE: Matched 5/5 steps...
+[00:00:34.679] SIMPLE: Completed 5 steps! Next target.
+[00:00:34.679] GAME: New Target 122.1 BPM! Match it!
+[00:00:34.679] Processed: BPM=108.83
+[00:00:35.317] Processed: BPM=108.04
+[00:00:35.891] Processed: BPM=103.63
+[00:00:36.525] Processed: BPM=97.46
+[00:00:37.018] Processed: BPM=106.26
+[00:00:37.649] Processed: BPM=102.16
+[00:00:38.203] Processed: BPM=107.53
+[00:00:38.799] Processed: BPM=100.78
+[00:00:39.353] Processed: BPM=105.45
+[00:00:39.953] Processed: BPM=102.68
+[00:00:40.049] SENSORS: WARNING: 4% of the sensor messages lost in the last 10 s: move the receiver closer or check for interference
+[00:00:40.446] Processed: BPM=109.22
+[00:00:41.018] Processed: BPM=108.04
+[00:00:41.504] Processed: BPM=115.90
+[00:00:42.096] Processed: BPM=109.09
+[00:00:42.610] Processed: BPM=112.92
+[00:00:43.196] Processed: BPM=106.45
+[00:00:43.745] Processed: BPM=109.42
+[00:00:44.346] Processed: BPM=103.81
+[00:00:44.841] Processed: BPM=109.76
+[00:00:45.417] Processed: BPM=107.27
+[00:00:45.928] Processed: BPM=114.07
+[00:00:46.497] Processed: BPM=108.43
+[00:00:46.995] Processed: BPM=114.14
+[00:00:47.623] Processed: BPM=105.94
+[00:00:48.141] Processed: BPM=109.82
+[00:00:48.763] Processed: BPM=102.21
+[00:00:49.275] Processed: BPM=108.89
+[00:00:49.677] SIMPLE: Timeout (15.0s)! Next target.
+[00:00:49.677] GAME: New Target 107.8 BPM! Match it!
+[00:00:49.893] Processed: BPM=102.45
+[00:00:50.056] SENSORS: Message loss is back to normal
+[00:00:50.398] Processed: BPM=110.57
+[00:00:50.993] Processed: BPM=105.45
+[00:00:51.479] Processed: BPM=113.49
+[00:00:52.091] SIMPLE: Matched 5/5 steps...
+[00:00:52.091] SIMPLE: Completed 5 steps! Next target.
+[00:00:52.091] GAME: New Target 96.3 BPM! Match it!
+[00:00:52.091] Processed: BPM=105.76
+[00:00:52.593] Processed: BPM=112.15
+[00:00:53.156] Processed: BPM=107.33
+[00:00:53.644] Processed: BPM=115.53
+[00:00:54.255] Processed: BPM=107.91
+[00:00:54.761] Processed: BPM=112.01
+[00:00:55.368] Processed: BPM=104.35
+[00:00:55.906] Processed: BPM=109.16
+[00:00:56.507] Processed: BPM=103.09
+[00:00:57.070] Processed: BPM=105.76
+[00:00:57.728] Processed: BPM=98.68
+[00:00:58.345] Processed: BPM=98.15
+[00:00:58.994] Processed: BPM=93.60
+[00:00:59.553] Processed: BPM=98.68
+[00:01:00.065] SENSORS: WARNING: 3% of the sensor messages lost in the last 10 s: move the receiver closer or check for interference
+[00:01:00.214] SIMPLE: Matched 5/5 steps...
+[00:01:00.215] SIMPLE: Completed 5 steps! Next target.
+[00:01:00.215] GAME: New Target 139.7 BPM! Match it!
+[00:01:00.216] Processed: BPM=96.05
+[00:01:00.822] Processed: BPM=98.47
+[00:01:01.493] Processed: BPM=92.88
+[00:01:02.004] Processed: BPM=100.90
+[00:01:02.594] Processed: BPM=102.10
+[00:01:03.096] Processed: BPM=113.07
+[00:01:03.691] Processed: BPM=106.51
+[00:01:04.192] Processed: BPM=112.08
+[00:01:04.770] Processed: BPM=106.64
+[00:01:05.267] Processed: BPM=114.29
+[00:01:05.799] Processed: BPM=111.94
+[00:01:06.240] Processed: BPM=123.12
+[00:01:06.831] Processed: BPM=115.02
+[00:01:07.310] Processed: BPM=119.05
+[00:01:07.911] Processed: BPM=107.14
+[00:01:08.374] Processed: BPM=116.58
+[00:01:08.944] Processed: BPM=110.23
+[00:01:09.430] Processed: BPM=118.50
+[00:01:10.013] Processed: BPM=110.16
+[00:01:10.071] SENSORS: Message loss is back to normal
+[00:01:10.481] Processed: BPM=117.80
+[00:01:11.065] Processed: BPM=110.09
+[00:01:11.530] Processed: BPM=118.34
+[00:01:12.123] Processed: BPM=109.02
+[00:01:12.566] Processed: BPM=119.92
+[00:01:13.153] Processed: BPM=110.84
+[00:01:13.642] Processed: BPM=118.58
+[00:01:14.722] Processed: BPM=114.36
+[00:01:15.215] SIMPLE: Timeout (15.0s)! Next target.
+[00:01:15.215] GAME: New Target 123.6 BPM! Match it!
+[00:01:15.293] Processed: BPM=115.31
+[00:01:15.773] Processed: BPM=115.98
+[00:01:16.370] Processed: BPM=109.16
+[00:01:16.853] Processed: BPM=115.90
+[00:01:17.456] Processed: BPM=108.30
+[00:01:17.940] Processed: BPM=115.24
+[00:01:18.513] Processed: BPM=108.24
+[00:01:18.991] Processed: BPM=115.76
+[00:01:19.640] Processed: BPM=105.76
+[00:01:20.077] SENSORS: WARNING: 8% of the sensor messages lost in the last 10 s: move the receiver closer or check for interference
+[00:01:20.143] Processed: BPM=110.84
+[00:01:20.761] Processed: BPM=101.75
+[00:01:21.274] Processed: BPM=109.82
+[00:01:21.875] Processed: BPM=103.45
+[00:01:22.381] Processed: BPM=111.11
+[00:01:22.954] Processed: BPM=107.14
+[00:01:23.442] Processed: BPM=115.24
+[00:01:24.040] Processed: BPM=108.83
+[00:01:24.524] Processed: BPM=114.58
+[00:01:25.095] Processed: BPM=108.56
+[00:01:25.614] Processed: BPM=113.85
+[00:01:26.191] Processed: BPM=108.17
+[00:01:26.674] Processed: BPM=113.92
+[00:01:27.243] Processed: BPM=110.57
+[00:01:27.714] Processed: BPM=117.88
+[00:01:28.291] Processed: BPM=111.59
+[00:01:28.775] Processed: BPM=117.49
+[00:01:29.364] Processed: BPM=109.22
+[00:01:29.860] Processed: BPM=114.43
+[00:01:30.087] SENSORS: Message loss is back to normal
+[00:01:30.215] SIMPLE: Timeout (15.0s)! Next target.
+[00:01:30.215] GAME: New Target 105.8 BPM! Match it!
+[00:01:30.439] Processed: BPM=108.11
+[00:01:30.944] Processed: BPM=113.85
+[00:01:31.545] Processed: BPM=107.53
+[00:01:32.041] Processed: BPM=113.07
+[00:01:32.642] SIMPLE: Lost match. Resetting counter.
+[00:01:32.643] Processed: BPM=106.32
+[00:01:33.151] Processed: BPM=112.50
+[00:01:33.722] SIMPLE: Lost match. Resetting counter.
+[00:01:33.723] Processed: BPM=106.38
+[00:01:34.241] Processed: BPM=112.43
+[00:01:34.845] Processed: BPM=105.39
+[00:01:35.363] Processed: BPM=109.69
+[00:01:36.003] Processed: BPM=101.93
+[00:01:36.513] SIMPLE: Matched 5/5 steps...
+[00:01:36.513] SIMPLE: Completed 5 steps! Next target.
+[00:01:36.513] GAME: New Target 137.2 BPM! Match it!
+[00:01:36.515] Processed: BPM=107.78
+[00:01:37.143] Processed: BPM=101.12
+[00:01:37.397] SENSORS: WARNING: Frequent IMU bus errors on the left foot (11 so far): check its wiring
+[00:01:37.589] Processed: BPM=113.49
+[00:01:38.061] Processed: BPM=116.28
+[00:01:39.006] Processed: BPM=104.53
+[00:01:39.096] SENSORS: WARNING: No data from the left IMU: check its wiring and power
+[00:01:39.151] Processed: BPM=126.67
+[00:01:39.286] Processed: BPM=165.44
+[00:01:39.791] Processed: BPM=231.07
+[00:01:39.939] Processed: BPM=227.56
+[00:01:40.096] SENSORS: WARNING: 5% of the sensor messages lost in the last 10 s: move the receiver closer or check for interference
+[00:01:40.290] Processed: BPM=180.00
+[00:01:40.362] SENSORS: WARNING: Frequent IMU bus errors on the right foot (4 so far): check its wiring
+[00:01:40.448] Processed: BPM=271.90
+[00:01:40.661] Processed: BPM=250.35
+[00:01:41.381] Processed: BPM=164.53
+[00:01:41.516] Processed: BPM=168.54
+[00:01:41.698] Processed: BPM=173.58
+[00:01:42.556] Processed: BPM=153.98
+[00:01:42.650] Session stopped by user.
+[00:01:42.650] Session ended
+[00:01:42.840] Link: IMU: 1910 received, 64 lost; LIFT: 198 received, 4 lost; STEP: 179 received, 4 lost; parse errors 0, unknown lines 0

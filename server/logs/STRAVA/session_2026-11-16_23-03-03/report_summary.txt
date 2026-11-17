@@ -1,0 +1,14 @@
+Session C:\Users\Rund\Desktop\computer science\BrainSync Project\BrainSync\server\logs\STRAVA\session_2026-11-16_23-03-03
+  54 steps, 122 beats, 60 s, alignment off, receiver protocol 2
+  Link: IMU: 1209 received, 11 lost; LIFT: 54 received, 0 lost; STEP: 54 received, 0 lost; parse errors 0, unknown lines 0
+  IMU: 99 lines/s, valid right 0%, left 0%, calibrated {'right': False, 'left': False}
+  Beat vs estimated contact: median 123 ms, 11% within ±30 ms, 19% within ±50 ms, mean +23 ms
+  Sensors: WARNING: Frequent IMU bus errors on the right foot (19300 so far): check its wiring
+  Sensors: WARNING: Frequent IMU bus errors on the left foot (19300 so far): check its wiring
+  Sensors: WARNING: No data from the right IMU: check its wiring and power
+  Sensors: WARNING: No data from the left IMU: check its wiring and power
+  Sensors: WARNING: 3% of the sensor messages lost in the last 10 s: move the receiver closer or check for interference
+  Sensors: Message loss is back to normal
+  Sensors: The right IMU sends data again
+  Sensors: The left IMU sends data again
+Report: C:\Users\Rund\Desktop\computer science\BrainSync Project\BrainSync\server\logs\STRAVA\session_2026-11-16_23-03-03\report.png

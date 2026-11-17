@@ -1,0 +1,12 @@
+Session C:\Users\Rund\Desktop\computer science\BrainSync Project\BrainSync\server\logs\STRAVA\session_2026-11-16_23-08-43
+  15 steps, 27 beats, 12 s, alignment off, receiver protocol 2
+  Link: IMU: 222 received, 25 lost; LIFT: 14 received, 2 lost; STEP: 15 received, 1 lost; parse errors 0, unknown lines 0
+  IMU: 91 lines/s, valid right 100%, left 100%, calibrated {'right': False, 'left': False}
+  Beat vs estimated contact: median 142 ms, 20% within ±30 ms, 27% within ±50 ms, mean -45 ms
+  Prediction 400ms_ahead: median error (ms) fused 3, B0 80; missed 2
+  Prediction 200ms_ahead: median error (ms) fused 164, B0 124; missed 2
+  Prediction 100ms_ahead: median error (ms) fused 157, B0 124; missed 2
+  Sensors: WARNING: The right IMU cannot measure its gyro bias: stand still for a second
+  Sensors: WARNING: The left IMU cannot measure its gyro bias: stand still for a second
+  Sensors: WARNING: 11% of the sensor messages lost in the last 10 s: move the receiver closer or check for interference
+Report: C:\Users\Rund\Desktop\computer science\BrainSync Project\BrainSync\server\logs\STRAVA\session_2026-11-16_23-08-43\report.png

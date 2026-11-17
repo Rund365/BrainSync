@@ -1,0 +1,43 @@
+{
+  "created": "2026-11-16T23:07:42",
+  "session": "session_2026-11-16_23-06-37",
+  "method": "gaitmap 2.6.0: gravity, PCA, forward direction sign",
+  "imus": {
+    "left": {
+      "pitch_axis": [
+        -0.961,
+        0.258,
+        0.0997
+      ],
+      "nearest_board_axis": "-x",
+      "angle_to_board_axis_deg": 16.1,
+      "pitch_share": 0.752,
+      "up": [
+        -0.1278,
+        -0.7339,
+        0.6671
+      ],
+      "rotation_fit_error_dps": 0.0,
+      "seconds_used": 57.2,
+      "largest_gap_s": 0.31
+    },
+    "right": {
+      "pitch_axis": [
+        0.9728,
+        -0.1106,
+        -0.2035
+      ],
+      "nearest_board_axis": "+x",
+      "angle_to_board_axis_deg": 13.4,
+      "pitch_share": 0.762,
+      "up": [
+        0.1842,
+        0.902,
+        0.3906
+      ],
+      "rotation_fit_error_dps": 0.0,
+      "seconds_used": 57.2,
+      "largest_gap_s": 0.31
+    }
+  }
+}

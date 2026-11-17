@@ -1,0 +1,239 @@
+{
+  "session": "C:\\Users\\Rund\\Desktop\\computer science\\BrainSync Project\\BrainSync\\server\\logs\\STRAVA\\session_2026-11-16_23-09-31",
+  "latency_ms": 30.0,
+  "alignment_enabled": false,
+  "receiver_protocol": 2,
+  "steps": 56,
+  "beats": 58,
+  "duration_s": 48.175961999979336,
+  "link": "IMU: 964 received, 17 lost; LIFT: 61 received, 1 lost; STEP: 56 received, 1 lost; parse errors 0, unknown lines 0",
+  "sensor_health": {
+    "open_problems": [
+      "calib_1",
+      "calib_2"
+    ],
+    "mount_tilt_deg": {},
+    "log": [
+      [
+        416168.666,
+        "WARNING: The right IMU cannot measure its gyro bias: stand still for a second"
+      ],
+      [
+        416168.666,
+        "WARNING: The left IMU cannot measure its gyro bias: stand still for a second"
+      ],
+      [
+        416177.671,
+        "WARNING: 3% of the sensor messages lost in the last 10 s: move the receiver closer or check for interference"
+      ],
+      [
+        416197.69,
+        "Message loss is back to normal"
+      ]
+    ]
+  },
+  "tracking": {
+    "calibration": {
+      "right": {
+        "gyro_bias_dps": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "bias_std_dps": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "up": [
+          -0.1278,
+          -0.7339,
+          0.6671
+        ],
+        "up_source": "given",
+        "standing_acc_ms2": null,
+        "g_level_ms2": 9.81,
+        "rejected_windows": 96,
+        "pitch_axis": [
+          -0.961,
+          0.258,
+          0.0997
+        ],
+        "still_samples": 4820,
+        "swing_samples": 0
+      },
+      "left": {
+        "gyro_bias_dps": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "bias_std_dps": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "up": [
+          0.1842,
+          0.902,
+          0.3906
+        ],
+        "up_source": "given",
+        "standing_acc_ms2": null,
+        "g_level_ms2": 9.81,
+        "rejected_windows": 96,
+        "pitch_axis": [
+          0.9728,
+          -0.1106,
+          -0.2035
+        ],
+        "still_samples": 4820,
+        "swing_samples": 0
+      }
+    },
+    "fsr_delay_ms": {
+      "right": 27.8,
+      "left": 26.4
+    },
+    "predictor": {
+      "step_ms": {
+        "right": 800.0,
+        "left": 865.2
+      },
+      "to_delay_ms": {
+        "right": null,
+        "left": null
+      },
+      "ms_delay_ms": {
+        "right": null,
+        "left": null
+      },
+      "rise_delay_ms": {
+        "right": 355.0,
+        "left": 555.0
+      },
+      "top_delay_ms": {
+        "right": 85.0,
+        "left": 345.0
+      },
+      "fall_delay_ms": {
+        "right": 365.0,
+        "left": 455.0
+      },
+      "sigma_ms": {
+        "B0": 115.8,
+        "B1": 25.0,
+        "B2": 12.0,
+        "B3": 30.0,
+        "B4": 34.3,
+        "B5": 75.5
+      }
+    },
+    "clock": {
+      "offset_s": 415978.64724415535,
+      "drift_ppm": -95.96678515492133,
+      "ref_sender_s": 236.450266
+    }
+  },
+  "beat_vs_estimated_contact_ms": {
+    "n": 56,
+    "median_abs": 148.3960000332445,
+    "mean": -76.66555354392456,
+    "sd": 186.0447883012392,
+    "within30": 8.928571428571429,
+    "within50": 10.714285714285714
+  },
+  "prediction": {
+    "400ms_ahead": {
+      "fused": {
+        "n": 30,
+        "median_abs": 60.14000000000408,
+        "mean": -7.147099999998356,
+        "sd": 89.19151117355973,
+        "within30": 16.666666666666664,
+        "within50": 33.33333333333333
+      },
+      "B0": {
+        "n": 41,
+        "median_abs": 60.06600000000617,
+        "mean": -9.038170731704524,
+        "sd": 81.80494204371436,
+        "within30": 24.390243902439025,
+        "within50": 41.46341463414634
+      },
+      "B1": {
+        "n": 0
+      },
+      "B2": {
+        "n": 0
+      },
+      "missed": 11
+    },
+    "200ms_ahead": {
+      "fused": {
+        "n": 31,
+        "median_abs": 56.46600000000035,
+        "mean": -14.342612903225282,
+        "sd": 76.76957228371096,
+        "within30": 22.58064516129032,
+        "within50": 41.935483870967744
+      },
+      "B0": {
+        "n": 42,
+        "median_abs": 60.36799999999687,
+        "mean": -3.3684047619025086,
+        "sd": 88.60423322791686,
+        "within30": 23.809523809523807,
+        "within50": 40.476190476190474
+      },
+      "B1": {
+        "n": 0
+      },
+      "B2": {
+        "n": 0
+      },
+      "missed": 12
+    },
+    "100ms_ahead": {
+      "fused": {
+        "n": 32,
+        "median_abs": 57.71400000000426,
+        "mean": -17.54481249999884,
+        "sd": 77.63549318909685,
+        "within30": 21.875,
+        "within50": 40.625
+      },
+      "B0": {
+        "n": 42,
+        "median_abs": 60.36799999999687,
+        "mean": -3.3684047619025086,
+        "sd": 88.60423322791686,
+        "within30": 23.809523809523807,
+        "within50": 40.476190476190474
+      },
+      "B1": {
+        "n": 0
+      },
+      "B2": {
+        "n": 0
+      },
+      "missed": 12
+    }
+  },
+  "imu": {
+    "lines": 4820,
+    "rate_hz": 98.52666052731468,
+    "valid_right_pct": 100.0,
+    "valid_left_pct": 100.0
+  },
+  "event_lead_s": {
+    "right_TO": null,
+    "right_MS": null,
+    "left_TO": null,
+    "left_MS": null
+  },
+  "calibrated": {
+    "right": false,
+    "left": false
+  }
+}

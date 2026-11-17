@@ -1,0 +1,233 @@
+{
+  "strike_tracking": {
+    "calibration": {
+      "right": {
+        "gyro_bias_dps": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "bias_std_dps": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "up": [
+          -0.3539,
+          -0.7937,
+          0.4947
+        ],
+        "up_source": "given",
+        "standing_acc_ms2": null,
+        "g_level_ms2": 9.81,
+        "rejected_windows": 0,
+        "pitch_axis": [
+          -0.9339,
+          0.3283,
+          -0.1414
+        ],
+        "still_samples": 0,
+        "swing_samples": 0
+      },
+      "left": {
+        "gyro_bias_dps": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "bias_std_dps": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "up": [
+          0.1721,
+          0.9313,
+          0.3211
+        ],
+        "up_source": "given",
+        "standing_acc_ms2": null,
+        "g_level_ms2": 9.81,
+        "rejected_windows": 0,
+        "pitch_axis": [
+          0.9826,
+          -0.1391,
+          -0.1229
+        ],
+        "still_samples": 0,
+        "swing_samples": 0
+      }
+    },
+    "fsr_delay_ms": {
+      "right": 0.0,
+      "left": 0.0
+    },
+    "predictor": {
+      "step_ms": {
+        "right": null,
+        "left": null
+      },
+      "to_delay_ms": {
+        "right": null,
+        "left": null
+      },
+      "ms_delay_ms": {
+        "right": null,
+        "left": null
+      },
+      "rise_delay_ms": {
+        "right": null,
+        "left": null
+      },
+      "top_delay_ms": {
+        "right": null,
+        "left": null
+      },
+      "fall_delay_ms": {
+        "right": null,
+        "left": null
+      },
+      "sigma_ms": {
+        "B0": 40.0,
+        "B1": 25.0,
+        "B2": 12.0,
+        "B3": 30.0,
+        "B4": 25.0,
+        "B5": 25.0
+      }
+    },
+    "clock": {
+      "offset_s": 415586.8247222355,
+      "drift_ppm": -14.019059727123691,
+      "ref_sender_s": 252.016
+    }
+  },
+  "phase_alignment": {
+    "enabled": false,
+    "settings": {
+      "latency_s": 0.03,
+      "kp": 1.0,
+      "ki": 0.1,
+      "delta_max": 0.15,
+      "delta_rate_per_s": 2.0,
+      "deadband_s": 0.0,
+      "catchup_s": 0.03,
+      "reset_s": 0.1,
+      "reset_delta_max": 0.5,
+      "t_min_s": 0.05,
+      "bias_max_s": 0.05,
+      "bias_window_s": 0.06,
+      "max_sigma_s": 0.08,
+      "beats_per_step": 1,
+      "base_from_strikes": true,
+      "base_steps": 8,
+      "base_ahead": 0.0,
+      "base_min_steps": 1,
+      "base_uses_model": false,
+      "decay_grace": 1.5,
+      "hold_when_standing": true,
+      "start_on_step": true,
+      "start_steps": 10,
+      "start_needs_calibration": true,
+      "start_fallback_steps": 20,
+      "restart_steps": 5,
+      "start_ahead": 0.0,
+      "pause_when_standing": true,
+      "pause_after_periods": 1.75,
+      "max_change_per_beat": 0.05,
+      "max_change_far": null,
+      "far_error_s": 0.08,
+      "near_error_s": 0.03
+    },
+    "bias_ms": 0.0
+  },
+  "link": "IMU: 1209 received, 11 lost; LIFT: 54 received, 0 lost; STEP: 54 received, 0 lost; parse errors 0, unknown lines 0",
+  "receiver_protocol": 2,
+  "sensor_health": {
+    "open_problems": [
+      "bus_1",
+      "bus_2"
+    ],
+    "mount_tilt_deg": {},
+    "log": [
+      [
+        415780.647,
+        "WARNING: Frequent IMU bus errors on the right foot (19300 so far): check its wiring"
+      ],
+      [
+        415780.647,
+        "WARNING: Frequent IMU bus errors on the left foot (19300 so far): check its wiring"
+      ],
+      [
+        415787.263,
+        "WARNING: No data from the right IMU: check its wiring and power"
+      ],
+      [
+        415787.263,
+        "WARNING: No data from the left IMU: check its wiring and power"
+      ],
+      [
+        415809.281,
+        "WARNING: 3% of the sensor messages lost in the last 10 s: move the receiver closer or check for interference"
+      ],
+      [
+        415819.289,
+        "Message loss is back to normal"
+      ],
+      [
+        415833.3,
+        "The right IMU sends data again"
+      ],
+      [
+        415833.3,
+        "The left IMU sends data again"
+      ]
+    ]
+  },
+  "run_type": "manual",
+  "simulated": false,
+  "imu_calibration": {
+    "created": "2026-11-16T22:53:38",
+    "session": "session_2026-11-16_22-52-24",
+    "method": "gaitmap 2.6.0: gravity, PCA, forward direction sign",
+    "imus": {
+      "left": {
+        "pitch_axis": [
+          -0.9339,
+          0.3283,
+          -0.1414
+        ],
+        "nearest_board_axis": "-x",
+        "angle_to_board_axis_deg": 20.9,
+        "pitch_share": 0.701,
+        "up": [
+          -0.3539,
+          -0.7937,
+          0.4947
+        ],
+        "rotation_fit_error_dps": 0.0,
+        "seconds_used": 62.3,
+        "largest_gap_s": 0.06
+      },
+      "right": {
+        "pitch_axis": [
+          0.9826,
+          -0.1391,
+          -0.1229
+        ],
+        "nearest_board_axis": "+x",
+        "angle_to_board_axis_deg": 10.7,
+        "pitch_share": 0.832,
+        "up": [
+          0.1721,
+          0.9313,
+          0.3211
+        ],
+        "rotation_fit_error_dps": 0.0,
+        "seconds_used": 62.3,
+        "largest_gap_s": 0.06
+      }
+    }
+  },
+  "calibration_walk": true
+}

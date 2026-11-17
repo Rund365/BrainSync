@@ -1,0 +1,87 @@
+Session log started at 2026-11-16_23-09-31 (t=0.000)
+[00:00:00.000] DEBUG: Attempting to initialize MidiBeatSync...
+[00:00:00.000] DEBUG: MidiBeatSync initialized successfully.
+[00:00:00.000] Starting in MANUAL MODE.
+[00:00:00.000] Setting fixed BPM to 70.98976109215018
+[00:00:00.000] Run type: manual
+[00:00:00.000] Prediction model enabled: lgbm_model.joblib
+[00:00:00.000] MANUAL: Target set to 71.0
+[00:00:00.000] Mode Activated: ManualMode
+[00:00:00.000] Session started
+[00:00:00.000] DEBUG: Attempting to open serial port COM5...
+[00:00:00.000] Receiver on COM5 at 921600 baud
+[00:00:00.000] Receiver firmware: protocol 2 (IMU)
+[00:00:00.000] Setting smoothing window to 3
+[00:00:00.000] Smoothing window set response: ACK,WINDOW,3
+[00:00:00.000] Setting update stride to 1
+[00:00:00.000] Update stride set response: ACK,STRIDE,1
+[00:00:00.000] ACK,RESET received
+[00:00:00.000] ACK,START received
+[00:00:00.000] Session handshake completed
+[00:00:00.000] Running main loop...
+[00:00:00.000] Session timer started - music is now playing
+[00:00:00.010] IMU calibration: imu_calibration.json, from session session_2026-11-16_23-06-37, made 2026-11-16T23:07:42
+[00:00:00.010] Phase alignment off (output latency 30 ms, kp 1.0, dead-band 0 ms, max nudge 15%, phase reset 100 ms, start: on the step after 10 steps, standing: pause, max tempo change 5% per beat)
+[00:00:01.013] SENSORS: WARNING: The right IMU cannot measure its gyro bias: stand still for a second
+[00:00:01.013] SENSORS: WARNING: The left IMU cannot measure its gyro bias: stand still for a second
+[00:00:01.409] Processed: BPM=70.99
+[00:00:02.542] Processed: BPM=53.24
+[00:00:04.142] Processed: BPM=43.91
+[00:00:04.975] Processed: BPM=50.55
+[00:00:06.015] Processed: BPM=51.80
+[00:00:06.898] Processed: BPM=65.77
+[00:00:07.749] Processed: BPM=64.82
+[00:00:08.437] Processed: BPM=74.60
+[00:00:09.254] Processed: BPM=76.05
+[00:00:09.987] Processed: BPM=80.65
+[00:00:10.019] SENSORS: WARNING: 3% of the sensor messages lost in the last 10 s: move the receiver closer or check for interference
+[00:00:10.926] Processed: BPM=71.97
+[00:00:11.619] Processed: BPM=75.95
+[00:00:12.544] Processed: BPM=70.20
+[00:00:13.442] Processed: BPM=71.91
+[00:00:14.250] Processed: BPM=68.36
+[00:00:15.001] Processed: BPM=73.29
+[00:00:15.831] Processed: BPM=75.63
+[00:00:16.463] Processed: BPM=81.34
+[00:00:17.309] Processed: BPM=77.99
+[00:00:17.964] Processed: BPM=83.76
+[00:00:18.891] Processed: BPM=74.38
+[00:00:19.645] Processed: BPM=77.02
+[00:00:20.589] Processed: BPM=68.60
+[00:00:21.389] Processed: BPM=72.23
+[00:00:22.238] Processed: BPM=69.63
+[00:00:23.010] Processed: BPM=74.17
+[00:00:23.888] Processed: BPM=71.68
+[00:00:24.613] Processed: BPM=75.79
+[00:00:25.464] Processed: BPM=73.26
+[00:00:26.328] Processed: BPM=73.74
+[00:00:27.275] Processed: BPM=67.57
+[00:00:28.124] Processed: BPM=67.75
+[00:00:28.965] Processed: BPM=68.26
+[00:00:29.659] Processed: BPM=75.31
+[00:00:30.036] SENSORS: Message loss is back to normal
+[00:00:30.588] Processed: BPM=73.08
+[00:00:31.303] Processed: BPM=77.02
+[00:00:32.199] Processed: BPM=70.89
+[00:00:32.991] Processed: BPM=74.88
+[00:00:33.957] Processed: BPM=67.77
+[00:00:34.845] Processed: BPM=68.03
+[00:00:35.673] Processed: BPM=67.19
+[00:00:36.467] Processed: BPM=71.74
+[00:00:37.311] Processed: BPM=73.17
+[00:00:38.191] Processed: BPM=71.37
+[00:00:39.097] Processed: BPM=68.42
+[00:00:39.901] Processed: BPM=69.34
+[00:00:40.809] Processed: BPM=68.75
+[00:00:41.719] Processed: BPM=68.65
+[00:00:42.587] Processed: BPM=67.19
+[00:00:44.420] Processed: BPM=64.98
+[00:00:45.167] Processed: BPM=69.04
+[00:00:46.014] Processed: BPM=69.47
+[00:00:46.705] Processed: BPM=78.74
+[00:00:47.493] Processed: BPM=77.39
+[00:00:48.105] Processed: BPM=85.92
+[00:00:48.905] Processed: BPM=81.86
+[00:00:48.986] Session stopped by user.
+[00:00:48.986] Session ended
+[00:00:49.100] Link: IMU: 964 received, 17 lost; LIFT: 61 received, 1 lost; STEP: 56 received, 1 lost; parse errors 0, unknown lines 0

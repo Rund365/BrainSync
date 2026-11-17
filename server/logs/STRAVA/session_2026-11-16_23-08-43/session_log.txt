@@ -1,0 +1,50 @@
+Session log started at 2026-11-16_23-08-43 (t=0.000)
+[00:00:00.000] DEBUG: Attempting to initialize MidiBeatSync...
+[00:00:00.000] DEBUG: MidiBeatSync initialized successfully.
+[00:00:00.000] Starting in RANDOM DRIFT MODE.
+[00:00:00.000] Run type: random
+[00:00:00.000] Prediction model enabled: lgbm_model.joblib
+[00:00:00.000] GAME: Difficulty updated to ±20%
+[00:00:00.000] RANDOM: Mode switched to SIMPLE (Step-based)
+[00:00:00.000] RANDOM: Simple threshold set to 5.0 BPM
+[00:00:00.000] RANDOM: Simple steps set to 5
+[00:00:00.000] RANDOM: Simple timeout set to 15.0s
+[00:00:00.000] Mode Activated: RandomMode
+[00:00:00.000] Session started
+[00:00:00.000] DEBUG: Attempting to open serial port COM5...
+[00:00:00.000] Receiver on COM5 at 921600 baud
+[00:00:00.000] Receiver firmware: protocol 2 (IMU)
+[00:00:00.000] Setting smoothing window to 3
+[00:00:00.000] Smoothing window set response: ACK,WINDOW,3
+[00:00:00.000] Setting update stride to 1
+[00:00:00.000] Update stride set response: ACK,STRIDE,1
+[00:00:00.000] ACK,RESET received
+[00:00:00.000] ACK,START received
+[00:00:00.000] Session handshake completed
+[00:00:00.000] Running main loop...
+[00:00:00.000] Session timer started - music is now playing
+[00:00:00.020] IMU calibration: imu_calibration.json, from session session_2026-11-16_23-06-37, made 2026-11-16T23:07:42
+[00:00:00.020] Phase alignment off (output latency 30 ms, kp 1.0, dead-band 0 ms, max nudge 15%, phase reset 100 ms, start: on the step after 10 steps, standing: pause, max tempo change 5% per beat)
+[00:00:00.021] GAME: New Target 132.0 BPM! Match it!
+[00:00:00.435] Processed: BPM=131.96
+[00:00:01.022] SENSORS: WARNING: The right IMU cannot measure its gyro bias: stand still for a second
+[00:00:01.022] SENSORS: WARNING: The left IMU cannot measure its gyro bias: stand still for a second
+[00:00:01.393] SIMPLE: Lost match. Resetting counter.
+[00:00:01.393] Processed: BPM=62.50
+[00:00:02.301] Processed: BPM=64.17
+[00:00:03.044] Processed: BPM=69.04
+[00:00:03.870] Processed: BPM=72.85
+[00:00:05.437] Processed: BPM=74.63
+[00:00:06.148] Processed: BPM=75.35
+[00:00:07.019] Processed: BPM=73.89
+[00:00:07.737] Processed: BPM=78.40
+[00:00:08.537] Processed: BPM=75.54
+[00:00:09.348] Processed: BPM=77.19
+[00:00:10.029] SENSORS: WARNING: 11% of the sensor messages lost in the last 10 s: move the receiver closer or check for interference
+[00:00:10.143] Processed: BPM=74.84
+[00:00:10.769] Processed: BPM=80.39
+[00:00:11.519] Processed: BPM=82.99
+[00:00:12.247] Processed: BPM=85.19
+[00:00:12.272] Session stopped by user.
+[00:00:12.272] Session ended
+[00:00:12.393] Link: IMU: 222 received, 25 lost; LIFT: 14 received, 2 lost; STEP: 15 received, 1 lost; parse errors 0, unknown lines 0
